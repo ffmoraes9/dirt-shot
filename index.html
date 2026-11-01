@@ -667,6 +667,7 @@ try{const sv=JSON.parse(localStorage.getItem('ds_eq')||'null');if(sv){if(DIFF[sv
 const HINTS={
  peek:'MIRAR te expõe: quanto mais tempo olhando, mais sobe a EXPOSIÇÃO. Em 100% ele atira em você. ABAIXAR esfria.',
  vento:'VENTO: o círculo amarelo IMPACTO mostra onde a bala vai cair. Coloque o alvo dentro dele e atire. Com vento forte, ele se afasta do centro da mira.',
+ queda:'O TEMPO COBRA: a cada 20% do tempo, parte do muro cai. Trechos caídos não protegem e não dá para passar por eles. Sua área de ação diminui.',
  exposicao:'EXPOSIÇÃO: mesmo atrás do muro ela não zera. Ela sobe com o tempo e quando você fica no mesmo trecho. A marca branca na barra é o mínimo de agora. Deslizar ajuda a reduzir.',
  fresta:'FRESTA: você observa com pouquíssimo risco. Não dá para atirar daqui. Use para procurar com calma e depois mire para atirar.',
  t_alto:'MURO ALTO: cobertura forte, mas mirar por cima expõe mais.',
@@ -693,7 +694,7 @@ function makeG(s,o2){
   const lo=o2?buildOpLoadout(o2):buildLoadout(s),types=makeTypes(),maxHp=types.map(t=>TYPE[t].hp);
   let diff=DIFF[diffKey];
   if(o2){const sc=(1+.08*(o2.n-1))*(o2.n===4?1.1:1)*(o2.map&&o2.map.hard?1.15:1);diff={exp:diff.exp*sc,bel:diff.bel*sc}}
-  return {diff,windK:o2&&o2.map?o2.map.windK:1,zoomCur:Math.max(1.0,lo.zoom*.45)*1.25,focus:1,notes:[],pins:[],noteFlash:-9,spot:false,swapUntil:0,amb:[],ambNext:30,sel:s,lo,t:0,timeMax:lo.time,time:lo.time,lives:lo.lives,maxLives:o2?o2.maxLives:lo.lives,bullets:lo.bullets,helm:lo.helm,rocks:lo.rocks,mirrors:lo.mirrors,
+  return {diff,windK:o2&&o2.map?o2.map.windK:1,zoomCur:Math.max(1.0,lo.zoom*.45)*1.25,focus:1,notes:[],pins:[],noteFlash:-9,col:[false,false,false,false,false],nextCol:.2,spot:false,swapUntil:0,amb:[],ambNext:30,sel:s,lo,t:0,timeMax:lo.time,time:lo.time,lives:lo.lives,maxLives:o2?o2.maxLives:lo.lives,bullets:lo.bullets,helm:lo.helm,rocks:lo.rocks,mirrors:lo.mirrors,
    view:'cover',pos:2,posF:2,moveFrom:2,moveTo:2,moveT:1,moveDur:2.4,crawl:'slow',exp:0,wind:{base:rr(-2,2),tgt:0,next:2,val:0,gust:0},
    cam:{x:posCenter(2),y:520},held:false,stam:1,gasp:0,wounds:{arm:lo.w.arm,lens:lo.w.lens||0,leg:lo.w.leg},types,maxHp,wall:maxHp.slice(),radioCd:0,radioLeft:lo.radioUses,
    log:[],stare:0,noiseWin:0,flash:0,shake:0,hbT:1,shots:0,over:false,menu:null,decoy:null,clues:[],glints:[],parts:[],impacts:[],missed:0,won:false,endAt:0,ammoOutAt:0};
@@ -1030,6 +1031,16 @@ function notesOverlay(){
   }
   btn('close',VW/2-80,py+h-52,160,42,'FECHAR',{fs:20});
 }
+function collapseWall(){
+  const alive=[];for(let i=0;i<NPOS;i++)if(!g.col[i])alive.push(i);
+  if(alive.length<=2)return;
+  const cand=alive.filter(i=>i!==g.pos&&i!==g.moveTo);if(!cand.length)return;
+  cand.sort((a,b)=>Math.abs(b-g.pos)-Math.abs(a-g.pos));
+  const i=R()<.6?cand[0]:pick(cand);
+  g.col[i]=true;g.wall[i]=0;g.shake=1;g.flash=Math.max(g.flash,.25);
+  try{AU.play('impacto_terra',{gain:1});AU.play('metal_2',{gain:.7,delay:.15})}catch(e){}
+  toast('PARTE DO MURO CAIU','o trecho '+(i+1)+' não protege mais e não dá para passar',4.5);
+}
 function candRings(c,cx,cy,z,Rr){
   const cs=candidates();cs.forEach((cd,i)=>{const hx=cd.h.x+(cd.h.jx||0),hy=cd.h.y+(cd.h.jy||0),sx=cx+(hx-g.cam.x)*z,sy=cy+(hy-g.cam.y)*z,rr2=62*z;
     if(Math.hypot(sx-cx,sy-cy)>Rr+rr2)return;c.strokeStyle='rgba(255,210,74,.85)';c.lineWidth=2.2;c.setLineDash([9,7]);c.beginPath();c.arc(sx,sy,rr2,0,6.3);c.stroke();c.setLineDash([]);c.fillStyle='rgba(255,210,74,.9)';c.font='700 18px Oswald,sans-serif';c.textAlign='center';c.fillText('SUSPEITO '+(i+1),sx,sy-rr2-8)});
@@ -1119,7 +1130,7 @@ function update(dt){
   g.time-=dt*(g.wounds.leg?1.25:1)*(g.lo.tScale||1);
   if(g.time<=0){g.time=0;end('time');return}
   g.radioCd=Math.max(0,g.radioCd-dt);
-  {const prog=clamp(1-g.time/g.timeMax,0,1);g.expFloor=prog*(diffKey==='veterano'?55:40);if(g.view!=='moving')g.stay=(g.stay||0)+dt;if(g.stay>14)hint('exposicao')}
+  {const prog=clamp(1-g.time/g.timeMax,0,1);g.expFloor=prog*(diffKey==='veterano'?55:40);if(prog>.1)hint('queda');if(prog>=g.nextCol&&g.nextCol<.99){g.nextCol+=.2;collapseWall()}if(g.view!=='moving')g.stay=(g.stay||0)+dt;if(g.stay>14)hint('exposicao')}
   g.flash=Math.max(0,g.flash-dt*1.4);g.shake=Math.max(0,g.shake-dt*2);g.noiseWin=Math.max(0,g.noiseWin-dt);
   const w=g.wind;w.next-=dt;if(w.next<=0){w.next=rr(3,7);w.tgt=rr(-3.5,3.5)*(R()<.3?1.6:1)*(g.windK||1)}
   w.gust+=(w.tgt-w.gust)*Math.min(1,dt*.7);w.base+=rr(-.2,.2)*dt;w.base=clamp(w.base,-3,3);w.val=clamp(w.base*.6+w.gust,-6,6);
@@ -1244,7 +1255,7 @@ function act(id){
    case 'zout':if(g.view==='scope')g.zoomCur=Math.max(zMin(),+(g.zoomCur/1.18).toFixed(2));break;
    case 'swap':if(g.view==='scope'&&g.lo.spotter&&g.t>=g.swapUntil){hint('observ');g.spot=!g.spot;g.swapUntil=g.t+2;if(!g.spot)g.exp=Math.min(100,g.exp+10)}break;
    case 'hole':if(g.view==='cover'&&g.types[g.pos]==='buraco'){hint('fresta');g.view='hole';g.cam.x=posCenter(g.pos);g.cam.y=520}break;
-   case 'moveL':case 'moveR':if(g.view==='cover'){const np=g.pos+(id==='moveL'?-1:1);if(np<0||np>=NPOS)return;
+   case 'moveL':case 'moveR':if(g.view==='cover'){const np=g.pos+(id==='moveL'?-1:1);if(np<0||np>=NPOS)return;if(g.col[np]){toast('TRECHO CAÍDO','não dá para passar por ali',2.5);return}
      g.moveFrom=g.pos;g.moveTo=np;g.moveT=0;g.view='moving';g.exp=Math.max(g.expFloor||0,g.exp-25);g.stay=0;g.moveDur=2.1;g.menu=null;
      for(let i=0;i<NPOS;i++)e.belief[i]=lerp(e.belief[i],1/NPOS,.5);
      AU.crawl(.3);}break;
@@ -1418,6 +1429,7 @@ function drawWallLayer(){
   for(let i=0;i<NPOS;i++){
     const x=VW/2+(i-g.posF)*segW-segW/2;if(x>VW||x+segW<0)continue;
     const kind=g.types[i],wy=wallY(kind),h=wallH[kind];
+    if(g.col&&g.col[i]){ctx.drawImage(wallV[kind],0,h*.66,segW,h*.34,x,wy+h*.66,segW,h*.34);ctx.fillStyle='rgba(20,14,8,.35)';ctx.fillRect(x,wy+h*.62,segW,h*.38);continue}
     ctx.drawImage(wallV[kind],x,wy);
     const dmg=g.maxHp[i]-g.wall[i];
     for(let k=0;k<dmg;k++){const cx2=x+segW*(.2+.3*k)+Math.sin(i*5+k)*30,cy2=wy+h*.55+k*16;const rg=ctx.createRadialGradient(cx2,cy2,2,cx2,cy2,40);rg.addColorStop(0,'rgba(10,8,6,.92)');rg.addColorStop(1,'rgba(10,8,6,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.arc(cx2,cy2,40,0,6.3);ctx.fill()}
@@ -1443,14 +1455,14 @@ function renderCover(){
   const by=py0+58,cur=Math.round(g.posF);
   for(let i=0;i<NPOS;i++){const x=VW/2+(i-2)*84,on=i===cur,tp=g.types[i];
     ctx.fillStyle=on?'rgba(255,210,74,.95)':'rgba(30,28,22,.75)';ctx.beginPath();ctx.arc(x,by,17,0,6.3);ctx.fill();ctx.strokeStyle=on?'#fff0a8':'rgba(230,226,200,.5)';ctx.lineWidth=2;ctx.stroke();
-    txt(GLYPH[tp],x,by+1,17,on?'#2a2410':'#d8d2b8','center',700);
+    if(g.col[i]){txt('✕',x,by+1,19,'#e0624a','center',700)}else txt(GLYPH[tp],x,by+1,17,on?'#2a2410':'#d8d2b8','center',700);
     for(let k=0;k<g.maxHp[i];k++){ctx.fillStyle=k<g.wall[i]?(on?'#ffd24a':'rgba(230,226,200,.55)'):'rgba(40,36,30,.8)';ctx.fillRect(x-14+k*10,by+24,8,10)}}
   txt(TYPE[g.types[cur]].nome+' · '+TYPE[g.types[cur]].dica,VW/2,by-40,19,'#f2ebc9','center',500);
   const gr=ctx.createRadialGradient(VW/2,VH/2,VH*.4,VW/2,VH/2,VH*.95);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VH);
   const gap=14,bh=84,y=VH-bh-22,cw=PORT?(VW-48-gap)/2:Math.min(200,VW*.13),mw2=PORT?(VW-48-4*gap)/5:Math.min(200,(VW-2*(cw+24)-6*gap)/5),tot=5*mw2+4*gap,x0m=VW/2-tot/2,mx=i=>x0m+i*(mw2+gap),ym=PORT?y-bh-gap:y,cs=PORT?{capfs:11}:{};
   const busy=g.view==='moving';
-  btn('moveL',24,y,cw,bh,'‹ DESLIZAR',{dis:busy||g.pos===0,fs:PORT?24:21,cap:g.pos>0?'ir ao trecho '+g.pos:'início do muro'});
-  btn('moveR',VW-24-cw,y,cw,bh,'DESLIZAR ›',{dis:busy||g.pos===NPOS-1,fs:PORT?24:21,cap:g.pos<NPOS-1?'ir ao trecho '+(g.pos+2):'fim do muro'});
+  btn('moveL',24,y,cw,bh,'‹ DESLIZAR',{dis:busy||g.pos===0||(g.pos>0&&g.col[g.pos-1]),fs:PORT?24:21,cap:g.pos>0?(g.col[g.pos-1]?'trecho caído':'ir ao trecho '+g.pos):'início do muro'});
+  btn('moveR',VW-24-cw,y,cw,bh,'DESLIZAR ›',{dis:busy||g.pos===NPOS-1||(g.pos<NPOS-1&&g.col[g.pos+1]),fs:PORT?24:21,cap:g.pos<NPOS-1?(g.col[g.pos+1]?'trecho caído':'ir ao trecho '+(g.pos+2)):'fim do muro'});
   btn('peek',mx(0),ym,mw2,bh,'MIRAR',Object.assign({dis:busy,fs:PORT?21:26,fill:'rgba(78,64,24,.92)',cap:PORT?'luneta':'olhar pela luneta'},cs));
   btn('hole',mx(1),ym,mw2,bh,'FRESTA',Object.assign({dis:busy||g.types[g.pos]!=='buraco',fs:PORT?17:22,cap:g.types[g.pos]==='buraco'?(PORT?'pouco risco':'olhar com pouco risco'):(PORT?'só em ●':'só nos trechos ●')},cs));
   btn('decoy',mx(2),ym,mw2,bh,'ISCA',Object.assign({dis:busy||(g.helm+g.rocks+g.mirrors===0),fs:PORT?21:24,cap:PORT?(g.helm+'c · '+g.rocks+'p · '+g.mirrors+'e'):(g.helm+' capac · '+g.rocks+' ped · '+g.mirrors+' esp')},cs));
@@ -1657,13 +1669,15 @@ const TUT=[
  {t:'Arma e zoom.',p:'Você escolhe a arma no início da operação, e cada modelo tem pontos fortes e fracos. Na luneta, use + e − para o zoom: mais zoom mostra mais detalhe, mas amplia o tremor e reduz o campo.',n:null},
  {t:'Ambiente e fone.',p:'Pássaros que levantam voo, cachorro que late ou goteira que para podem indicar movimento dele, mas também podem ser engano. Com fone, ligue o MODO FONE para ouvir tiros de provocação e saber de que lado vêm.',n:null},
  {t:'Foco, zoom e som.',p:'Com zoom baixo você vê mais campo, mas ele é minúsculo e camuflado. O foco enxerga nítida uma distância por vez: 100, 200 ou 300 m. Procure em cada faixa, suspeite de um ponto e aproxime o zoom para confirmar, sabendo que a mira treme mais. Depois de um clarão, o som chega 0,3 s a cada 100 m: use o atraso para saber a distância do tiro.',n:null},
- {t:'Caderno de campo.',p:'Cada pista que você percebe (tiro, brilho, poeira, ambiente e voz) é anotada no caderno, que você abre atrás do muro. Quando 2 ou mais pistas apontam para o mesmo lugar, o caderno marca áreas prováveis com círculos largos, e a luneta mostra SUSPEITO. Pistas falsas existem: compare e deduza. Use MARCAR para deixar bandeiras.',n:null}
+ {t:'Caderno de campo.',p:'Cada pista que você percebe (tiro, brilho, poeira, ambiente e voz) é anotada no caderno, que você abre atrás do muro. Quando 2 ou mais pistas apontam para o mesmo lugar, o caderno marca áreas prováveis com círculos largos, e a luneta mostra SUSPEITO. Pistas falsas existem: compare e deduza. Use MARCAR para deixar bandeiras.',n:null},
+ {t:'O tempo cobra.',p:'A exposição mínima sobe com o tempo e quando você fica parado no mesmo trecho: é preciso trocar de lugar. A cada 20% do tempo, parte do muro cai: os trechos caídos não protegem e não dá para passar por eles. Sua área de ação diminui.',n:null}
 ];
 function tutVisual(i){
   switch(i){
    case 0:return `<img class="vi" src="art/wall1.webp" alt="">`;
    case 1:return `<div class="eye">👁️</div><div class="vbar"><i style="width:68%"></i><b>EXPOSIÇÃO 68%</b></div>`;
    case 2:return `<div class="walls"><div><img src="art/wall0.webp" alt=""><span>▲ ALTO</span></div><div><img src="art/wall1.webp" alt=""><span>◣ QUEBRADO</span></div><div><img src="art/wall2.webp" alt=""><span>● FRESTA</span></div></div>`;
+   case 11:return `<div class="walls"><div style="font-size:clamp(30px,12vh,80px)">⏳</div><div style="font-size:clamp(30px,12vh,80px)">🧱</div></div>`;
    case 10:return `<div class="walls"><div style="font-size:clamp(30px,12vh,80px)">📓</div><div style="font-size:clamp(30px,12vh,80px)">📍</div></div>`;
    case 9:return `<div class="walls"><div style="font-size:clamp(30px,12vh,80px)">🔍</div><div style="font-size:clamp(30px,12vh,80px)">🎚️</div></div>`;
    case 8:return `<div class="walls"><div style="font-size:clamp(30px,12vh,80px)">🐕</div><div style="font-size:clamp(30px,12vh,80px)">🎧</div></div>`;
