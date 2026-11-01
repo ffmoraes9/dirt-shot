@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Dirty Shot</title>
+<title>Dead Still</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&display=swap">
 <style>
 *{box-sizing:border-box}
@@ -179,7 +179,7 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
 <body>
 <canvas id="c"></canvas>
 <div id="ov" class="ov on"></div>
-<div id="rot">Gire o celular para a horizontal.<br>O Dirty Shot é jogado deitado.</div>
+<div id="rot">Gire o celular para a horizontal.<br>O Dead Still é jogado deitado.</div>
 <script>
 (()=>{
 'use strict';
@@ -691,7 +691,7 @@ const HINTS={
  radio:'RÁDIO: PROVOCAR o faz brilhar. CONVERSAR baixa sua exposição.',
  folego:'SEGURAR firma a mira, mas o fôlego acaba.',
  zoom:'ZOOM: mais zoom mostra detalhe, mas a mira treme. Ele é pequeno: aproxime.',
- caderno:'CADERNO: abra atrás do muro e responda SIM ou NÃO às perguntas. Acertar enche o ÍNDICE e revela um pouco o inimigo. Errar tira. O índice cai com o tempo.',
+ caderno:'CADERNO: o quadro junta as pistas por objeto. Aposte (SUSPEITO) no objeto com mais tipos de pista diferentes. Acertar reduz a camuflagem dele.',
  foco:'FOCO: nítido só em uma distância. Troque entre 100, 200 e 300 m.',
  som:'O som chega atrasado: quanto maior o atraso, mais longe o tiro.',
  observ:'LUNETA: não atira, mas vê mais e expõe metade.',
@@ -785,14 +785,14 @@ function opPanel(){
    <div class="ki cur"><small>VIDAS</small><b class="hearts">${'♥'.repeat(op.lives)}<span style="color:#55583c">${'♥'.repeat(Math.max(0,op.maxLives-op.lives))}</span></b></div>
    <div class="ki ${op.weapon?'ok':''}"><small>ARMA</small><b>${op.weapon?CARD[op.weapon].n:'?'}</b></div>
    <div class="ki ${w.length?'':'ok'}"><small>FERIDAS</small><b>${w.length?w.join(', '):'Nenhuma'}</b></div>
-   <div class="ki lst"><small>EQUIPAMENTOS</small><b>${own.length?own.join(' · '):'Nenhum ainda'}</b></div></div>`;
+   <div class="ki lst"><small>EQUIPAMENTOS</small><b>${own.length?own.join(' · '):'Nenhum ainda'}</b></div>${op.lastRep?`<div class="ki lst"><small>ÚLTIMO DUELO</small><b style="font-weight:500;font-size:.8em">${op.lastRep}</b></div>`:''}</div>`;
 }
 function cardBtn(id){const c=CARD[id];return `<button class="opt ccard ${c.inst?'inst':''} ${cardSel===id?'sel':''}" data-cpick="${id}"><div class="cg">${GRP[c.g]}</div><div class="cico">${cardIcon(c)}</div><div class="on">${c.n}</div><div class="op">+ ${c.pro}</div><div class="oc">− ${c.con}</div></button>`}
 function opHome(){
   scene='menu';AU.heart(0);curScr=opHome;
   const ov=$('#ov');ov.dataset.screen='ophome';ov.classList.add('on','title');
   ov.innerHTML=`<div class="scr th-modo"><div class="tint"></div>
-   <div class="wh"><div class="whl">DIRTY SHOT</div><div class="whr">OPERAÇÃO</div></div>
+   <div class="wh"><div class="whl">DEAD STILL</div><div class="whr">OPERAÇÃO</div></div>
    <div class="wmain"><div class="q">4 DUELOS. UMA OPERAÇÃO.</div>
     <div class="opmeta" style="max-width:min(88vw,820px);text-align:center">Você começa escolhendo a arma e o primeiro equipamento.<br>Vidas e ferimentos passam de um duelo para o outro.<br>Depois de cada duelo você escolhe 1 entre 3 equipamentos, ou pula e recupera 1 vida.<br>Antes de cada duelo você escolhe o muro: o mais arriscado dá 4 equipamentos.</div>
     <div class="dif"><span>DIFICULDADE</span><button class="chip ${diffKey==='recruta'?'sel':''}" data-d="recruta">RECRUTA</button><button class="chip ${diffKey==='veterano'?'sel':''}" data-d="veterano">VETERANO</button><em>${diffKey==='recruta'?'7 vidas. Ele demora mais para te achar.':'6 vidas. Ele te caça no ritmo normal.'}</em></div>
@@ -872,14 +872,14 @@ function opFinish(win,kind){
     x.strokeStyle='rgba(255,70,50,.95)';x.lineWidth=3;x.beginPath();x.arc(280,150,36,0,6.3);x.stroke();
     x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,270,560,30);x.fillStyle='#fff';x.font='600 18px Oswald,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('ELE ESTAVA AQUI · '+distM(e.y)+' m',280,285);
     reveal='<div class="rpw"><div><img src="'+c.toDataURL('image/jpeg',.85)+'" alt=""><br>ONDE ELE ESTAVA</div><div><canvas id="rp1" width="300" height="300"></canvas><br>SUA VISÃO</div><div><canvas id="rp2" width="300" height="300"></canvas><br>VISÃO DELE</div></div>'}catch(err){}}
-  ov.innerHTML=`<div class="panel ${win?'opwin':''}"><div class="endk ${win?'w':'l'}">${T[0]}</div><p class="tut-p">${T[1]}</p>${reveal}
+  ov.innerHTML=`<div class="panel ${win?'opwin':''}"><div class="endk ${win?'w':'l'}">${T[0]}</div><p class="tut-p">${T[1]}</p>${reveal}<p class="tut-p" style="font-size:clamp(11px,2.6vh,16px);opacity:.85">${reportText()}</p>
    <div class="sumlist">Duelos vencidos: ${reach} de 4 · Dificuldade: ${diffKey==='recruta'?'Recruta':'Veterano'}<br>Arma: ${op.weapon?CARD[op.weapon].n:'nenhuma'}<br>Equipamentos: ${names.length?names.join(' · '):'nenhum'}</div>
    <div class="row"><button class="btn" data-a="again">NOVA OPERAÇÃO</button></div></div>`;
   if(!win)setTimeout(startReplay,60);
 }
 function opAfterDuel(){
   // chamado por showEnd quando há operação
-  const k=g.endKind;
+  const k=g.endKind;op.lastRep=reportText();
   if(k!=='win'){opFinish(false,k);return}
   op.hist.push({n:op.n,card:null});
   op.lives=Math.min(op.maxLives,g.lives+1);op.w={arm:g.wounds.arm,leg:g.wounds.leg,lens:g.wounds.lens};
@@ -1004,28 +1004,31 @@ function addNote(kind,text,side,plane,x,y){
   if(!g||g.over)return;
   g.notes.push({t:g.t,kind,text,side,plane});if(g.notes.length>16)g.notes.shift();
   hint('caderno');g.noteFlash=g.t;
-  if(x!==undefined)genQ(x,y,kind);
+  if(x!==undefined)addEv(kind,x,y);
 }
-const QN=['Perto','Junto','Rente'];
-function genQ(x,y,kind){
-  g.qs=g.qs||[];g.qHist=g.qHist||{};
-  g.qs=g.qs.filter(q=>q.ans===null||g.t-q.t<25);
-  if(g.qs.filter(q=>q.ans===null).length>=3||g.t-(g.qLast||-99)<5)return;
-  let cl=LM.filter(m=>!(g.qHist[m.k]>g.t-90)&&Math.hypot(m.x-x,(m.y-y)*2)<300&&!g.qs.some(q=>q.lm===m)).sort((a,b)=>Math.hypot(a.x-x,(a.y-y)*2)-Math.hypot(b.x-x,(b.y-y)*2));
-  {const bg=cl.filter(m=>m.big);if(bg.length)cl=bg}
-  if(!cl.length)return;const c=(Math.random()<.5||cl.length<2)?cl[0]:cl[1+((Math.random()*(cl.length-1))|0)];
-  g.qHist[c.k]=g.t;g.qLast=g.t;
-  const src={tiro:'O tiro',brilho:'O brilho',poeira:'A poeira',ambiente:'O sinal'}[kind]||'A pista';
-  g.qs.push({lm:c,t:g.t,ans:null,txt:src+' veio '+QN[(Math.random()*3)|0].toLowerCase()+' d'+c.n.slice(1===0?0:0)+'?'});
-  g.qs[g.qs.length-1].txt='Ele está perto d'+c.n+'?';g.qs[g.qs.length-1].src=src+' '+({tiro:'foi ouvido',brilho:'foi visto',poeira:'foi vista',ambiente:'foi notado'}[kind]||'foi notada')+' ali';
-}
-function answerQ(i,yes){
-  const q=g.qs&&g.qs[i];if(!q||q.ans!==null)return;
-  const e=g.e,near=Math.hypot(q.lm.x-e.x,(q.lm.y-e.y)*2)<230;
-  q.ans=yes;q.ok=(yes===near);q.t=g.t;
-  g.idx=clamp((g.idx||0)+(q.ok?.2:-.26),0,1);
-  g.idxFlash=g.t;try{AU.click()}catch(er){}
-}
+const EVW={tiro:1.2,brilho:1,poeira:.7,ambiente:.6},EVN={tiro:'tiro',brilho:'brilho',poeira:'poeira',ambiente:'ambiente'};
+function stt(){return g.stats||(g.stats={real:0,fake:0,first:null,ok:0,bad:0})}
+function addEv(kind,x,y){
+  if(!g||!g.e)return;const e=g.e,s2=stt(),real=Math.hypot(x-e.x,(y-e.y)*2)<160;
+  if(real){s2.real++;if(s2.first==null)s2.first=Math.max(0,g.timeMax-g.time)}else s2.fake++;
+  const c=LM.filter(m=>Math.hypot(m.x-x,(m.y-y)*2)<300).sort((p,q)=>Math.hypot(p.x-x,(p.y-y)*2)-Math.hypot(q.x-x,(q.y-y)*2))[0]||null;
+  (g.ev=g.ev||[]).push({t:g.t,kind,x,y,lm:c,real});if(g.ev.length>70)g.ev.shift()}
+function board(){
+  const now=g.t,by=new Map();
+  for(const v of g.ev||[]){if(!v.lm||now-v.t>170)continue;let o=by.get(v.lm);if(!o){o={lm:v.lm,kinds:{},n:0,score:0};by.set(v.lm,o)}
+    o.kinds[v.kind]=(o.kinds[v.kind]||0)+1;o.n++;o.score+=(EVW[v.kind]||.6)*(1-(now-v.t)/200)}
+  const arr=[...by.values()];arr.forEach(o=>{o.dk=Object.keys(o.kinds).length;o.score*=1+.35*(o.dk-1)});
+  return arr.sort((p,q)=>q.score-p.score)}
+function markSuspect(lm){
+  const wait=40-(g.t-(g.sTime||-99));
+  if(wait>0){toast('AGUARDE '+Math.ceil(wait)+' s','você acabou de apostar. Reúna mais pistas antes de apostar de novo.',3);return}
+  const e=g.e,ok=Math.hypot(lm.x-e.x,(lm.y-e.y)*2)<230,o=board().find(b2=>b2.lm===lm),dk=o?o.dk:1,s2=stt();
+  g.sTime=g.t;g.suspect={lm,t:g.t};
+  if(ok){g.idx=clamp((g.idx||0)+.14+.1*Math.min(3,dk),0,1);s2.ok++}else{g.idx=clamp((g.idx||0)-.35,0,1);s2.bad++}
+  g.idxFlash=g.t;try{AU.click()}catch(er){}}
+function reportText(){
+  if(!g||!g.stats)return '';const s2=g.stats,el=Math.max(0,Math.round(g.timeMax-g.time)),mmx=Math.floor(el/60),ssx=String(el%60).padStart(2,'0');
+  return 'Duração '+mmx+':'+ssx+' · pistas vistas '+(s2.real+s2.fake)+' ('+s2.real+' reais, '+s2.fake+' falsas) · primeira pista real aos '+(s2.first==null?'—':Math.round(s2.first)+' s')+' · apostas '+s2.ok+' certas e '+s2.bad+' erradas · tiros '+g.shots}
 function seen(kind,x,y,label){
   if(!g||g.view!=='scope')return;
   const z=curZoom();if(Math.hypot(x-g.cam.x,y-g.cam.y)>292/z)return;
@@ -1052,27 +1055,30 @@ function notesOverlay(){
   const now=g.t,list=g.notes.slice().reverse().slice(0,3);
   if(!list.length){txt('Nada ainda. Observe tiros, brilhos, poeira e o ambiente.',lx,y,fs-2,INK2,'left',500);y+=26}
   for(const n of list){txt('• '+n.text+' · há '+Math.round(now-n.t)+' s',lx,y,fs-2,INK,'left',500);y+=26}
-  // perguntas
-  y+=10;txt('PERGUNTAS',lx,y,14,INK2,'left',700);y+=12;
-  const qs=g.qs||[],open=qs.map((q,i)=>({q,i})).filter(o=>o.q.ans===null).slice(0,3);
-  if(!open.length){y+=18;txt('Sem perguntas agora. Novas pistas geram novas perguntas.',lx,y,fs-2,INK2,'left',500);y+=30}
+  // quadro de evidências
+  y+=8;txt('QUADRO DE EVIDÊNCIAS',lx,y,14,INK2,'left',700);y+=20;
+  txt('Aposte no objeto com mais tipos de pista diferentes.',lx,y,fs-5,INK2,'left',500);y+=16;
+  const bd=board().slice(0,3),open=bd.map((o,i)=>({o,i}));
+  if(!bd.length){y+=16;txt('Sem pistas ligadas a objetos ainda. Observe com a mira.',lx,y,fs-2,INK2,'left',500);y+=30}
   const ch=PORT?84:70;
-  for(const o of open){
-    const q=o.q;ctx.fillStyle='rgba(255,250,225,.8)';rrect(ctx,lx-8,y,LW-70,ch,8);ctx.fill();ctx.strokeStyle='rgba(120,100,60,.5)';ctx.lineWidth=1.5;ctx.stroke();
-    const im=ART.img[q.lm.k];if(im){const ih=ch-14,iw=im.width*ih/im.height;ctx.drawImage(im,lx+2,y+7,Math.min(iw,ch+10),ih)}
-    const tx=lx+ch+22,bw0=PORT?92:84,avail=lx+LW-70-8-bw0*2-18-tx-10;let qs2=fs+1;ctx.font='700 '+qs2+'px Oswald,Arial Narrow,sans-serif';while(ctx.measureText(q.txt).width>avail&&qs2>11){qs2--;ctx.font='700 '+qs2+'px Oswald,Arial Narrow,sans-serif'}txt(q.txt,tx,y+(PORT?30:27),qs2,INK,'left',700);txt(q.src,tx,y+(PORT?56:50),fs-5,INK2,'left',500);
-    const bw=PORT?92:84,bh=PORT?52:44,bx=lx+LW-70-8-bw*2-18,byy=y+(ch-bh)/2;
-    btn('qy'+o.i,bx,byy,bw,bh,'SIM',{fs:20,fill:'rgba(40,110,60,.95)'});btn('qn'+o.i,bx+bw+10,byy,bw,bh,'NÃO',{fs:20,fill:'rgba(150,50,40,.95)'});
+  for(const it of open){
+    const o=it.o,isS=g.suspect&&g.suspect.lm===o.lm;ctx.fillStyle=isS?'rgba(210,235,170,.9)':'rgba(255,250,225,.8)';rrect(ctx,lx-8,y,LW-70,ch,8);ctx.fill();ctx.strokeStyle=isS?'rgba(80,130,40,.9)':'rgba(120,100,60,.5)';ctx.lineWidth=isS?3:1.5;ctx.stroke();
+    const im=ART.img[o.lm.k];if(im){const ih=ch-14,iw=im.width*ih/im.height;ctx.drawImage(im,lx+2,y+7,Math.min(iw,ch+10),ih)}
+    const tx=lx+ch+22,bw0=PORT?118:104,avail=lx+LW-70-8-bw0-10-tx;let qs2=fs+1;ctx.font='700 '+qs2+'px Oswald,Arial Narrow,sans-serif';const nm=o.lm.n.replace(/^(o|a|os|as) /,'').replace(/^./,c=>c.toUpperCase());while(ctx.measureText(nm).width>avail&&qs2>11){qs2--;ctx.font='700 '+qs2+'px Oswald,Arial Narrow,sans-serif'}
+    txt(nm,tx,y+(PORT?26:22),qs2,INK,'left',700);
+    const kt=Object.keys(o.kinds).map(k=>EVN[k]+(o.kinds[k]>1?' ×'+o.kinds[k]:'')).join(' · ');let ks=fs-4;ctx.font='500 '+ks+'px Oswald,Arial Narrow,sans-serif';while(ctx.measureText(kt).width>avail&&ks>10){ks--;ctx.font='500 '+ks+'px Oswald,Arial Narrow,sans-serif'}
+    txt(kt,tx,y+(PORT?50:43),ks,INK2,'left',500);
+    txt(o.n+(o.n>1?' pistas':' pista')+' · '+o.dk+(o.dk>1?' tipos':' tipo'),tx,y+(PORT?70:60),fs-6,o.dk>1?'#2c5c1a':INK2,'left',700);
+    const bw=bw0,bh=PORT?52:44,bx=lx+LW-70-8-bw,byy=y+(ch-bh)/2;
+    btn('qs'+it.i,bx,byy,bw,bh,isS?'APOSTADO':'SUSPEITO',{fs:18,fill:isS?'rgba(80,100,40,.95)':'rgba(150,90,30,.95)'});
     y+=ch+10;
   }
-  const done=qs.filter(q=>q.ans!==null).slice(-2);
-  for(const q of done){txt('✓ '+q.txt.replace('?','')+': '+(q.ans?'SIM':'NÃO'),lx,y+12,fs-4,INK2,'left',500);y+=22}
   // índice
   const bxx=PORT?lx:px+Math.round(w*.69),bw2=PORT?w-(lx-px)-30:Math.round(w*.27),byy2=PORT?y+22:py+72;
   txt('ÍNDICE DE PISTAS',bxx,byy2,14,INK2,'left',700);
   ctx.fillStyle='rgba(60,50,30,.25)';rrect(ctx,bxx,byy2+10,bw2,20,10);ctx.fill();
   const v=clamp(g.idx||0,0,1);if(v>.01){ctx.fillStyle=g.t-(g.idxFlash||-9)<.8?'#e8b33a':'#7a9a3a';rrect(ctx,bxx,byy2+10,Math.max(20,bw2*v),20,10);ctx.fill()}
-  txt('Cai com o tempo. Respostas certas somam, erradas subtraem.',bxx,byy2+52,fs-6,INK2,'left',500);
+  txt('Cai com o tempo. Aposta certa sobe, errada desce.',bxx,byy2+52,fs-6,INK2,'left',500);
   // mapa
   const mw=PORT?bw2:px+w-30-lx,mx=PORT?bxx:lx,mh=PORT?150:Math.round(mw*260/WW),my=PORT?byy2+72:py+h-mh-58;
   if(mh>50){
@@ -1080,8 +1086,8 @@ function notesOverlay(){
     const MX=xx=>mx+(xx/WW)*mw,MY=yy=>my+((yy-430)/260)*mh;
     ctx.strokeStyle='rgba(227,200,106,.35)';ctx.lineWidth=1;ctx.setLineDash([4,5]);
     for(const yy of [505,575]){ctx.beginPath();ctx.moveTo(mx,MY(yy));ctx.lineTo(mx+mw,MY(yy));ctx.stroke()}ctx.setLineDash([]);
-    for(const o of open){ctx.strokeStyle='#ffd24a';ctx.lineWidth=2.4;ctx.beginPath();ctx.arc(MX(o.q.lm.x),MY(o.q.lm.y),Math.max(9,110/WW*mw),0,6.3);ctx.stroke();const mi=ART.img[o.q.lm.k];if(mi){const mh2=Math.min(PORT?44:34,mh*.55),mw2=mi.width*mh2/mi.height;ctx.drawImage(mi,MX(o.q.lm.x)-mw2/2,MY(o.q.lm.y)-mh2/2,mw2,mh2)}}
-    for(const q of qs.filter(q=>q.ans!==null&&g.t-q.t<120)){ctx.strokeStyle=q.ans?'rgba(120,220,120,.9)':'rgba(230,110,90,.9)';ctx.lineWidth=2;ctx.setLineDash(q.ans?[]:[4,4]);ctx.beginPath();ctx.arc(MX(q.lm.x),MY(q.lm.y),Math.max(9,110/WW*mw),0,6.3);ctx.stroke();ctx.setLineDash([])}
+    {const KC={tiro:'#ff6a50',brilho:'#ffffff',poeira:'#e0c070',ambiente:'#7fc4ff'};for(const v of g.ev||[]){if(g.t-v.t>170)continue;ctx.fillStyle=KC[v.kind]||'#fff';ctx.globalAlpha=Math.max(.25,1-(g.t-v.t)/200);ctx.beginPath();ctx.arc(MX(v.x),MY(v.y),Math.max(3,PORT?4:3.2),0,6.3);ctx.fill();ctx.globalAlpha=1}}
+    for(const it of open){const o=it.o;ctx.strokeStyle=g.suspect&&g.suspect.lm===o.lm?'rgba(130,220,100,.95)':'#ffd24a';ctx.lineWidth=2.4;ctx.beginPath();ctx.arc(MX(o.lm.x),MY(o.lm.y),Math.max(9,110/WW*mw),0,6.3);ctx.stroke();const mi=ART.img[o.lm.k];if(mi){const mh2=Math.min(PORT?44:34,mh*.55),mw2=mi.width*mh2/mi.height;ctx.drawImage(mi,MX(o.lm.x)-mw2/2,MY(o.lm.y)-mh2/2,mw2,mh2)}}
     for(const pn of g.pins)drawPin(ctx,MX(pn.x),MY(pn.y),.8);
   }
   btn('close',px+w/2-80,py+h-50,160,40,'FECHAR',{fs:20});
@@ -1112,7 +1118,7 @@ const SN_LENS=[[.50,.42],[.43,.46],[.46,.41],[.46,.42]],SN_CAMO=[1,1.18,1,.82];
 function newEnemy(){
   const h=pick(HID);
   return {ty:(op&&op.n?(op.n-1)%4:(Math.random()*4)|0),h,x:h.x,y:h.y,s:h.s,belief:new Array(NPOS).fill(1/NPOS),focus:2,nextFocus:3,threat:0,bites:0,tw:0,spotted:0,lockUntil:0,
-   impUntil:0,alertUntil:0,suspUntil:0,calmUntil:0,nextTwitch:rr(8,13),nextTalk:rr(18,28),relocAt:0,nextReloc:rr(140,200),nextBait:rr(22,34),nextWall:rr(22,34),nextProv:rr(20,35),moving:null,hr:hrOf(h.s),plane:h.plane};
+   impUntil:0,alertUntil:0,suspUntil:0,calmUntil:0,nextTwitch:rr(25,45),nextTalk:rr(18,28),relocAt:0,nextReloc:rr(140,200),nextBait:rr(22,34),nextWall:rr(22,34),nextProv:rr(20,35),moving:null,hr:hrOf(h.s),plane:h.plane};
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a}
 function drawOffers(){
@@ -1208,7 +1214,7 @@ function update(dt){
   if(g.view==='moving'){g.moveT+=dt/g.moveDur;const t=Math.min(1,g.moveT);g.posF=lerp(g.moveFrom,g.moveTo,t*t*(3-2*t));if(g.moveT>=1){g.pos=g.moveTo;g.posF=g.pos;g.view='cover';hint('t_'+g.types[g.pos])}}
   if(g.decoy&&g.t>=g.decoy.at){resolveDecoy()}
   updateEnemy(dt);updateAmb(dt);
-  g.fkD=(g.fkD==null?rr(3,6):g.fkD)-dt;if(g.fkD<=0){g.fkD=rr(2.5,6);const o=pick(HID);dust(o.x,o.y+16,(rr(2,5)|0),false);seen('poeira',o.x,o.y,'Poeira')}
+  g.fkD=(g.fkD==null?rr(20,40):g.fkD)-dt;if(g.fkD<=0){g.fkD=rr(45,75);const o=pick(HID);dust(o.x,o.y+16,(rr(2,5)|0),false);seen('poeira',o.x,o.y,'Poeira')}
   g.fkG=(g.fkG==null?rr(12,20):g.fkG)-dt;if(g.fkG<=0){g.fkG=rr(14,26);const o=pick(HID);glint(o.x+rr(-60,60),o.y+rr(-10,25),rr(.25,.6),true)}
   g.recT=(g.recT||0)-dt;if(g.recT<=0){g.recT=.12;const sw0=sway();(g.rec=g.rec||[]).push({t:g.t,v:g.view,cx:g.cam.x,cy:g.cam.y,z:curZoom(),exp:g.exp,pos:g.pos,sx:sw0.x,sy:sw0.y});if(g.rec.length>70)g.rec.shift()}
   const e=g.e,m=mode();
@@ -1260,13 +1266,13 @@ function updateEnemy(dt){
       else if(t>e.nextReloc)e.nextReloc=e.lockUntil+2;
     }
     if(e.relocAt&&t>=e.relocAt)startMove();
-    if(t>e.nextTwitch){e.tw=1;{const jx=rr(-60,60),jy=rr(-20,20);dust(e.x+jx,e.y+16+jy,4,false);seen('poeira',e.x+jx,e.y+jy,'Poeira')}AU.tink(panOf(e.x),g.lo.hearSide?1.8:1);e.nextTwitch=t+(m==='impatient'?rr(5,9):rr(9,15))*(e.calmUntil>t?2:1)}
+    if(t>e.nextTwitch){e.tw=1;{const jx=rr(-60,60),jy=rr(-20,20);dust(e.x+jx,e.y+16+jy,4,false);seen('poeira',e.x+jx,e.y+jy,'Poeira')}AU.tink(panOf(e.x),g.lo.hearSide?1.8:1);e.nextTwitch=t+(m==='impatient'?rr(22,38):rr(40,70))*(e.calmUntil>t?1.6:1)}
     const gr=(m==='impatient'?.03:.008)+(g.exp>75?.03:0);
     if(R()<gr*dt)glint(e.x,e.y+2,.25,false);
-    if(t>e.nextBait&&(m==='alert'||m==='impatient')){e.nextBait=t+rr(18,30);const o=pick(HID.filter(h=>Math.hypot(h.x-e.x,h.y-e.y)>150));if(o){glint(o.x,o.y+2,.55,true);if(R()<.4)dust(o.x,o.y+16,3,false)}}
+    if(t>e.nextBait&&(m==='alert'||m==='impatient')){e.nextBait=t+rr(40,70);const o=pick(HID.filter(h=>Math.hypot(h.x-e.x,h.y-e.y)>150));if(o){glint(o.x,o.y+2,.55,true);if(R()<.4)dust(o.x,o.y+16,3,false)}}
     if(m==='impatient'&&v==='cover'&&t>e.nextWall&&R()<.25*dt){e.nextWall=t+rr(18,30);enemyWall()}
     if(t>e.nextTalk){e.nextTalk=t+rr(22,34)*((e.ty===3)?2.2:1);if(!eLine(m==='impatient'?'imp':m==='suspicious'?'isca':'calm'))eSay(pick(LINES[m]),panOf(e.x))}
-    if(phoneMode&&t>e.nextProv){e.nextProv=t+rr(25,45)*(m==='impatient'?.7:1)*(diffKey==='veterano'?1.25:1);provShot()}
+    if(phoneMode&&t>e.nextProv){e.nextProv=t+rr(55,90)*(m==='impatient'?.7:1)*(diffKey==='veterano'?1.25:1);provShot()}
   }
 }
 function startMove(){
@@ -1276,7 +1282,7 @@ function startMove(){
   if(!c.length)c=HID.filter(h=>h!==e.h);
   const to=pick(c);
   e.moving={from:e.h,to,fx:e.x,fy:e.y,fs:e.s,tx:to.x,ty:to.y,ts:to.s,t0:t,dur:rr(4,6.5)};ambReact(e.x,e.y,'mov');
-  e.relocAt=0;e.threat*=.4;e.spotted=0;g.stare=0;g.idx=(g.idx||0)*.3;if(g.qs)g.qs=[];
+  e.relocAt=0;e.threat*=.4;e.spotted=0;g.stare=0;g.idx=(g.idx||0)*.3;g.ev=[];g.suspect=null;
 }
 function enemyWall(){
   const e=g.e,B=e.belief,p=B.indexOf(Math.max(...B));
@@ -1316,7 +1322,7 @@ function act(id){
   if(!g||g.over)return;AU.init();
   const e=g.e;
   if(g.menu==='notes'&&id.indexOf('q')!==0&&id!=='close'&&id!=='notes'&&id!=='sound')return;
-  if(id.indexOf('qy')===0||id.indexOf('qn')===0){answerQ(+id.slice(2),id[1]==='y');return}
+  if(id.indexOf('qs')===0){const bd=board(),o=bd[+id.slice(2)];if(o)markSuspect(o.lm);return}
   switch(id){
    case 'peek':if(g.view==='cover'){g.peeks=(g.peeks||0)+1;if(g.peeks>1&&R()<.3)eLine(g.pos<=1?'lado_e':g.pos===2?'lado_m':'lado_d',{p:1});hint('peek');g.view='scope';g.cam.x=posCenter(g.pos);g.cam.y=520;g.stare=0;g.menu=null}break;
    case 'duck':g.view='cover';g.held=false;g.spot=false;g.swapUntil=0;break;
@@ -1763,7 +1769,7 @@ addEventListener('keyup',e=>{if(g&&e.key===' ')g.held=false});
 const TUT=[
  {t:'Ache o atirador inimigo.',p:'Ele está escondido no lixo, pequeno e camuflado. Você está atrás do muro. Quem acertar a cabeça ou a luneta do outro primeiro vence.',n:'nar_tut_1',v:0},
  {t:'Mirar te expõe.',p:'Olhar pela luneta sobe a EXPOSIÇÃO. Em 100%, ele atira. Abaixe para esfriar e deslize pelo muro para trocar de lugar.',n:'nar_tut_2',v:1},
- {t:'Procure pistas.',p:'Zoom e foco (100, 200, 300 m) revelam detalhes. Pistas viram perguntas SIM/NÃO no CADERNO. Acertar revela um pouco o inimigo.',n:null,v:9},
+ {t:'Procure pistas.',p:'Zoom e foco (100, 200, 300 m) revelam detalhes. O CADERNO junta as pistas por objeto. Aposte no objeto com mais tipos de pista. Acertar revela um pouco o inimigo.',n:null,v:9},
  {t:'Atire com o vento.',p:'O círculo amarelo IMPACTO mostra onde a bala cai. Coloque o alvo dentro dele e atire. O resto o jogo explica quando você precisar.',n:null,v:5}
 ];
 function tutVisual(i){
@@ -1807,7 +1813,7 @@ function wzRender(step,silent){
   let html='';
   if(step===0){
     html=`<div class="scr th-modo"><div class="tint"></div>
-     <div class="wh"><div class="whl">DIRTY SHOT</div><div class="whr">PREPARAR A MISSÃO</div></div>
+     <div class="wh"><div class="whl">DEAD STILL</div><div class="whr">PREPARAR A MISSÃO</div></div>
      <div class="wmain"><div class="q">COMO VOCÊ QUER MONTAR O SEU KIT?</div>
       <div class="mcards">
        <button class="mcard ${!sor?'sel':''}" data-wmode="escolher"><div class="mi">✅</div><b>ESCOLHER</b><span>Cada espaço oferece 2 itens sorteados. Você escolhe 1.</span></button>
@@ -1839,7 +1845,7 @@ function wzRender(step,silent){
 function showMenu(){wzRender(0)}
 function showTitle(){
   scene='menu';const ov=$('#ov');ov.dataset.screen='title';ov.classList.add('on','title');
-  ov.innerHTML=`<div class="tbox" data-a="start"><div class="tbg"></div><img class="tsn" src="art/sniper0.webp" alt=""><div class="tmid"><h1 class="tt">DIRTY SHOT</h1><div class="tsub">ELE ESTÁ NO LIXO. VOCÊ, ATRÁS DO MURO.</div></div><div class="tap">TOQUE PARA COMEÇAR</div></div>`;
+  ov.innerHTML=`<div class="tbox" data-a="start"><div class="tbg"></div><img class="tsn" src="art/sniper0.webp" alt=""><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">ELE ESTÁ NO LIXO. VOCÊ, ATRÁS DO MURO.</div></div><div class="tap">TOQUE PARA COMEÇAR</div></div>`;
 }
 function showBrief(){
   const ov=$('#ov');ov.dataset.screen='brief';ov.classList.add('on','title');
@@ -1892,7 +1898,7 @@ function frame(ts){
 }
 resize();buildScene(12345);g=makeG(sel);g.e=newEnemy();scene='menu';drawOffers();showTitle();loadArt();
 requestAnimationFrame(frame);
-window.__DS={eLine,E_MAN,E_MAP,VOZ_MAP,genQ,answerQ,seen,LM:()=>LM,get L(){return L},get g(){return g},start:startGame,act,fire,sway,HID:()=>HID,mode,end,step:dt=>update(dt),render,get scene(){return scene},get op(){return op},newOp,opHome,opPick,opMap,opGoMap,opReward,opAfterDuel,CARDS,CARD,offerCards,mapOpts:()=>mapOpts,setMap:i=>{mapSel=i;},goDuel,EQ,EQ_ORDER,ART,AU,RQ,DIFF};
+window.__DS={eLine,E_MAN,E_MAP,VOZ_MAP,addEv,markSuspect,board,reportText,seen,LM:()=>LM,get L(){return L},get g(){return g},start:startGame,act,fire,sway,HID:()=>HID,mode,end,step:dt=>update(dt),render,get scene(){return scene},get op(){return op},newOp,opHome,opPick,opMap,opGoMap,opReward,opAfterDuel,CARDS,CARD,offerCards,mapOpts:()=>mapOpts,setMap:i=>{mapSel=i;},goDuel,EQ,EQ_ORDER,ART,AU,RQ,DIFF};
 })();
 </script>
 </body>
