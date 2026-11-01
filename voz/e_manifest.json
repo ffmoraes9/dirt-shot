@@ -1,0 +1,708 @@
+{
+ "0": {
+  "calm": [
+   {
+    "f": "e0_calm_0",
+    "t": "Sem pressa. Eu gosto de esperar."
+   },
+   {
+    "f": "e0_calm_1",
+    "t": "Você respira mais alto do que acha."
+   },
+   {
+    "f": "e0_calm_2",
+    "t": "Eu já fiz isso mais vezes do que você."
+   },
+   {
+    "f": "e0_calm_3",
+    "t": "Ainda aí. Bom."
+   },
+   {
+    "f": "e0_calm_4",
+    "t": "Cada minuto é meu."
+   },
+   {
+    "f": "e0_calm_5",
+    "t": "Pode olhar. Eu não me mexo."
+   }
+  ],
+  "imp": [
+   {
+    "f": "e0_imp_0",
+    "t": "Está ficando nervoso."
+   },
+   {
+    "f": "e0_imp_1",
+    "t": "A paciência é a primeira a ir embora."
+   },
+   {
+    "f": "e0_imp_2",
+    "t": "Seu tempo está acabando. O meu, não."
+   },
+   {
+    "f": "e0_imp_3",
+    "t": "Já pensou em desistir?"
+   }
+  ],
+  "errp": [
+   {
+    "f": "e0_errp_0",
+    "t": "Perto. Quase."
+   },
+   {
+    "f": "e0_errp_1",
+    "t": "Agora eu sei onde você está."
+   },
+   {
+    "f": "e0_errp_2",
+    "t": "Respira. Foi por pouco."
+   }
+  ],
+  "errl": [
+   {
+    "f": "e0_errl_0",
+    "t": "Nem perto."
+   },
+   {
+    "f": "e0_errl_1",
+    "t": "Você está mirando no vazio."
+   },
+   {
+    "f": "e0_errl_2",
+    "t": "Gastou uma bala. Restam poucas."
+   }
+  ],
+  "troc": [
+   {
+    "f": "e0_troc_0",
+    "t": "Mudou de lugar. Esperto."
+   },
+   {
+    "f": "e0_troc_1",
+    "t": "Eu ouvi você arrastar."
+   },
+   {
+    "f": "e0_troc_2",
+    "t": "Não adianta mudar. Eu espero."
+   }
+  ],
+  "rep": [
+   {
+    "f": "e0_rep_0",
+    "t": "De novo aí? Você se repete."
+   },
+   {
+    "f": "e0_rep_1",
+    "t": "Mesmo lugar. Obrigado."
+   },
+   {
+    "f": "e0_rep_2",
+    "t": "Você tem hábitos."
+   }
+  ],
+  "lado_e": [
+   {
+    "f": "e0_lado_e_0",
+    "t": "Pela esquerda. Eu esperava."
+   },
+   {
+    "f": "e0_lado_e_1",
+    "t": "Esquerda de novo."
+   }
+  ],
+  "lado_m": [
+   {
+    "f": "e0_lado_m_0",
+    "t": "No meio do muro. Corajoso."
+   },
+   {
+    "f": "e0_lado_m_1",
+    "t": "O meio. Mais exposto."
+   }
+  ],
+  "lado_d": [
+   {
+    "f": "e0_lado_d_0",
+    "t": "Pela direita. Interessante."
+   },
+   {
+    "f": "e0_lado_d_1",
+    "t": "Direita. Eu vi."
+   }
+  ],
+  "t50": [
+   {
+    "f": "e0_t50_0",
+    "t": "Metade do tempo já foi."
+   },
+   {
+    "f": "e0_t50_1",
+    "t": "O relógio está do meu lado."
+   }
+  ],
+  "t10": [
+   {
+    "f": "e0_t10_0",
+    "t": "Pouco tempo. Faça algo."
+   },
+   {
+    "f": "e0_t10_1",
+    "t": "Acabou o tempo de pensar."
+   }
+  ],
+  "hit_arm": [
+   {
+    "f": "e0_hit_arm_0",
+    "t": "Seu braço. A mira vai tremer."
+   },
+   {
+    "f": "e0_hit_arm_1",
+    "t": "Agora segure firme."
+   }
+  ],
+  "hit_lens": [
+   {
+    "f": "e0_hit_lens_0",
+    "t": "Sua luneta. Boa sorte enxergando."
+   },
+   {
+    "f": "e0_hit_lens_1",
+    "t": "Vidro quebrado não ajuda."
+   }
+  ],
+  "hit_leg": [
+   {
+    "f": "e0_hit_leg_0",
+    "t": "Sua perna. Agora você anda devagar."
+   },
+   {
+    "f": "e0_hit_leg_1",
+    "t": "Correr não vai ser mais fácil."
+   }
+  ],
+  "isca": [
+   {
+    "f": "e0_isca_0",
+    "t": "Capacete velho. Eu não caio."
+   },
+   {
+    "f": "e0_isca_1",
+    "t": "Isca. Eu percebo."
+   },
+   {
+    "f": "e0_isca_2",
+    "t": "Eu vi o brilho. Não era você."
+   }
+  ],
+  "wall": [
+   {
+    "f": "e0_wall_0",
+    "t": "O muro está caindo. Cada vez menos lugar."
+   },
+   {
+    "f": "e0_wall_1",
+    "t": "Sua cobertura acaba."
+   }
+  ]
+ },
+ "1": {
+  "calm": [
+   {
+    "f": "e1_calm_0",
+    "t": "Anda. Eu não aguento."
+   },
+   {
+    "f": "e1_calm_1",
+    "t": "Cadê você? Cadê?"
+   },
+   {
+    "f": "e1_calm_2",
+    "t": "Mexe um dedo. Só um."
+   },
+   {
+    "f": "e1_calm_3",
+    "t": "Eu estou ouvindo. Estou ouvindo tudo."
+   },
+   {
+    "f": "e1_calm_4",
+    "t": "Para de se esconder."
+   },
+   {
+    "f": "e1_calm_5",
+    "t": "Qualquer barulho e eu atiro."
+   }
+  ],
+  "imp": [
+   {
+    "f": "e1_imp_0",
+    "t": "Chega. Aparece."
+   },
+   {
+    "f": "e1_imp_1",
+    "t": "Eu vou perder a cabeça."
+   },
+   {
+    "f": "e1_imp_2",
+    "t": "Você vai me obrigar."
+   },
+   {
+    "f": "e1_imp_3",
+    "t": "Agora. Agora."
+   }
+  ],
+  "errp": [
+   {
+    "f": "e1_errp_0",
+    "t": "Quase. Quase me pegou."
+   },
+   {
+    "f": "e1_errp_1",
+    "t": "Isso foi perto demais."
+   },
+   {
+    "f": "e1_errp_2",
+    "t": "Você errou. Eu vi onde."
+   }
+  ],
+  "errl": [
+   {
+    "f": "e1_errl_0",
+    "t": "Errou. Errou feio."
+   },
+   {
+    "f": "e1_errl_1",
+    "t": "Nem encostou."
+   },
+   {
+    "f": "e1_errl_2",
+    "t": "Gastou bala à toa."
+   }
+  ],
+  "troc": [
+   {
+    "f": "e1_troc_0",
+    "t": "Mudou. Eu ouvi."
+   },
+   {
+    "f": "e1_troc_1",
+    "t": "Onde você foi? Onde?"
+   },
+   {
+    "f": "e1_troc_2",
+    "t": "Eu vou te achar."
+   }
+  ],
+  "rep": [
+   {
+    "f": "e1_rep_0",
+    "t": "Aí de novo. Eu sei."
+   },
+   {
+    "f": "e1_rep_1",
+    "t": "Sempre o mesmo lugar."
+   },
+   {
+    "f": "e1_rep_2",
+    "t": "Previsível. Previsível."
+   }
+  ],
+  "lado_e": [
+   {
+    "f": "e1_lado_e_0",
+    "t": "Esquerda. Eu ouvi pela esquerda."
+   }
+  ],
+  "lado_m": [
+   {
+    "f": "e1_lado_m_0",
+    "t": "O meio. Estou vendo a sombra."
+   }
+  ],
+  "lado_d": [
+   {
+    "f": "e1_lado_d_0",
+    "t": "Direita. Eu ouvi."
+   }
+  ],
+  "t50": [
+   {
+    "f": "e1_t50_0",
+    "t": "Metade. E você aí parado."
+   }
+  ],
+  "t10": [
+   {
+    "f": "e1_t10_0",
+    "t": "Quase acabando. Faça alguma coisa."
+   }
+  ],
+  "hit_arm": [
+   {
+    "f": "e1_hit_arm_0",
+    "t": "Acertei o braço. Acertei."
+   },
+   {
+    "f": "e1_hit_arm_1",
+    "t": "Treme agora, treme."
+   }
+  ],
+  "hit_lens": [
+   {
+    "f": "e1_hit_lens_0",
+    "t": "A luneta. Acertei a luneta."
+   },
+   {
+    "f": "e1_hit_lens_1",
+    "t": "Boa sorte vendo alguma coisa."
+   }
+  ],
+  "hit_leg": [
+   {
+    "f": "e1_hit_leg_0",
+    "t": "Perna. Acertei a perna."
+   },
+   {
+    "f": "e1_hit_leg_1",
+    "t": "Agora você não corre."
+   }
+  ],
+  "isca": [
+   {
+    "f": "e1_isca_0",
+    "t": "Isca. Eu não sou idiota."
+   },
+   {
+    "f": "e1_isca_1",
+    "t": "Capacete outra vez?"
+   },
+   {
+    "f": "e1_isca_2",
+    "t": "Me enganar? Tente melhor."
+   }
+  ],
+  "wall": [
+   {
+    "f": "e1_wall_0",
+    "t": "O muro caiu. Agora sim."
+   },
+   {
+    "f": "e1_wall_1",
+    "t": "Acabou sua cobertura."
+   }
+  ]
+ },
+ "2": {
+  "calm": [
+   {
+    "f": "e2_calm_0",
+    "t": "Distância e vento. Só isso."
+   },
+   {
+    "f": "e2_calm_1",
+    "t": "Você mira devagar. Isso ajuda."
+   },
+   {
+    "f": "e2_calm_2",
+    "t": "Eu anoto tudo o que você faz."
+   },
+   {
+    "f": "e2_calm_3",
+    "t": "Respiração a cada quatro segundos."
+   },
+   {
+    "f": "e2_calm_4",
+    "t": "Você deixou rastro de poeira."
+   },
+   {
+    "f": "e2_calm_5",
+    "t": "Paciência é método, não virtude."
+   }
+  ],
+  "imp": [
+   {
+    "f": "e2_imp_0",
+    "t": "Sua exposição está subindo."
+   },
+   {
+    "f": "e2_imp_1",
+    "t": "Já estimei sua posição."
+   },
+   {
+    "f": "e2_imp_2",
+    "t": "Falta pouco para fechar a conta."
+   },
+   {
+    "f": "e2_imp_3",
+    "t": "Você está sem opções."
+   }
+  ],
+  "errp": [
+   {
+    "f": "e2_errp_0",
+    "t": "Desvio de dois palmos. Quase."
+   },
+   {
+    "f": "e2_errp_1",
+    "t": "Corrigi. Você está ali."
+   },
+   {
+    "f": "e2_errp_2",
+    "t": "Boa tentativa. Anotado."
+   }
+  ],
+  "errl": [
+   {
+    "f": "e2_errl_0",
+    "t": "Desvio grande. Ruim."
+   },
+   {
+    "f": "e2_errl_1",
+    "t": "Você não leu o vento."
+   },
+   {
+    "f": "e2_errl_2",
+    "t": "Erro de cálculo."
+   }
+  ],
+  "troc": [
+   {
+    "f": "e2_troc_0",
+    "t": "Mudou de ponto. Recalculando."
+   },
+   {
+    "f": "e2_troc_1",
+    "t": "Deslocamento detectado."
+   },
+   {
+    "f": "e2_troc_2",
+    "t": "Nova posição. Mesma conclusão."
+   }
+  ],
+  "rep": [
+   {
+    "f": "e2_rep_0",
+    "t": "Terceira vez neste ponto. É um padrão."
+   },
+   {
+    "f": "e2_rep_1",
+    "t": "Você repete. Eu aprendo."
+   },
+   {
+    "f": "e2_rep_2",
+    "t": "Mesmo ponto de tiro. Erro de iniciante."
+   }
+  ],
+  "lado_e": [
+   {
+    "f": "e2_lado_e_0",
+    "t": "Flanco esquerdo. Coberto."
+   },
+   {
+    "f": "e2_lado_e_1",
+    "t": "Esquerda. Ângulo ruim para você."
+   }
+  ],
+  "lado_m": [
+   {
+    "f": "e2_lado_m_0",
+    "t": "Centro. Posição mais exposta."
+   },
+   {
+    "f": "e2_lado_m_1",
+    "t": "Meio do muro. Fácil de cobrir."
+   }
+  ],
+  "lado_d": [
+   {
+    "f": "e2_lado_d_0",
+    "t": "Flanco direito. Anotado."
+   },
+   {
+    "f": "e2_lado_d_1",
+    "t": "Direita. Sem proteção lateral."
+   }
+  ],
+  "t50": [
+   {
+    "f": "e2_t50_0",
+    "t": "Metade do tempo. Nenhum resultado seu."
+   },
+   {
+    "f": "e2_t50_1",
+    "t": "Cinquenta por cento. Para mim, suficiente."
+   }
+  ],
+  "t10": [
+   {
+    "f": "e2_t10_0",
+    "t": "Resta pouco. Decida."
+   },
+   {
+    "f": "e2_t10_1",
+    "t": "A janela está fechando."
+   }
+  ],
+  "hit_arm": [
+   {
+    "f": "e2_hit_arm_0",
+    "t": "Braço atingido. Sua mira piora."
+   },
+   {
+    "f": "e2_hit_arm_1",
+    "t": "Tremor agora. Previsto."
+   }
+  ],
+  "hit_lens": [
+   {
+    "f": "e2_hit_lens_0",
+    "t": "Óptica comprometida."
+   },
+   {
+    "f": "e2_hit_lens_1",
+    "t": "Sem visão limpa. Acabou o jogo."
+   }
+  ],
+  "hit_leg": [
+   {
+    "f": "e2_hit_leg_0",
+    "t": "Perna atingida. Mobilidade reduzida."
+   },
+   {
+    "f": "e2_hit_leg_1",
+    "t": "Você vai demorar a trocar de posição."
+   }
+  ],
+  "isca": [
+   {
+    "f": "e2_isca_0",
+    "t": "Isca identificada."
+   },
+   {
+    "f": "e2_isca_1",
+    "t": "Capacete. Truque conhecido."
+   },
+   {
+    "f": "e2_isca_2",
+    "t": "Brilho falso. Descartado."
+   }
+  ],
+  "wall": [
+   {
+    "f": "e2_wall_0",
+    "t": "Cobertura reduzida."
+   },
+   {
+    "f": "e2_wall_1",
+    "t": "Menos muro. Menos lugares para você."
+   }
+  ]
+ },
+ "3": {
+  "calm": [
+   {
+    "f": "e3_calm_0",
+    "t": "Eu estou aqui."
+   },
+   {
+    "f": "e3_calm_1",
+    "t": "Mais perto do que pensa."
+   },
+   {
+    "f": "e3_calm_2",
+    "t": "Silêncio."
+   },
+   {
+    "f": "e3_calm_3",
+    "t": "Você já me viu? Não."
+   }
+  ],
+  "imp": [
+   {
+    "f": "e3_imp_0",
+    "t": "Você está cansando."
+   },
+   {
+    "f": "e3_imp_1",
+    "t": "Sinta o tempo passar."
+   }
+  ],
+  "errp": [
+   {
+    "f": "e3_errp_0",
+    "t": "Quase."
+   },
+   {
+    "f": "e3_errp_1",
+    "t": "Agora eu sei."
+   }
+  ],
+  "errl": [
+   {
+    "f": "e3_errl_0",
+    "t": "Longe."
+   }
+  ],
+  "troc": [
+   {
+    "f": "e3_troc_0",
+    "t": "Eu ouvi."
+   },
+   {
+    "f": "e3_troc_1",
+    "t": "Inútil."
+   }
+  ],
+  "rep": [
+   {
+    "f": "e3_rep_0",
+    "t": "De novo."
+   }
+  ],
+  "t50": [
+   {
+    "f": "e3_t50_0",
+    "t": "Metade."
+   }
+  ],
+  "t10": [
+   {
+    "f": "e3_t10_0",
+    "t": "Acabando."
+   }
+  ],
+  "hit_arm": [
+   {
+    "f": "e3_hit_arm_0",
+    "t": "Braço."
+   }
+  ],
+  "hit_lens": [
+   {
+    "f": "e3_hit_lens_0",
+    "t": "Luneta."
+   }
+  ],
+  "hit_leg": [
+   {
+    "f": "e3_hit_leg_0",
+    "t": "Perna."
+   }
+  ],
+  "isca": [
+   {
+    "f": "e3_isca_0",
+    "t": "Eu vi."
+   },
+   {
+    "f": "e3_isca_1",
+    "t": "Truque."
+   }
+  ],
+  "wall": [
+   {
+    "f": "e3_wall_0",
+    "t": "Menos muro."
+   }
+  ]
+ }
+}
