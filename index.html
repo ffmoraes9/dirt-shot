@@ -665,23 +665,23 @@ const DIFF={recruta:{exp:.7,bel:.6},veterano:{exp:1,bel:1}};
 let diffKey='recruta',eqMode='escolher',offers={},swapUsed=false;
 try{const sv=JSON.parse(localStorage.getItem('ds_eq')||'null');if(sv){if(DIFF[sv.d])diffKey=sv.d;if(sv.m==='sorteio'||sv.m==='escolher')eqMode=sv.m}}catch(e){}
 const HINTS={
- peek:'MIRAR te expõe: quanto mais tempo olhando, mais sobe a EXPOSIÇÃO. Em 100% ele atira em você. ABAIXAR esfria.',
- vento:'VENTO: o círculo amarelo IMPACTO mostra onde a bala vai cair. Coloque o alvo dentro dele e atire. Com vento forte, ele se afasta do centro da mira.',
- queda:'O TEMPO COBRA: a cada 20% do tempo, parte do muro cai. Trechos caídos não protegem e não dá para passar por eles. Sua área de ação diminui.',
- exposicao:'EXPOSIÇÃO: mesmo atrás do muro ela não zera. Ela sobe com o tempo e quando você fica no mesmo trecho. A marca branca na barra é o mínimo de agora. Deslizar ajuda a reduzir.',
- fresta:'FRESTA: você observa com pouquíssimo risco. Não dá para atirar daqui. Use para procurar com calma e depois mire para atirar.',
+ peek:'Cada segundo mirando sobe a EXPOSIÇÃO. Em 100% ele atira. ABAIXAR esfria.',
+ vento:'VENTO: o círculo IMPACTO mostra onde a bala cai. Ponha o alvo dentro dele.',
+ queda:'O muro está caindo. Trechos caídos não protegem. Seu espaço diminui.',
+ exposicao:'A marca branca é a exposição mínima agora. Ela sobe com o tempo. Troque de trecho.',
+ fresta:'FRESTA: observa com pouco risco, mas não dá para atirar daqui.',
  t_alto:'MURO ALTO: cobertura forte, mas mirar por cima expõe mais.',
  t_quebrado:'MURO QUEBRADO: mira normal, mas só vê um setor do campo e o muro é frágil.',
  t_buraco:'Este trecho tem uma FRESTA. Use o botão FRESTA para observar com segurança.',
- iscas:'ISCAS: o capacete pode fazer ele atirar e se revelar. A pedra o distrai. O espelho pode fazê-lo brilhar.',
- radio:'RÁDIO: PROVOCAR faz ele brilhar, mas o deixa impaciente. CONVERSAR baixa sua exposição. "JÁ TE VI" é um blefe.',
- folego:'SEGURAR estabiliza a mira, mas o fôlego acaba. Solte e respire antes de atirar de novo.',
- zoom:'ZOOM: com zoom baixo você vê mais campo, mas ele fica minúsculo e camuflado. Aproxime para reconhecer, mas a mira treme mais.',
- caderno:'CADERNO: cada pista que você percebe é anotada. Atrás do muro, abra o CADERNO para ver as áreas prováveis: quando 2 ou mais pistas apontam para o mesmo lugar, um círculo marca a região. Use MARCAR para deixar bandeiras nos seus suspeitos.',
- foco:'FOCO: a luneta enxerga nítido uma distância por vez (100, 200 ou 300 m). Troque o foco para procurar em cada faixa: o resto fica embaçado.',
- som:'SOM ATRASADO: depois de um clarão, o som chega 0,3 s a cada 100 m. Use o atraso para saber a distância do tiro.',
- observ:'LUNETA DE OBSERVAÇÃO: não atira, mas observa com zoom maior, sem tremor e com metade da exposição. Trocar para o rifle leva 2 s.',
- ambiente:'O AMBIENTE reage: pássaros que levantam voo, cachorro que late, goteira que para. Algo se mexeu perto. Mas pode não ter sido ele.',
+ iscas:'ISCAS: fazem ele atirar ou brilhar e se revelar.',
+ radio:'RÁDIO: PROVOCAR o faz brilhar. CONVERSAR baixa sua exposição.',
+ folego:'SEGURAR firma a mira, mas o fôlego acaba.',
+ zoom:'ZOOM: mais zoom mostra detalhe, mas a mira treme. Ele é pequeno: aproxime.',
+ caderno:'CADERNO: pistas somam. Onde 2 ou mais apontam, aparece um círculo. Use MARCAR na mira.',
+ foco:'FOCO: nítido só em uma distância. Troque entre 100, 200 e 300 m.',
+ som:'O som chega atrasado: quanto maior o atraso, mais longe o tiro.',
+ observ:'LUNETA: não atira, mas vê mais e expõe metade.',
+ ambiente:'O ambiente reagiu: algo se mexeu perto. Pode ser engano.',
  ferido:'Você foi ferido. Cada ferimento piora algo: braço (mira), luneta (visão), perna (tempo). Quando as vidas acabam, você morre.'
 };
 let hintsSeen={};try{hintsSeen=JSON.parse(localStorage.getItem('ds_hints')||'{}')}catch(e){}
@@ -1130,7 +1130,7 @@ function update(dt){
   g.time-=dt*(g.wounds.leg?1.25:1)*(g.lo.tScale||1);
   if(g.time<=0){g.time=0;end('time');return}
   g.radioCd=Math.max(0,g.radioCd-dt);
-  {const prog=clamp(1-g.time/g.timeMax,0,1);g.expFloor=prog*(diffKey==='veterano'?55:40);if(prog>.1)hint('queda');if(prog>=g.nextCol&&g.nextCol<.99){g.nextCol+=.2;collapseWall()}if(g.view!=='moving')g.stay=(g.stay||0)+dt;if(g.stay>14)hint('exposicao')}
+  {const prog=clamp(1-g.time/g.timeMax,0,1);g.expFloor=prog*(diffKey==='veterano'?55:40);if(prog>.1)hint('queda');if(g.view==='scope'){g.scopeT=(g.scopeT||0)+dt;if(g.scopeT>7)hint('zoom');if(g.scopeT>16)hint('vento');if(g.scopeT>26)hint('foco')}if(prog>=g.nextCol&&g.nextCol<.99){g.nextCol+=.2;collapseWall()}if(g.view!=='moving')g.stay=(g.stay||0)+dt;if(g.stay>14)hint('exposicao')}
   g.flash=Math.max(0,g.flash-dt*1.4);g.shake=Math.max(0,g.shake-dt*2);g.noiseWin=Math.max(0,g.noiseWin-dt);
   const w=g.wind;w.next-=dt;if(w.next<=0){w.next=rr(3,7);w.tgt=rr(-3.5,3.5)*(R()<.3?1.6:1)*(g.windK||1)}
   w.gust+=(w.tgt-w.gust)*Math.min(1,dt*.7);w.base+=rr(-.2,.2)*dt;w.base=clamp(w.base,-3,3);w.val=clamp(w.base*.6+w.gust,-6,6);
@@ -1247,7 +1247,7 @@ function act(id){
   const e=g.e;
   if(g.menu==='notes'&&id!=='close'&&id!=='notes'&&id!=='sound')return;
   switch(id){
-   case 'peek':if(g.view==='cover'){hint('peek');hint('vento');hint('zoom');hint('foco');g.view='scope';g.cam.x=posCenter(g.pos);g.cam.y=520;g.stare=0;g.menu=null}break;
+   case 'peek':if(g.view==='cover'){hint('peek');g.view='scope';g.cam.x=posCenter(g.pos);g.cam.y=520;g.stare=0;g.menu=null}break;
    case 'duck':g.view='cover';g.held=false;g.spot=false;g.swapUntil=0;break;
    case 'zin':if(g.view==='scope')g.zoomCur=Math.min(zMax(),+(g.zoomCur*1.18).toFixed(2));break;
    case 'fin':if(g.view==='scope'){hint('foco');g.focus=Math.min(2,g.focus+1)}break;
@@ -1659,18 +1659,10 @@ addEventListener('keyup',e=>{if(g&&e.key===' ')g.held=false});
 
 // ---------------------------------------------------------------- telas (DOM), todas em tela cheia
 const TUT=[
- {t:'Ele está no lixo. Você, atrás do muro.',p:'Um atirador inimigo está escondido no campo de lixo. Ele também está caçando você. Só um dos dois sai daqui.',n:'nar_tut_1'},
- {t:'Mirar expõe você.',p:'Quanto mais tempo você olha pela luneta, mais sobe a barra de EXPOSIÇÃO. Em 100%, ele atira. Abaixe para esfriar. Mirar sempre do mesmo trecho faz com que ele espere você ali.',n:'nar_tut_2'},
- {t:'Deslize pelo muro.',p:'O muro tem 5 trechos. ▲ ALTO protege bem, mas mirar por cima expõe mais. ◣ QUEBRADO é frágil e mostra só um setor. ● FRESTA deixa observar com pouco risco, mas não dá para atirar dela. Trocar de trecho confunde o atirador.',n:'nar_tut_3'},
- {t:'Faça ele se revelar.',p:'Use iscas, rádio, poeira, brilho e som. Um brilho curto e preciso é dele. Um brilho largo e demorado pode ser uma isca. E ele também pensa: aprende por onde você mira.',n:'nar_tut_4'},
- {t:'Ache e firme a mira.',p:'Mantenha a mira sobre ele por 1,5 s e um círculo discreto aparece ao redor dele. SEGURAR estabiliza a mira, mas o fôlego acaba. Só a cabeça e a luneta dele contam como acerto.',n:'nar_tut_5'},
- {t:'Só o vento empurra a bala.',p:'O vento empurra a bala para o lado, e o círculo amarelo IMPACTO mostra onde ela vai cair. Coloque o alvo dentro dele e atire. Com vento forte, ele se afasta do centro da mira, e mais ainda se o alvo está longe. Depois de errar, a linha pontilhada mostra o desvio.',n:'nar_tut_6'},
- {t:'Quatro duelos, uma operação.',p:'Vidas e ferimentos passam de um duelo para o outro. Depois de cada duelo, escolha 1 entre 3 equipamentos (ou pule e recupere 1 vida). Cada equipamento tem um ganho e um custo, e vale pelo resto da operação. Antes de cada duelo, escolha o muro: o arriscado tem vento forte e inimigo mais atento, mas dá 4 equipamentos.',n:null},
- {t:'Arma e zoom.',p:'Você escolhe a arma no início da operação, e cada modelo tem pontos fortes e fracos. Na luneta, use + e − para o zoom: mais zoom mostra mais detalhe, mas amplia o tremor e reduz o campo.',n:null},
- {t:'Ambiente e fone.',p:'Pássaros que levantam voo, cachorro que late ou goteira que para podem indicar movimento dele, mas também podem ser engano. Com fone, ligue o MODO FONE para ouvir tiros de provocação e saber de que lado vêm.',n:null},
- {t:'Foco, zoom e som.',p:'Com zoom baixo você vê mais campo, mas ele é minúsculo e camuflado. O foco enxerga nítida uma distância por vez: 100, 200 ou 300 m. Procure em cada faixa, suspeite de um ponto e aproxime o zoom para confirmar, sabendo que a mira treme mais. Depois de um clarão, o som chega 0,3 s a cada 100 m: use o atraso para saber a distância do tiro.',n:null},
- {t:'Caderno de campo.',p:'Cada pista que você percebe (tiro, brilho, poeira, ambiente e voz) é anotada no caderno, que você abre atrás do muro. Quando 2 ou mais pistas apontam para o mesmo lugar, o caderno marca áreas prováveis com círculos largos, e a luneta mostra SUSPEITO. Pistas falsas existem: compare e deduza. Use MARCAR para deixar bandeiras.',n:null},
- {t:'O tempo cobra.',p:'A exposição mínima sobe com o tempo e quando você fica parado no mesmo trecho: é preciso trocar de lugar. A cada 20% do tempo, parte do muro cai: os trechos caídos não protegem e não dá para passar por eles. Sua área de ação diminui.',n:null}
+ {t:'Ache o atirador inimigo.',p:'Ele está escondido no lixo, pequeno e camuflado. Você está atrás do muro. Quem acertar a cabeça ou a luneta do outro primeiro vence.',n:'nar_tut_1',v:0},
+ {t:'Mirar te expõe.',p:'Olhar pela luneta sobe a EXPOSIÇÃO. Em 100%, ele atira. Abaixe para esfriar e deslize pelo muro para trocar de lugar.',n:'nar_tut_2',v:1},
+ {t:'Procure pistas.',p:'Zoom e foco (100, 200, 300 m) revelam detalhes. Tiros, brilhos, poeira e bichos viram anotações no CADERNO. Pistas juntas marcam onde ele está.',n:null,v:9},
+ {t:'Atire com o vento.',p:'O círculo amarelo IMPACTO mostra onde a bala cai. Coloque o alvo dentro dele e atire. O resto o jogo explica quando você precisar.',n:null,v:5}
 ];
 function tutVisual(i){
   switch(i){
@@ -1694,7 +1686,7 @@ function showTut(){
   const last=tutI===TUT.length-1;
   ov.innerHTML=`<div class="scr th-tut"><div class="tint"></div>
    <div class="wh"><div class="whl">COMO JOGAR</div><div class="whr">${tutI+1} DE ${TUT.length}</div></div>
-   <div class="tut2"><div class="tl">${tutVisual(tutI)}</div><div class="tr"><h2>${t.t}</h2><p>${t.p}</p></div></div>
+   <div class="tut2"><div class="tl">${tutVisual(t.v!==undefined?t.v:tutI)}</div><div class="tr"><h2>${t.t}</h2><p>${t.p}</p></div></div>
    <div class="wnav"><button class="btn sec" data-a="tprev" ${tutI?'':'style="visibility:hidden"'}>‹ VOLTAR</button><button class="btn sec" data-a="tspeak">🔊 OUVIR</button><button class="btn" data-a="tnext">${last?'ENTENDI':'PRÓXIMO ›'}</button></div></div>`;
   if(t.n)AU.whenReady(()=>{if(ov.dataset.screen==='tut')AU.narr(t.n)},6000);
 }
