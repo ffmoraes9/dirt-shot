@@ -452,12 +452,12 @@ function onArtDone(){
 const NPOS=5;
 const TYPE={alto:{exp:1.3,cool:1.3,fov:9999,hp:3,nome:'MURO ALTO',dica:'Espiar por cima expõe mais, mas a cobertura é forte.'},
             quebrado:{exp:1,cool:1,fov:480,hp:2,nome:'MURO QUEBRADO',dica:'Espiada normal, visão em um só setor e muro frágil.'},
-            buraco:{exp:1,cool:.85,fov:9999,hp:3,nome:'SETEIRA',dica:'Tem uma seteira para observar com pouco risco.'}};
+            buraco:{exp:1,cool:.85,fov:9999,hp:3,nome:'FRESTA',dica:'Tem uma fresta para observar com pouco risco.'}};
 const GLYPH={alto:'▲',quebrado:'◣',buraco:'●'};
 const posCenter=i=>X0+(X1-X0)*(i+.5)/NPOS;
 let wallV={}, wallH={}, segW=900;
 function buildWall(){
-  segW=Math.ceil(VW*(PORT?.92:.72));
+  segW=Math.ceil(VW*(PORT?1.3:.82));
   if(ART.ready){
     ['alto','quebrado','buraco'].forEach((kind,i)=>{const im=ART.img['wall'+i],h=Math.round(segW*im.height/im.width),cc=mkc(segW,h);cc.getContext('2d').drawImage(im,0,0,segW,h);wallV[kind]=cc;wallH[kind]=h});
     return;
@@ -646,10 +646,10 @@ try{const sv=JSON.parse(localStorage.getItem('ds_eq')||'null');if(sv){if(DIFF[sv
 const HINTS={
  peek:'ESPIAR te expõe: quanto mais tempo olhando, mais sobe a EXPOSIÇÃO. Em 100% ele atira em você. ABAIXAR esfria.',
  vento:'O VENTO empurra a bala para o lado. Veja o aviso VENTO perto da distância e ponha o alvo do lado para onde a seta aponta, contando as marcas.',
- seteira:'SETEIRA: você observa com pouquíssimo risco. Não dá para atirar daqui. Use para procurar com calma e depois espie para atirar.',
+ fresta:'FRESTA: você observa com pouquíssimo risco. Não dá para atirar daqui. Use para procurar com calma e depois espie para atirar.',
  t_alto:'MURO ALTO: cobertura forte, mas espiar por cima expõe mais.',
  t_quebrado:'MURO QUEBRADO: espiada normal, mas só vê um setor do campo e o muro é frágil.',
- t_buraco:'Este trecho tem uma SETEIRA. Use o botão SETEIRA para observar com segurança.',
+ t_buraco:'Este trecho tem uma FRESTA. Use o botão FRESTA para observar com segurança.',
  iscas:'ISCAS: o capacete pode fazer ele atirar e se revelar. A pedra o distrai. O espelho pode fazê-lo brilhar.',
  radio:'RÁDIO: PROVOCAR faz ele brilhar, mas o deixa impaciente. CONVERSAR baixa sua exposição. "JÁ TE VI" é um blefe.',
  folego:'SEGURAR estabiliza a mira, mas o fôlego acaba. Solte e respire antes de atirar de novo.',
@@ -671,7 +671,7 @@ function makeG(s,o2){
    log:[],stare:0,noiseWin:0,flash:0,shake:0,hbT:1,shots:0,over:false,menu:null,decoy:null,clues:[],glints:[],parts:[],impacts:[],missed:0,won:false,endAt:0,ammoOutAt:0};
 }
 
-// ---------------------------------------------------------------- operação (4 duelos + cartas)
+// ---------------------------------------------------------------- operação (4 duelos + equipamentos)
 const GRP={arma:'ARMA',sup:'SUPRIMENTO',radio:'RÁDIO',corpo:'CORPO'};
 const CARDS=[
  {id:'luneta',g:'arma',n:'Luneta longa',pro:'Zoom maior e mira 15% mais firme.',con:'O fôlego dura 25% menos.',f:o=>{o.zoom+=.6;o.sway*=.85;o.breath*=.75}},
@@ -702,7 +702,7 @@ const CARD={};CARDS.forEach(c=>CARD[c.id]=c);
 let op=null,mapOpts=[],offerIds=[],cardSel=null,mapSel=null,curScr=null,afterTut=null;
 const MAPS=[{id:'fabrica',nome:'Muro da fábrica',bias:'alto',desc:'Muros altos: boa cobertura, mas espiar por cima expõe mais.'},
  {id:'escombros',nome:'Escombros do bairro',bias:'quebrado',desc:'Muros frágeis: cobertura fraca e visão de um só setor.'},
- {id:'galpao',nome:'Galpão aberto',bias:'buraco',desc:'Mais seteiras: dá para observar com segurança.'}];
+ {id:'galpao',nome:'Galpão aberto',bias:'buraco',desc:'Mais frestas: dá para observar com segurança.'}];
 function newOp(){const L=diffKey==='recruta'?7:6;op={n:1,lives:L,maxLives:L,w:{arm:0,leg:0,lens:0},cards:[],hist:[],map:null,start:true}}
 function buildOpLoadout(p){
   const o={sway:1,bullets:5,lives:p.lives,helm:1,rocks:1,mirrors:0,zoom:2.4,range:100,perceive:1,bite:1,radioCost:0,breath:2.5,breathRec:6,missPen:30,radioUses:Infinity,radioCd:15,hearSide:false,noRadio:false,expMult:1,w:{arm:p.w.arm,leg:p.w.leg,lens:p.w.lens},time:300,tScale:1};
@@ -728,7 +728,7 @@ function opPanel(){
   return `<div class="kit"><div class="kt">OPERAÇÃO</div>
    <div class="ki cur"><small>VIDAS</small><b class="hearts">${'♥'.repeat(op.lives)}<span style="color:#55583c">${'♥'.repeat(Math.max(0,op.maxLives-op.lives))}</span></b></div>
    <div class="ki ${w.length?'':'ok'}"><small>FERIDAS</small><b>${w.length?w.join(', '):'Nenhuma'}</b></div>
-   <div class="ki lst"><small>CARTAS</small><b>${own.length?own.join(' · '):'Nenhuma ainda'}</b></div></div>`;
+   <div class="ki lst"><small>EQUIPAMENTOS</small><b>${own.length?own.join(' · '):'Nenhum ainda'}</b></div></div>`;
 }
 function cardBtn(id){const c=CARD[id];return `<button class="opt ccard ${c.inst?'inst':''} ${cardSel===id?'sel':''}" data-cpick="${id}"><div class="cg">${GRP[c.g]}</div><div class="cico">${cardIcon(c)}</div><div class="on">${c.n}</div><div class="op">+ ${c.pro}</div><div class="oc">− ${c.con}</div></button>`}
 function opHome(){
@@ -737,7 +737,7 @@ function opHome(){
   ov.innerHTML=`<div class="scr th-modo"><div class="tint"></div>
    <div class="wh"><div class="whl">DIRTY SHOT</div><div class="whr">OPERAÇÃO</div></div>
    <div class="wmain"><div class="q">4 DUELOS. UMA OPERAÇÃO.</div>
-    <div class="opmeta" style="max-width:min(88vw,820px);text-align:center">Vidas e ferimentos passam de um duelo para o outro.<br>Depois de cada duelo você escolhe 1 entre 3 cartas, ou pula e recupera 1 vida.<br>Antes de cada duelo você escolhe o muro: o mais arriscado dá 4 cartas.</div>
+    <div class="opmeta" style="max-width:min(88vw,820px);text-align:center">Vidas e ferimentos passam de um duelo para o outro.<br>Depois de cada duelo você escolhe 1 entre 3 equipamentos, ou pula e recupera 1 vida.<br>Antes de cada duelo você escolhe o muro: o mais arriscado dá 4 equipamentos.</div>
     <div class="dif"><span>DIFICULDADE</span><button class="chip ${diffKey==='recruta'?'sel':''}" data-d="recruta">RECRUTA</button><button class="chip ${diffKey==='veterano'?'sel':''}" data-d="veterano">VETERANO</button><em>${diffKey==='recruta'?'7 vidas. Ele demora mais para te achar.':'6 vidas. Ele te caça no ritmo normal.'}</em></div>
     <button class="btn" data-a="opstart">INICIAR OPERAÇÃO ›</button>
    </div>
@@ -749,15 +749,15 @@ function opPick(){
   const first=op.start;
   const title=first?'EQUIPAMENTO INICIAL':'DUELO '+(op.n-1)+' CONCLUÍDO';
   ov.innerHTML=`<div class="scr th-arma"><div class="tint"></div>
-   <div class="wh"><div class="whl">${title}</div><div class="whr">ESCOLHA 1 CARTA</div></div>
+   <div class="wh"><div class="whl">${title}</div><div class="whr">ESCOLHA 1 EQUIPAMENTO</div></div>
    <div class="wbody">${opPanel()}<div class="wmain2"><div class="cards">${offerIds.map(cardBtn).join('')}</div></div></div>
-   <div class="wnav">${first?'<span></span>':'<button class="btn sec" data-a="cskip">PULAR (+1 VIDA)</button>'}<span class="hintn">${cardSel?'':'Toque em uma carta para escolher'}</span><button class="btn" data-a="cgo" ${cardSel?'':'disabled style="opacity:.45"'}>ESCOLHER ›</button></div></div>`;
+   <div class="wnav">${first?'<span></span>':'<button class="btn sec" data-a="cskip">PULAR (+1 VIDA)</button>'}<span class="hintn">${cardSel?'':'Toque em um equipamento para escolher'}</span><button class="btn" data-a="cgo" ${cardSel?'':'disabled style="opacity:.45"'}>ESCOLHER ›</button></div></div>`;
 }
 function opMap(){
   scene='menu';AU.heart(0);curScr=opMap;
   const ov=$('#ov');ov.dataset.screen='opmap';ov.classList.add('on','title');
   const cards=mapOpts.map((m,i)=>`<button class="opt ${mapSel===i?'sel':''}" data-mpick="${i}"><div class="cg" style="font:700 clamp(9px,2vh,14px) 'Oswald',sans-serif;letter-spacing:.2em;color:#8f8a73">${m.hard?'ARRISCADO':'SEGURO'}</div><div class="on">${m.nome}</div><div class="opmeta">${m.desc}</div>
-    ${m.hard?`<div class="op">+ Recompensa de 4 cartas.</div><div class="oc">− Vento forte e inimigo 15% mais atento.</div>`:`<div class="op">+ Vento fraco.</div><div class="oc">− Recompensa de 3 cartas.</div>`}</button>`).join('');
+    ${m.hard?`<div class="op">+ Recompensa de 4 equipamentos.</div><div class="oc">− Vento forte e inimigo 15% mais atento.</div>`:`<div class="op">+ Vento fraco.</div><div class="oc">− Recompensa de 3 equipamentos.</div>`}</button>`).join('');
   ov.innerHTML=`<div class="scr th-resumo"><div class="tint"></div>
    <div class="wh"><div class="whl">ESCOLHA O MURO</div><div class="whr">DUELO ${op.n} DE 4</div></div>
    <div class="wbody">${opPanel()}<div class="wmain2"><div class="cards">${cards}</div></div></div>
@@ -778,7 +778,7 @@ function opFinish(win,kind){
     x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,270,560,30);x.fillStyle='#fff';x.font='600 18px Oswald,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('ELE ESTAVA AQUI · '+distM(e.y)+' m',280,285);
     reveal='<img src="'+c.toDataURL('image/jpeg',.85)+'" style="max-width:min(60vw,360px);max-height:28vh;border:2px solid #6c6c55;border-radius:8px;margin:.4vh 0" alt="">'}catch(err){}}
   ov.innerHTML=`<div class="panel ${win?'opwin':''}"><div class="endk ${win?'w':'l'}">${T[0]}</div><p class="tut-p">${T[1]}</p>${reveal}
-   <div class="sumlist">Duelos vencidos: ${reach} de 4 · Dificuldade: ${diffKey==='recruta'?'Recruta':'Veterano'}<br>Cartas: ${names.length?names.join(' · '):'nenhuma'}</div>
+   <div class="sumlist">Duelos vencidos: ${reach} de 4 · Dificuldade: ${diffKey==='recruta'?'Recruta':'Veterano'}<br>Equipamentos: ${names.length?names.join(' · '):'nenhum'}</div>
    <div class="row"><button class="btn" data-a="again">NOVA OPERAÇÃO</button></div></div>`;
 }
 function opAfterDuel(){
@@ -825,6 +825,7 @@ const LINES={
  alert:['Isso foi perto.','Não se mexa agora.','Errou. Agora eu sei onde você está.','Você acha que eu não vi a poeira?','Você ainda está aí. Por enquanto.'],
  impatient:['Cansei de esperar.','Aparece logo!','Vem. Me mostra a cara.','Eu não vou sair daqui. Você vai.','Quanto mais você demora, pior fica.'],
  suspicious:['Truque velho.','Capacete de novo? Sério?','Não caio mais nessa.','Você acha que eu sou idiota?','Guarda essas iscas. Comigo não funcionam.']};
+function toast(a,b,ttl){if(g)g.toast={a,b,t0:g.t,ttl:ttl||4}}
 function log(who,text){g.log.push({who,text,t:g.t});if(g.log.length>6)g.log.shift()}
 function sideOf(x){const a=X0+(X1-X0)/3,b=X0+2*(X1-X0)/3;return x<a?'ESQ':x>b?'DIR':'CENTRO'}
 const RQ={q:[],busy:false,
@@ -979,7 +980,7 @@ function act(id){
   switch(id){
    case 'peek':if(g.view==='cover'){hint('peek');hint('vento');g.view='scope';g.cam.x=posCenter(g.pos);g.cam.y=520;g.stare=0;g.menu=null}break;
    case 'duck':g.view='cover';g.held=false;break;
-   case 'hole':if(g.view==='cover'&&g.types[g.pos]==='buraco'){hint('seteira');g.view='hole';g.cam.x=posCenter(g.pos);g.cam.y=520}break;
+   case 'hole':if(g.view==='cover'&&g.types[g.pos]==='buraco'){hint('fresta');g.view='hole';g.cam.x=posCenter(g.pos);g.cam.y=520}break;
    case 'moveL':case 'moveR':if(g.view==='cover'){const np=g.pos+(id==='moveL'?-1:1);if(np<0||np>=NPOS)return;
      g.moveFrom=g.pos;g.moveTo=np;g.moveT=0;g.view='moving';g.exp=Math.max(0,g.exp-25);g.moveDur=2.1;g.menu=null;
      for(let i=0;i<NPOS;i++)e.belief[i]=lerp(e.belief[i],1/NPOS,.5);
@@ -992,8 +993,8 @@ function act(id){
    case 'sound':AU.setLevel((AU.level+2)%3);break;
    case 'r_prov':radio('prov');break;case 'r_talk':radio('talk');break;case 'r_seen':radio('seen');break;
    case 'd_helm':if(g.helm>0&&!g.decoy){g.helm--;g.decoy={at:g.t+1.4,kind:'helm',pos:g.pos,t0:g.t};g.menu=null}break;
-   case 'd_rock':if(g.rocks>0){g.rocks--;g.menu=null;g.baitFx={kind:'rock',t0:g.t,dir:R()<.5?-1:1};AU.noise(rr(-.7,.7),1200,.25,.25);g.noiseWin=5;if(mode()==='suspicious'&&R()<.5){g.noiseWin=0;log('RÁDIO','Ele não se distraiu com a pedra.')}else log('RÁDIO','Pedra jogada. Ele olhou pro outro lado.')}break;
-   case 'd_mirror':if(g.mirrors>0){g.mirrors--;g.menu=null;g.baitFx={kind:'mirror',t0:g.t};if(mode()!=='suspicious'||R()<.3){glint(e.x,e.y+2,3,false);addClue('glint',e.x,e.y,60,6);log('RÁDIO','O espelho pegou o sol. Algo brilhou.')}else log('RÁDIO','Ele não olhou para o espelho.')}break;
+   case 'd_rock':if(g.rocks>0){g.rocks--;g.menu=null;toast('ELE OUVIU A PEDRA','distraído: a exposição não sobe por 5 s',5);g.baitFx={kind:'rock',t0:g.t,dir:R()<.5?-1:1};AU.noise(rr(-.7,.7),1200,.25,.25);g.noiseWin=5;if(mode()==='suspicious'&&R()<.5){g.noiseWin=0;toast('ELE NÃO CAIU','ele já desconfia das iscas',3.5);log('RÁDIO','Ele não se distraiu com a pedra.')}else log('RÁDIO','Pedra jogada. Ele olhou pro outro lado.')}break;
+   case 'd_mirror':if(g.mirrors>0){g.mirrors--;g.menu=null;g.baitFx={kind:'mirror',t0:g.t};if(mode()!=='suspicious'||R()<.3){glint(e.x,e.y+2,3,false);addClue('glint',e.x,e.y,60,6);toast('BRILHO À '+({ESQ:'ESQUERDA',DIR:'DIREITA',CENTRO:'FRENTE'})[sideOf(e.x)],'olhe pela luneta: dura 3 s',4);log('RÁDIO','O espelho pegou o sol. Algo brilhou.')}else{toast('SEM REAÇÃO','ele não olhou para o espelho',3.5);log('RÁDIO','Ele não olhou para o espelho.')}}break;
   }
 }
 function radio(kind){
@@ -1165,7 +1166,7 @@ function renderCover(){
   btn('moveL',24,y,cw,bh,'‹ DESLIZAR',{dis:busy||g.pos===0,fs:PORT?24:21,cap:g.pos>0?'ir ao trecho '+g.pos:'início do muro'});
   btn('moveR',VW-24-cw,y,cw,bh,'DESLIZAR ›',{dis:busy||g.pos===NPOS-1,fs:PORT?24:21,cap:g.pos<NPOS-1?'ir ao trecho '+(g.pos+2):'fim do muro'});
   btn('peek',mx(0),ym,mw2,bh,'ESPIAR',Object.assign({dis:busy,fs:PORT?21:26,fill:'rgba(78,64,24,.92)',cap:PORT?'luneta':'olhar pela luneta'},cs));
-  btn('hole',mx(1),ym,mw2,bh,'SETEIRA',Object.assign({dis:busy||g.types[g.pos]!=='buraco',fs:PORT?17:22,cap:g.types[g.pos]==='buraco'?(PORT?'pouco risco':'olhar com pouco risco'):(PORT?'só em ●':'só nos trechos ●')},cs));
+  btn('hole',mx(1),ym,mw2,bh,'FRESTA',Object.assign({dis:busy||g.types[g.pos]!=='buraco',fs:PORT?17:22,cap:g.types[g.pos]==='buraco'?(PORT?'pouco risco':'olhar com pouco risco'):(PORT?'só em ●':'só nos trechos ●')},cs));
   btn('decoy',mx(2),ym,mw2,bh,'ISCA',Object.assign({dis:busy||(g.helm+g.rocks+g.mirrors===0),fs:PORT?21:24,cap:PORT?(g.helm+'c · '+g.rocks+'p · '+g.mirrors+'e'):(g.helm+' capac · '+g.rocks+' ped · '+g.mirrors+' esp')},cs));
   btn('radio',mx(3),ym,mw2,bh,'RÁDIO',Object.assign({dis:g.lo.noRadio||g.radioCd>0||g.radioLeft<=0,fs:PORT?21:24,cap:g.lo.noRadio?'sem rádio':(g.radioCd>0?'aguarde '+Math.ceil(g.radioCd)+'s':(PORT?'falar':'falar com ele'+(isFinite(g.radioLeft)?' ('+g.radioLeft+')':'')))},cs));
   void 0;/*{dis:g.lo.noRadio||g.radioCd>0||g.radioLeft<=0,fs:24,cap:g.lo.noRadio?'sem rádio':(g.radioCd>0?'aguarde '+Math.ceil(g.radioCd)+'s':'falar com ele'+(isFinite(g.radioLeft)?' ('+g.radioLeft+')':''))});*/
@@ -1180,7 +1181,7 @@ function renderHole(){
   const rg=ctx.createRadialGradient(hx,hy,60,hx,hy,170);rg.addColorStop(0,'rgba(0,0,0,0)');rg.addColorStop(1,'rgba(0,0,0,.85)');ctx.fillStyle=rg;ctx.fillRect(hx-170,hy-125,340,250);
   ctx.restore();
   ctx.strokeStyle='rgba(20,16,12,.9)';ctx.lineWidth=14;ctx.beginPath();ctx.ellipse(hx,hy,170,122,-.1,0,6.3);ctx.stroke();
-  txt(PORT?'SETEIRA: visão curta, exposição menor':'SETEIRA: visão curta e quase sem zoom, mas exposição bem menor',VW/2,PORT?250:86,20,'#f2ebc9','center');
+  txt(PORT?'FRESTA: visão curta, exposição menor':'FRESTA: visão curta e quase sem zoom, mas exposição bem menor',VW/2,PORT?250:86,20,'#f2ebc9','center');
   btn('duck',24,VH-106,200,84,'SAIR',{fs:28});
 }
 function renderScope(){
@@ -1222,7 +1223,7 @@ function renderScope(){
   btn('hold',34,VH-176,128,128,g.stam<=0?'FÔLEGO':'SEGURAR\nFÔLEGO',{round:true,fs:20,hold:true,dis:g.gasp>0});
   btn('duck',PORT?VW/2-75:24,PORT?VH-166:VH/2-44,150,84,'ABAIXAR',{fs:PORT?24:26,cap:'esfria a exposição',capfs:PORT?11:13});
   btn('fire',VW-166,VH-176,136,136,'ATIRAR',{round:true,fs:27,fill:'rgba(100,36,24,.92)',stroke:'#e58a6a',dis:g.bullets<=0});
-  btn('radio',VW-170,20,150,62,g.lo.noRadio?'SEM RÁDIO':'RÁDIO',{fs:22,dis:g.lo.noRadio||g.radioCd>0||g.radioLeft<=0,cap:g.lo.noRadio?'':(g.radioCd>0?'aguarde '+Math.ceil(g.radioCd)+'s':'falar com ele')});
+  btn('radio',VW-170,PORT?VH-256:VH/2-31,150,62,g.lo.noRadio?'SEM RÁDIO':'RÁDIO',{fs:22,dis:g.lo.noRadio||g.radioCd>0||g.radioLeft<=0,cap:g.lo.noRadio?'':(g.radioCd>0?'aguarde '+Math.ceil(g.radioCd)+'s':'falar com ele')});
 }
 function hud(){
   ctx.fillStyle='rgba(8,9,6,.72)';rrect(ctx,14,14,372,128,10);ctx.fill();
@@ -1236,18 +1237,27 @@ function hud(){
   txt(wnd.length?wnd.join(' · '):'SEM FERIMENTOS',178,108,18,wnd.length?'#e58a6a':'#9a967f','left',500);
   const sc2=g.view==='scope',bw=sc2?400:Math.min(420,VW*.34),bx=VW/2-bw/2;
   const ex=g.exp/100,c1=ex<.5?'#8fb04a':ex<.8?'#e0b030':'#d9402e';
-  if(PORT){bar(20,150,VW-40,sc2?26:30,ex,c1,'#6a6a52','EXPOSIÇÃO '+Math.round(g.exp)+'%');if(sc2)bar(20,180,VW-40,8,g.stam,'#6aa0c0','#4a5a60')}else{bar(bx,sc2?60:14,bw,sc2?24:30,ex,c1,'#6a6a52','EXPOSIÇÃO '+Math.round(g.exp)+'%');
+  if(PORT){bar(20,150,VW-40,sc2?26:30,ex,c1,'#6a6a52','EXPOSIÇÃO '+Math.round(g.exp)+'%'+(g.noiseWin>0?' · ELE DISTRAÍDO '+Math.ceil(g.noiseWin)+'s':''));if(sc2)bar(20,180,VW-40,8,g.stam,'#6aa0c0','#4a5a60')}else{bar(bx,sc2?60:14,bw,sc2?24:30,ex,c1,'#6a6a52','EXPOSIÇÃO '+Math.round(g.exp)+'%'+(g.noiseWin>0?' · DISTRAÍDO '+Math.ceil(g.noiseWin)+'s':''));
   if(sc2)bar(bx,87,bw,8,g.stam,'#6aa0c0','#4a5a60')}
-  // registro do rádio (abaixo do painel)
-  const lg=g.log.filter(l=>g.t-l.t<14).slice(-3);
-  lg.forEach((l,i)=>{const a=Math.min(1,(14-(g.t-l.t))/3);ctx.globalAlpha=a;const y=(PORT?214:170)+i*30;
-    const s=(l.who==='ELE'?'ATIRADOR: ':l.who==='VOCÊ'?'VOCÊ: ':'RÁDIO: ')+l.text;
-    ctx.font='600 20px Oswald,Arial Narrow,sans-serif';const wd=ctx.measureText(s).width;ctx.fillStyle='rgba(8,8,6,.7)';ctx.fillRect(20,y-14,wd+16,28);
-    txt(s,28,y,20,l.who==='ELE'?'#ffb070':l.who==='VOCÊ'?'#bfe0a0':'#d6d0b4','left');ctx.globalAlpha=1});
+  // registro do rádio: canto superior direito, ao lado do tempo
+  {const lg=g.log.filter(l=>g.t-l.t<14).slice(-(PORT?1:3));
+   const rx=VW-18,sc3=g.view==='scope',y0=PORT?(sc3?96:24):24,maxw=PORT?300:520,fsz=PORT?17:20;
+   lg.forEach((l,i)=>{const a=Math.min(1,(14-(g.t-l.t))/3);ctx.globalAlpha=a;
+    const s2=(l.who==='ELE'?'ATIRADOR: ':l.who==='VOCÊ'?'VOCÊ: ':'RÁDIO: ')+l.text;
+    ctx.font=`600 ${fsz}px Oswald,Arial Narrow,sans-serif`;
+    const words=s2.split(' ');let line='',lines=[];for(const wd of words){const t2=line?line+' '+wd:wd;if(ctx.measureText(t2).width>maxw){lines.push(line);line=wd}else line=t2}lines.push(line);
+    const col=l.who==='ELE'?'#ffb070':l.who==='VOCÊ'?'#bfe0a0':'#d6d0b4';
+    const yy=y0+(PORT?0:i*34*Math.max(1,0)+0);
+    let yb=PORT?y0:y0+i*40;
+    lines.slice(0,PORT?3:2).forEach((ln,k)=>{const wd=ctx.measureText(ln).width;ctx.fillStyle='rgba(8,8,6,.72)';ctx.fillRect(rx-wd-14,yb+k*(fsz+8)-fsz/2-3,wd+22,fsz+8);ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle=col;ctx.fillText(ln,rx,yb+k*(fsz+8))});
+    ctx.globalAlpha=1});}
+  if(g.toast){const t=g.toast,k=g.t-t.t0;if(k>t.ttl)g.toast=null;else{const a=Math.min(1,k/.15,(t.ttl-k)/.6);ctx.globalAlpha=a;const ty=PORT?(g.view==='scope'?VH-380:540):(g.view==='scope'?104:290);
+    ctx.fillStyle='rgba(8,9,6,.9)';rrect(ctx,VW/2-210,ty,420,70,10);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
+    txt(t.a,VW/2,ty+25,26,'#ffd24a','center',700);txt(t.b,VW/2,ty+52,17,'#eee6c8','center',500);ctx.globalAlpha=1}}
   if(g.flash>0){ctx.fillStyle=`rgba(180,20,10,${g.flash*.5})`;ctx.fillRect(0,0,VW,VH)}
   btn('sound',276,20,40,36,['×','♪','♪♪'][AU.level],{fs:19});
   btn('help',326,20,40,36,'?',{fs:22});
-  if(g.hint){const h=g.hint,k=Math.min(1,(g.t-h.t0)/.4),w=Math.min(760,VW-120);const hy0=PORT?(g.view==='scope'?VH-300:VH*.38):(g.view==='scope'?VH-178:VH*.4);ctx.globalAlpha=k;ctx.fillStyle='rgba(8,9,6,.9)';rrect(ctx,VW/2-w/2,hy0,w,96,12);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
+  if(g.hint){const h=g.hint,k=Math.min(1,(g.t-h.t0)/.4),w=Math.min(760,VW-120);const hy0=g.view==='scope'?(PORT?VH-500:VH-178):(PORT?420:166);ctx.globalAlpha=k;ctx.fillStyle='rgba(8,9,6,.9)';rrect(ctx,VW/2-w/2,hy0,w,96,12);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
     ctx.font='600 22px Oswald,Arial Narrow,sans-serif';ctx.fillStyle='#f6efd0';ctx.textAlign='center';ctx.textBaseline='middle';
     const words=h.text.split(' ');let line='',lines=[];for(const wd of words){const t2=line?line+' '+wd:wd;if(ctx.measureText(t2).width>w-40){lines.push(line);line=wd}else line=t2}lines.push(line);
     lines.slice(0,3).forEach((ln,i)=>ctx.fillText(ln,VW/2,hy0+48+(i-(Math.min(3,lines.length)-1)/2)*27));ctx.globalAlpha=1}
@@ -1257,7 +1267,7 @@ function helpOverlay(){
   const w=Math.min(900,VW-60),px=VW/2-w/2,py=40;
   const ph=PORT?Math.min(VH-80,8*72+170):VH-80;ctx.fillStyle='rgba(30,34,20,.98)';rrect(ctx,px,py,w,ph,14);ctx.fill();ctx.strokeStyle='#d7bd62';ctx.lineWidth=3;ctx.stroke();
   txt('COMO FUNCIONA (jogo em pausa)',VW/2,py+30,26,'#e3c86a','center',700);
-  const L2=[['ESPIAR','olha pela luneta. A EXPOSIÇÃO sobe; em 100% ele atira.'],['ABAIXAR','volta para trás do muro e esfria a exposição.'],['DESLIZAR','muda de trecho do muro. Trocar de lugar o confunde.'],['SETEIRA','observar com pouco risco (só nos trechos ●).'],['ISCA','capacete, pedra ou espelho para fazê-lo se revelar.'],['RÁDIO','provocar, conversar ou blefar. Cada um tem um efeito.'],['SEGURAR','estabiliza a mira, mas o fôlego acaba.'],['VENTO','empurra a bala. Conte as marcas da retícula.']];
+  const L2=[['ESPIAR','olha pela luneta. A EXPOSIÇÃO sobe; em 100% ele atira.'],['ABAIXAR','volta para trás do muro e esfria a exposição.'],['DESLIZAR','muda de trecho do muro. Trocar de lugar o confunde.'],['FRESTA','observar com pouco risco (só nos trechos ●).'],['ISCA','capacete, pedra ou espelho para fazê-lo se revelar.'],['RÁDIO','provocar, conversar ou blefar. Cada um tem um efeito.'],['SEGURAR','estabiliza a mira, mas o fôlego acaba.'],['VENTO','empurra a bala. Conte as marcas da retícula.']];
   L2.forEach((r,i)=>{if(PORT){const y=py+84+i*72;txt(r[0],px+24,y,22,'#e3c86a','left',700);txt(r[1],px+24,y+28,18,'#eee6c8','left',500)}else{const y=py+72+i*34;txt(r[0],px+30,y,22,'#e3c86a','left',700);txt(r[1],px+190,y,20,'#eee6c8','left',500)}});
   btn('help',VW/2-80,PORT?py+ph-62:VH-122,160,48,'CONTINUAR',{fs:22});
 }
@@ -1321,17 +1331,17 @@ addEventListener('keyup',e=>{if(g&&e.key===' ')g.held=false});
 const TUT=[
  {t:'Ele está no lixo. Você, atrás do muro.',p:'Um atirador inimigo está escondido no campo de lixo. Ele também está caçando você. Só um dos dois sai daqui.',n:'nar_tut_1'},
  {t:'Espiar expõe você.',p:'Quanto mais tempo você olha pela luneta, mais sobe a barra de EXPOSIÇÃO. Em 100%, ele atira. Abaixe para esfriar. Espiar sempre do mesmo trecho faz com que ele espere você ali.',n:'nar_tut_2'},
- {t:'Deslize pelo muro.',p:'O muro tem 5 trechos. ▲ ALTO protege bem, mas espiar por cima expõe mais. ◣ QUEBRADO é frágil e mostra só um setor. ● SETEIRA deixa observar com pouco risco, mas não dá para atirar dela. Trocar de trecho confunde o atirador.',n:'nar_tut_3'},
+ {t:'Deslize pelo muro.',p:'O muro tem 5 trechos. ▲ ALTO protege bem, mas espiar por cima expõe mais. ◣ QUEBRADO é frágil e mostra só um setor. ● FRESTA deixa observar com pouco risco, mas não dá para atirar dela. Trocar de trecho confunde o atirador.',n:'nar_tut_3'},
  {t:'Faça ele se revelar.',p:'Use iscas, rádio, poeira, brilho e som. Um brilho curto e preciso é dele. Um brilho largo e demorado pode ser uma isca. E ele também pensa: aprende por onde você espia.',n:'nar_tut_4'},
  {t:'Ache e firme a mira.',p:'Mantenha a mira sobre ele por 1,5 s e um círculo discreto aparece ao redor dele. SEGURAR estabiliza a mira, mas o fôlego acaba. Só a cabeça e a luneta dele contam como acerto.',n:'nar_tut_5'},
  {t:'Só o vento empurra a bala.',p:'A mira já compensa a queda. O vento empurra a bala para o lado: veja o aviso VENTO ao lado da distância e ponha o alvo do lado para onde a seta aponta, contando as marcas da retícula. O X vermelho mostra onde sua bala caiu.',n:'nar_tut_6'},
- {t:'Quatro duelos, uma operação.',p:'Vidas e ferimentos passam de um duelo para o outro. Depois de cada duelo, escolha 1 entre 3 cartas (ou pule e recupere 1 vida). Cada carta tem um ganho e um custo, e vale pelo resto da operação. Antes de cada duelo, escolha o muro: o arriscado tem vento forte e inimigo mais atento, mas dá 4 cartas.',n:null}
+ {t:'Quatro duelos, uma operação.',p:'Vidas e ferimentos passam de um duelo para o outro. Depois de cada duelo, escolha 1 entre 3 equipamentos (ou pule e recupere 1 vida). Cada equipamento tem um ganho e um custo, e vale pelo resto da operação. Antes de cada duelo, escolha o muro: o arriscado tem vento forte e inimigo mais atento, mas dá 4 equipamentos.',n:null}
 ];
 function tutVisual(i){
   switch(i){
    case 0:return `<img class="vi" src="art/wall1.webp" alt="">`;
    case 1:return `<div class="eye">👁️</div><div class="vbar"><i style="width:68%"></i><b>EXPOSIÇÃO 68%</b></div>`;
-   case 2:return `<div class="walls"><div><img src="art/wall0.webp" alt=""><span>▲ ALTO</span></div><div><img src="art/wall1.webp" alt=""><span>◣ QUEBRADO</span></div><div><img src="art/wall2.webp" alt=""><span>● SETEIRA</span></div></div>`;
+   case 2:return `<div class="walls"><div><img src="art/wall0.webp" alt=""><span>▲ ALTO</span></div><div><img src="art/wall1.webp" alt=""><span>◣ QUEBRADO</span></div><div><img src="art/wall2.webp" alt=""><span>● FRESTA</span></div></div>`;
    case 6:return `<div class="walls"><div style="font-size:clamp(30px,12vh,80px)">🎴</div><div style="font-size:clamp(30px,12vh,80px)">🧱</div><div style="font-size:clamp(30px,12vh,80px)">♥</div></div>`;
    case 3:return `<div class="baits"><img src="art/bait0.webp" alt=""><img src="art/bait1.webp" alt=""><img src="art/bait2.webp" alt=""></div>`;
    case 4:return `<div class="scope"><img src="art/sniper0.webp" alt=""><div class="ring"></div></div>`;
