@@ -163,6 +163,9 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
  .walls span{font-size:clamp(11px,3.4vw,16px);text-align:center}
  .kit{padding:2.4vw 3vw}
 }
+.rpw{display:flex;gap:2.4vw;justify-content:center;align-items:flex-start;margin:.8vh 0}.rpw>div{text-align:center;font:600 clamp(9px,2.2vh,13px) 'Oswald',sans-serif;letter-spacing:.14em;color:#9a937a}
+.rpw canvas,.rpw img{position:static;inset:auto;width:clamp(110px,30vh,250px);height:clamp(110px,30vh,250px);object-fit:cover;border:2px solid #55583c;border-radius:10px;background:#000;display:block;margin:0 auto .4vh}
+@media (orientation:portrait){.rpw{gap:2vw}.rpw canvas,.rpw img{width:29vw;height:29vw}}
 </style>
 </head>
 <body>
@@ -450,8 +453,8 @@ function onArtDone(){
 
 // ---------------------------------------------------------------- muro (pré-render, 3 tipos de trecho)
 const NPOS=5;
-const TYPE={alto:{exp:1.3,cool:1.3,fov:9999,hp:3,nome:'MURO ALTO',dica:'Espiar por cima expõe mais, mas a cobertura é forte.'},
-            quebrado:{exp:1,cool:1,fov:480,hp:2,nome:'MURO QUEBRADO',dica:'Espiada normal, visão em um só setor e muro frágil.'},
+const TYPE={alto:{exp:1.3,cool:1.3,fov:9999,hp:3,nome:'MURO ALTO',dica:'Mirar por cima expõe mais, mas a cobertura é forte.'},
+            quebrado:{exp:1,cool:1,fov:480,hp:2,nome:'MURO QUEBRADO',dica:'Mira normal, visão em um só setor e muro frágil.'},
             buraco:{exp:1,cool:.85,fov:9999,hp:3,nome:'FRESTA',dica:'Tem uma fresta para observar com pouco risco.'}};
 const GLYPH={alto:'▲',quebrado:'◣',buraco:'●'};
 const posCenter=i=>X0+(X1-X0)*(i+.5)/NPOS;
@@ -644,11 +647,11 @@ const DIFF={recruta:{exp:.7,bel:.6},veterano:{exp:1,bel:1}};
 let diffKey='recruta',eqMode='escolher',offers={},swapUsed=false;
 try{const sv=JSON.parse(localStorage.getItem('ds_eq')||'null');if(sv){if(DIFF[sv.d])diffKey=sv.d;if(sv.m==='sorteio'||sv.m==='escolher')eqMode=sv.m}}catch(e){}
 const HINTS={
- peek:'ESPIAR te expõe: quanto mais tempo olhando, mais sobe a EXPOSIÇÃO. Em 100% ele atira em você. ABAIXAR esfria.',
+ peek:'MIRAR te expõe: quanto mais tempo olhando, mais sobe a EXPOSIÇÃO. Em 100% ele atira em você. ABAIXAR esfria.',
  vento:'O VENTO empurra a bala para o lado. Veja o aviso VENTO perto da distância e ponha o alvo do lado para onde a seta aponta, contando as marcas.',
- fresta:'FRESTA: você observa com pouquíssimo risco. Não dá para atirar daqui. Use para procurar com calma e depois espie para atirar.',
- t_alto:'MURO ALTO: cobertura forte, mas espiar por cima expõe mais.',
- t_quebrado:'MURO QUEBRADO: espiada normal, mas só vê um setor do campo e o muro é frágil.',
+ fresta:'FRESTA: você observa com pouquíssimo risco. Não dá para atirar daqui. Use para procurar com calma e depois mire para atirar.',
+ t_alto:'MURO ALTO: cobertura forte, mas mirar por cima expõe mais.',
+ t_quebrado:'MURO QUEBRADO: mira normal, mas só vê um setor do campo e o muro é frágil.',
  t_buraco:'Este trecho tem uma FRESTA. Use o botão FRESTA para observar com segurança.',
  iscas:'ISCAS: o capacete pode fazer ele atirar e se revelar. A pedra o distrai. O espelho pode fazê-lo brilhar.',
  radio:'RÁDIO: PROVOCAR faz ele brilhar, mas o deixa impaciente. CONVERSAR baixa sua exposição. "JÁ TE VI" é um blefe.',
@@ -714,7 +717,7 @@ WEAP.forEach(w=>CARD[w.id]=w);
 
 let phoneMode=false;try{phoneMode=localStorage.getItem('ds_fone')==='1'}catch(e){}
 let op=null,mapOpts=[],offerIds=[],cardSel=null,mapSel=null,curScr=null,afterTut=null;
-const MAPS=[{id:'fabrica',nome:'Muro da fábrica',bias:'alto',desc:'Muros altos: boa cobertura, mas espiar por cima expõe mais.'},
+const MAPS=[{id:'fabrica',nome:'Muro da fábrica',bias:'alto',desc:'Muros altos: boa cobertura, mas mirar por cima expõe mais.'},
  {id:'escombros',nome:'Escombros do bairro',bias:'quebrado',desc:'Muros frágeis: cobertura fraca e visão de um só setor.'},
  {id:'galpao',nome:'Galpão aberto',bias:'buraco',desc:'Mais frestas: dá para observar com segurança.'}];
 function newOp(){const L=diffKey==='recruta'?7:6;op={n:1,lives:L,maxLives:L,w:{arm:0,leg:0,lens:0},cards:[],hist:[],map:null,start:true,weapon:null,stage:'weapon'}}
@@ -782,6 +785,43 @@ function opMap(){
 }
 function opGoMap(){drawMaps();mapSel=null;opMap()}
 function opReward(){const n=op.map&&op.map.hard?4:3;offerIds=offerCards(n);cardSel=null;opPick()}
+
+// ---------------------------------------------------------------- replay da morte: sua visão e a dele
+function startReplay(){
+  const c1=$('#rp1'),c2=$('#rp2');if(!c1||!c2||!g||!g.rec||g.rec.length<4)return;
+  const x1=c1.getContext('2d'),x2=c2.getContext('2d'),rec=g.rec,t0=rec[0].t,dur=rec[rec.length-1].t-t0+.6,start=performance.now();
+  const W=c1.width,H=c1.height,Rr=W/2-10,tp=['alto','quebrado','buraco'];
+  const loop=now=>{
+    if(!c1.isConnected)return;
+    const cyc=dur+1.4,el=((now-start)/1000)%cyc,tt=Math.min(el,dur)+t0;
+    let f=rec[0];for(const r of rec){if(r.t<=tt)f=r}
+    const last=el>=dur-.2;
+    // SUA VISÃO
+    x1.setTransform(1,0,0,1,0,0);x1.fillStyle='#070806';x1.fillRect(0,0,W,H);
+    if(f.v==='scope'||f.v==='hole'){
+      x1.save();x1.beginPath();x1.arc(W/2,H/2,Rr,0,6.3);x1.clip();x1.fillStyle='#a89c78';x1.fillRect(0,0,W,H);
+      try{drawWorld(x1,f.cx+f.sx,f.cy+f.sy,f.z*(Rr/292),W/2,H/2)}catch(e){}
+      x1.restore();x1.strokeStyle='#161610';x1.lineWidth=10;x1.beginPath();x1.arc(W/2,H/2,Rr+4,0,6.3);x1.stroke();
+      x1.strokeStyle='rgba(8,8,6,.9)';x1.lineWidth=1.5;x1.beginPath();x1.moveTo(W/2-Rr,H/2);x1.lineTo(W/2+Rr,H/2);x1.moveTo(W/2,H/2-Rr);x1.lineTo(W/2,H/2+Rr);x1.stroke();
+    }else{x1.fillStyle='#8d8870';x1.font='600 22px Oswald,sans-serif';x1.textAlign='center';x1.fillText('ABRIGADO ATRÁS DO MURO',W/2,H/2)}
+    // VISÃO DELE
+    x2.setTransform(1,0,0,1,0,0);
+    const gg=x2.createLinearGradient(0,0,0,H);gg.addColorStop(0,'#b79c78');gg.addColorStop(.6,'#7a4a2c');gg.addColorStop(1,'#2a1c12');x2.fillStyle=gg;x2.fillRect(0,0,W,H);
+    const kind=g.types[f.pos]||'alto',wi=ART.img['wall'+tp.indexOf(kind)];
+    const ww=W*.95,wh=wi?ww*wi.height/wi.width:ww*.3,wy=H*.62;
+    if(f.v==='scope'||f.v==='hole'){const sn=ART.img.sniper0;if(sn){const sw=W*.34,sh=sw*sn.height/sn.width,pk=.3+.6*clamp(f.exp/100,0,1);x2.save();x2.beginPath();x2.rect(0,0,W,wy+wh*.12);x2.clip();x2.drawImage(sn,W/2-sw/2,wy+wh*.1-sh*pk,sw,sh);x2.restore()}}
+    if(wi)x2.drawImage(wi,(W-ww)/2,wy,ww,wh);
+    // luneta dele
+    x2.save();x2.fillStyle='rgba(0,0,0,.82)';x2.beginPath();x2.rect(0,0,W,H);x2.arc(W/2,wy,Rr*.55,0,6.3,true);x2.fill('evenodd');x2.restore();
+    x2.strokeStyle='rgba(255,70,50,.9)';x2.lineWidth=1.6;x2.beginPath();x2.moveTo(W/2-Rr*.55,wy);x2.lineTo(W/2+Rr*.55,wy);x2.moveTo(W/2,wy-Rr*.55);x2.lineTo(W/2,wy+Rr*.55);x2.stroke();
+    x2.strokeStyle='rgba(255,70,50,.9)';x2.beginPath();x2.arc(W/2,wy,Rr*.55,0,6.3);x2.stroke();
+    const ex=clamp(f.exp/100,0,1);x2.fillStyle='rgba(8,8,6,.8)';x2.fillRect(14,H-34,W-28,18);x2.fillStyle=ex<.5?'#8fb04a':ex<.8?'#e0b030':'#d9402e';x2.fillRect(16,H-32,(W-32)*ex,14);
+    x2.fillStyle='#f2ebc9';x2.font='600 13px Oswald,sans-serif';x2.textAlign='left';x2.fillText('EXPOSIÇÃO '+Math.round(f.exp)+'%',20,H-25);
+    if(last){x2.fillStyle='rgba(210,20,10,.35)';x2.fillRect(0,0,W,H);x2.fillStyle='#fff';x2.font='700 26px Oswald,sans-serif';x2.textAlign='center';x2.fillText('DISPARO',W/2,40)}
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
 function opFinish(win,kind){
   scene='menu';AU.heart(0);curScr=null;
   const ov=$('#ov');ov.dataset.screen='opend';ov.classList.add('on','title');
@@ -793,10 +833,11 @@ function opFinish(win,kind){
     drawWorld(x,e.x,e.y+6,2.2,280,150);
     x.strokeStyle='rgba(255,70,50,.95)';x.lineWidth=3;x.beginPath();x.arc(280,150,36,0,6.3);x.stroke();
     x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,270,560,30);x.fillStyle='#fff';x.font='600 18px Oswald,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('ELE ESTAVA AQUI · '+distM(e.y)+' m',280,285);
-    reveal='<img src="'+c.toDataURL('image/jpeg',.85)+'" style="max-width:min(60vw,360px);max-height:28vh;border:2px solid #6c6c55;border-radius:8px;margin:.4vh 0" alt="">'}catch(err){}}
+    reveal='<div class="rpw"><div><img src="'+c.toDataURL('image/jpeg',.85)+'" alt=""><br>ONDE ELE ESTAVA</div><div><canvas id="rp1" width="300" height="300"></canvas><br>SUA VISÃO</div><div><canvas id="rp2" width="300" height="300"></canvas><br>VISÃO DELE</div></div>'}catch(err){}}
   ov.innerHTML=`<div class="panel ${win?'opwin':''}"><div class="endk ${win?'w':'l'}">${T[0]}</div><p class="tut-p">${T[1]}</p>${reveal}
    <div class="sumlist">Duelos vencidos: ${reach} de 4 · Dificuldade: ${diffKey==='recruta'?'Recruta':'Veterano'}<br>Arma: ${op.weapon?CARD[op.weapon].n:'nenhuma'}<br>Equipamentos: ${names.length?names.join(' · '):'nenhum'}</div>
    <div class="row"><button class="btn" data-a="again">NOVA OPERAÇÃO</button></div></div>`;
+  if(!win)setTimeout(startReplay,60);
 }
 function opAfterDuel(){
   // chamado por showEnd quando há operação
@@ -969,10 +1010,10 @@ const RQ={q:[],busy:false,
  clear(){this.q=[];this.busy=false}};
 function eSay(text,pan,force){RQ.say('ELE',text,pan,force)}
 const panOf=x=>{const p=clamp((x-980)/820,-1,1);return Math.abs(p)<.1?0:p};
-function addClue(kind,x,y,r,ttl){g.clues.push({kind,x:x+(Math.random()*2-1)*r*.6,y:y+(Math.random()*2-1)*r*.6,r,ttl,max:ttl})}
+function addClue(kind,x,y,r,ttl){const k=kind==='glint'?1.4:(diffKey==='veterano'?2.6:1.8);r*=k;g.clues.push({kind,x:x+(Math.random()*2-1)*r*.55,y:y+(Math.random()*2-1)*r*.55,r,ttl,max:ttl})}
 function dust(x,y,n,big){for(let i=0;i<n;i++)g.parts.push({x:x+rr(-8,8),y:y+rr(-4,8),vx:rr(-8,8),vy:rr(-14,-4),life:0,max:rr(1.6,3.2)*(big?1.7:1),r:rr(6,13)*(big?1.4:1)})}
 function glint(x,y,dur,fake){g.glints.push({x,y,t:0,dur,fake})}
-function muzzle(){const e=g.e;ambReact(e.x,e.y,'tiro');e.aimUntil=g.t+.5;g.ping={x:e.x,y:e.y,t:g.t,ttl:4.5};g.glints.push({x:e.x,y:e.y+2,t:0,dur:.16,fake:false,flash:true});dust(e.x,e.y+16,10,true)}
+function muzzle(){const e=g.e;ambReact(e.x,e.y,'tiro');e.aimUntil=g.t+.5;{const j=diffKey==='veterano'?140:80;g.ping={x:e.x+rr(-j,j),y:e.y+rr(-j*.6,j*.6),t:g.t,ttl:4.5}};g.glints.push({x:e.x,y:e.y+2,t:0,dur:.16,fake:false,flash:true});dust(e.x,e.y+16,10,true)}
 
 // ---------------------------------------------------------------- atualização
 const curZoom=()=>g.zoomCur*(g.spot?1.5:1)*(1+(g.kz||0));
@@ -1003,6 +1044,9 @@ function update(dt){
   if(g.view==='moving'){g.moveT+=dt/g.moveDur;const t=Math.min(1,g.moveT);g.posF=lerp(g.moveFrom,g.moveTo,t*t*(3-2*t));if(g.moveT>=1){g.pos=g.moveTo;g.posF=g.pos;g.view='cover';hint('t_'+g.types[g.pos])}}
   if(g.decoy&&g.t>=g.decoy.at){resolveDecoy()}
   updateEnemy(dt);updateAmb(dt);
+  g.fkD=(g.fkD==null?rr(4,8):g.fkD)-dt;if(g.fkD<=0){g.fkD=rr(5,11);const o=pick(HID);dust(o.x,o.y+16,(rr(2,5)|0),false)}
+  g.fkG=(g.fkG==null?rr(12,20):g.fkG)-dt;if(g.fkG<=0){g.fkG=rr(14,26);const o=pick(HID);glint(o.x+rr(-60,60),o.y+rr(-10,25),rr(.25,.6),true)}
+  g.recT=(g.recT||0)-dt;if(g.recT<=0){g.recT=.12;const sw0=sway();(g.rec=g.rec||[]).push({t:g.t,v:g.view,cx:g.cam.x,cy:g.cam.y,z:curZoom(),exp:g.exp,pos:g.pos,sx:sw0.x,sy:sw0.y});if(g.rec.length>70)g.rec.shift()}
   const e=g.e,m=mode();
   if(g.view==='scope'||g.view==='hole'){
     const dd=Math.abs(e.focus-g.pos),fm=dd===0?1:dd===1?.6:.35;
@@ -1010,7 +1054,7 @@ function update(dt){
     rate*=g.view==='scope'?TYPE[g.types[g.pos]].exp:.25;if(g.spot)rate*=.5;
     if(g.noiseWin>0)rate=0;
     g.exp+=rate*dt;
-    if(g.view==='scope'&&Math.hypot(g.cam.x-e.x,g.cam.y-e.y)<50&&!e.moving){g.stare+=dt;if(g.stare>1.5&&e.spotted<=0){e.spotted=25;e.lockUntil=g.t+20}}else g.stare=Math.max(0,g.stare-dt*.7);
+    if(g.view==='scope'&&Math.hypot(g.cam.x-e.x,g.cam.y-e.y)<50&&!e.moving){g.stare+=dt;if(g.stare>(diffKey==='veterano'?99:2.5)&&e.spotted<=0){e.spotted=25;e.lockUntil=g.t+20}}else g.stare=Math.max(0,g.stare-dt*.7);
   }else{
     const wf=.35+.65*g.wall[g.pos]/g.maxHp[g.pos];
     if(g.wall[g.pos]===0){g.exp=Math.min(75,Math.max(g.exp,40)+3*dt)}
@@ -1123,7 +1167,7 @@ function act(id){
    case 'sound':AU.setLevel((AU.level+2)%3);break;
    case 'r_prov':radio('prov');break;case 'r_talk':radio('talk');break;case 'r_seen':radio('seen');break;
    case 'd_helm':if(g.helm>0&&!g.decoy){g.helm--;g.decoy={at:g.t+1.4,kind:'helm',pos:g.pos,t0:g.t};g.menu=null}break;
-   case 'd_rock':if(g.rocks>0){g.rocks--;g.menu=null;toast('ELE OUVIU A PEDRA','distraído: a exposição não sobe por 8 s',6);e.focus=g.pos<2?NPOS-1:0;e.nextFocus=g.t+8;g.baitFx={kind:'rock',t0:g.t,dir:R()<.5?-1:1};AU.noise(rr(-.7,.7),1200,.25,.25);g.noiseWin=8;if(mode()==='suspicious'&&R()<.5){g.noiseWin=0;toast('ELE NÃO CAIU','ele já desconfia das iscas',3.5);log('RÁDIO','Ele não se distraiu com a pedra.')}else log('RÁDIO','Pedra jogada. Ele olhou pro outro lado.')}break;
+   case 'd_rock':if(g.rocks>0){g.rocks--;g.menu=null;toast('ELE OUVIU A PEDRA','distraído: a exposição não sobe por 8 s',6);e.focus=g.pos<2?NPOS-1:0;e.nextFocus=g.t+8;g.baitFx={kind:'rock',t0:g.t,dir:R()<.5?-1:1};{const dv=g.baitFx.dir;setTimeout(()=>{try{if(g&&!g.over)AU.play('impacto_terra',{pan:dv*.7,gain:.7})}catch(e){}},950)}AU.noise(rr(-.7,.7),1200,.25,.25);g.noiseWin=8;if(mode()==='suspicious'&&R()<.5){g.noiseWin=0;toast('ELE NÃO CAIU','ele já desconfia das iscas',3.5);log('RÁDIO','Ele não se distraiu com a pedra.')}else log('RÁDIO','Pedra jogada. Ele olhou pro outro lado.')}break;
    case 'd_mirror':if(g.mirrors>0){g.mirrors--;g.menu=null;g.baitFx={kind:'mirror',t0:g.t};if(mode()!=='suspicious'||R()<.3){glint(e.x,e.y+2,3,false);addClue('glint',e.x,e.y,60,6);toast('BRILHO À '+({ESQ:'ESQUERDA',DIR:'DIREITA',CENTRO:'FRENTE'})[sideOf(e.x)],'olhe pela luneta: dura 3 s',4);log('RÁDIO','O espelho pegou o sol. Algo brilhou.')}else{toast('SEM REAÇÃO','ele não olhou para o espelho',3.5);log('RÁDIO','Ele não olhou para o espelho.')}}break;
   }
 }
@@ -1151,10 +1195,11 @@ function fire(){
   const e=g.e,sw=sway(),ax=g.cam.x+sw.x,ay=g.cam.y+sw.y,d=distM(ay);
   g.bullets--;g.shots++;
   const ix=ax+g.wind.val*d/1200*TICK,iy=ay;
-  g.impacts.push({x:ix,y:iy,ttl:6});ambReact(ix,iy,'tiro');dust(ix,iy,6,false);
+  g.impacts.push({x:ix,y:iy,ttl:6});ambReact(ix,iy,'tiro');g.tracer={ax,ay,ix,iy,t0:g.t};dust(ix,iy,6,false);
   AU.shot(0,0,true);AU.impact(d);g.held=false;g.cam.y-=7;g.shake=.25;
   const dd=Math.hypot(ix-e.x,iy-e.y);
   if(dd<=e.hr){g.won=true;end('win');return}
+  {const mk=(ix-ax)/TICK;toast('ERROU · DESVIO DO VENTO',Math.abs(mk)<.15?'a bala quase não desviou':Math.abs(mk).toFixed(1)+' marcas para '+(mk>0?'a direita':'a esquerda'),3.8)}
   g.exp=Math.min(100,g.exp+g.lo.missPen);
   e.belief[g.pos]=Math.min(.9,e.belief[g.pos]+.4);
   const near=clamp(1-dd/170,0,1);
@@ -1280,7 +1325,7 @@ function renderCover(){
   drawWallLayer();
   if(g.baitFx){const f=g.baitFx,t=g.t-f.t0;
     if(t>1.3)g.baitFx=null;
-    else if(f.kind==='rock'){const k=t/1.0,x=VW/2+f.dir*300*k,y=topY-40-220*Math.sin(Math.PI*Math.min(1,k))+80*k*k;if(k<=1.0){if(ART.ready){const im=ART.img.bait1,w=34,h=w*im.height/im.width;ctx.save();ctx.translate(x,y);ctx.rotate(t*9);ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore()}else{ctx.fillStyle='#8a7a66';ctx.beginPath();ctx.arc(x,y,9,0,6.3);ctx.fill()}}}
+    else if(f.kind==='rock'){const k=t/1.0,kk=Math.min(1,k),x=VW/2+f.dir*300*kk,y=topY-40-220*Math.sin(Math.PI*kk)+80*kk*kk;if(k>1.0){const a2=Math.max(0,1-(t-1)/.3);ctx.fillStyle='rgba(206,186,148,'+(.55*a2)+')';ctx.beginPath();ctx.ellipse(x,y,26*(1+(t-1)*2),12,0,0,6.3);ctx.fill()}if(k<=1.0){if(ART.ready){const im=ART.img.bait1,w=52,h=w*im.height/im.width;ctx.save();ctx.translate(x,y);ctx.rotate(t*9);ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore()}else{ctx.fillStyle='#8a7a66';ctx.beginPath();ctx.arc(x,y,9,0,6.3);ctx.fill()}}}
     else if(f.kind==='mirror'){const k=Math.min(1,t/.4),hx=VW/2+40;if(ART.ready){const im=ART.img.bait2,hh=120,ww=hh*im.width/im.height;ctx.drawImage(im,hx-ww/2,topY-90*k+30*(1-k),ww,hh)}
       const fl=Math.max(0,Math.sin(Math.min(1,t/1.0)*Math.PI));const gr=ctx.createRadialGradient(hx,topY-50,0,hx,topY-50,170);gr.addColorStop(0,`rgba(255,255,240,${.9*fl})`);gr.addColorStop(1,'rgba(255,255,240,0)');ctx.fillStyle=gr;ctx.fillRect(hx-180,topY-230,360,360)}}
   // painel dos trechos
@@ -1296,7 +1341,7 @@ function renderCover(){
   const busy=g.view==='moving';
   btn('moveL',24,y,cw,bh,'‹ DESLIZAR',{dis:busy||g.pos===0,fs:PORT?24:21,cap:g.pos>0?'ir ao trecho '+g.pos:'início do muro'});
   btn('moveR',VW-24-cw,y,cw,bh,'DESLIZAR ›',{dis:busy||g.pos===NPOS-1,fs:PORT?24:21,cap:g.pos<NPOS-1?'ir ao trecho '+(g.pos+2):'fim do muro'});
-  btn('peek',mx(0),ym,mw2,bh,'ESPIAR',Object.assign({dis:busy,fs:PORT?21:26,fill:'rgba(78,64,24,.92)',cap:PORT?'luneta':'olhar pela luneta'},cs));
+  btn('peek',mx(0),ym,mw2,bh,'MIRAR',Object.assign({dis:busy,fs:PORT?21:26,fill:'rgba(78,64,24,.92)',cap:PORT?'luneta':'olhar pela luneta'},cs));
   btn('hole',mx(1),ym,mw2,bh,'FRESTA',Object.assign({dis:busy||g.types[g.pos]!=='buraco',fs:PORT?17:22,cap:g.types[g.pos]==='buraco'?(PORT?'pouco risco':'olhar com pouco risco'):(PORT?'só em ●':'só nos trechos ●')},cs));
   btn('decoy',mx(2),ym,mw2,bh,'ISCA',Object.assign({dis:busy||(g.helm+g.rocks+g.mirrors===0),fs:PORT?21:24,cap:PORT?(g.helm+'c · '+g.rocks+'p · '+g.mirrors+'e'):(g.helm+' capac · '+g.rocks+' ped · '+g.mirrors+' esp')},cs));
   btn('radio',mx(3),ym,mw2,bh,'RÁDIO',Object.assign({dis:g.lo.noRadio||g.radioCd>0||g.radioLeft<=0,fs:PORT?21:24,cap:g.lo.noRadio?'sem rádio':(g.radioCd>0?'aguarde '+Math.ceil(g.radioCd)+'s':(PORT?'falar':'falar com ele'+(isFinite(g.radioLeft)?' ('+g.radioLeft+')':'')))},cs));
@@ -1331,6 +1376,9 @@ function renderScope(){
   ctx.beginPath();ctx.moveTo(cx-Rr,ry);ctx.lineTo(rx-12,ry);ctx.moveTo(rx+12,ry);ctx.lineTo(cx+Rr,ry);ctx.moveTo(rx,cy-Rr);ctx.lineTo(rx,ry-12);ctx.moveTo(rx,ry+12);ctx.lineTo(rx,cy+Rr);ctx.stroke();
   ctx.lineWidth=2;for(let i=1;i<=5;i++){const l=7;ctx.beginPath();ctx.moveTo(rx+i*tk,ry-l);ctx.lineTo(rx+i*tk,ry+l);ctx.moveTo(rx-i*tk,ry-l);ctx.lineTo(rx-i*tk,ry+l);ctx.stroke();
     ctx.fillStyle='rgba(10,10,8,.85)';ctx.font='600 13px Oswald,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i),rx+i*tk,ry-15);ctx.fillText(String(i),rx-i*tk,ry-15)}
+  if(g.tracer&&g.t-g.tracer.t0<3){const tr=g.tracer,a=1-(g.t-tr.t0)/3,sx=cx+(tr.ix-g.cam.x)*z,sy=cy+(tr.iy-g.cam.y)*z,ax2=cx+(tr.ax-g.cam.x)*z,ay2=cy+(tr.ay-g.cam.y)*z;
+    ctx.strokeStyle=`rgba(255,220,120,${a})`;ctx.lineWidth=2.5;ctx.setLineDash([8,6]);ctx.beginPath();ctx.moveTo(ax2,ay2);ctx.lineTo(sx,sy);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle=`rgba(255,90,60,${a})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(sx,sy,8,0,6.3);ctx.stroke()}
   ctx.fillStyle='rgba(10,10,8,.9)';ctx.beginPath();ctx.arc(rx,ry,2.2,0,6.3);ctx.fill();
   ctx.restore();
   if(g.spot){txt('LUNETA DE OBSERVAÇÃO',cx,cy-Rr+26,19,'#9fd0ff','center',700)}
@@ -1350,7 +1398,7 @@ function renderScope(){
   for(const q of g.impacts){ctx.fillStyle='rgba(230,50,40,.95)';ctx.fillRect(mxS(q.x)-1.5,myS(q.y)-1.5,3,3)}
   // ping do tiro dele: ponto no mapa e seta na borda da luneta
   if(g.ping&&g.t-g.ping.t<g.ping.ttl){const pg=g.ping,a=1-(g.t-pg.t)/pg.ttl;
-    ctx.fillStyle=`rgba(255,80,50,${a})`;ctx.beginPath();ctx.arc(mxS(pg.x),myS(pg.y),4.5,0,6.3);ctx.fill();
+    if(diffKey!=='veterano'){ctx.fillStyle=`rgba(255,80,50,${a})`;ctx.beginPath();ctx.arc(mxS(pg.x),myS(pg.y),4.5,0,6.3);ctx.fill()}
     const dxw=pg.x-g.cam.x,dyw=pg.y-g.cam.y,dpx=Math.hypot(dxw,dyw)*z;
     if(dpx>Rr-26){const ang=Math.atan2(dyw,dxw),ax2=cx+Math.cos(ang)*(Rr-12),ay2=cy+Math.sin(ang)*(Rr-12);
       ctx.save();ctx.translate(ax2,ay2);ctx.rotate(ang);ctx.fillStyle=`rgba(255,100,60,${.4+.6*a})`;ctx.strokeStyle=`rgba(20,8,4,${a})`;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(16,0);ctx.lineTo(-10,-13);ctx.lineTo(-10,13);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
@@ -1411,7 +1459,7 @@ function helpOverlay(){
   const w=Math.min(900,VW-60),px=VW/2-w/2,py=40;
   const ph=PORT?Math.min(VH-80,8*72+170):VH-80;ctx.fillStyle='rgba(30,34,20,.98)';rrect(ctx,px,py,w,ph,14);ctx.fill();ctx.strokeStyle='#d7bd62';ctx.lineWidth=3;ctx.stroke();
   txt('COMO FUNCIONA (jogo em pausa)',VW/2,py+30,26,'#e3c86a','center',700);
-  const L2=[['ESPIAR','olha pela luneta. A EXPOSIÇÃO sobe; em 100% ele atira.'],['ABAIXAR','volta para trás do muro e esfria a exposição.'],['DESLIZAR','muda de trecho do muro. Trocar de lugar o confunde.'],['FRESTA','observar com pouco risco (só nos trechos ●).'],['ISCA','capacete, pedra ou espelho para fazê-lo se revelar.'],['RÁDIO','provocar, conversar ou blefar. Cada um tem um efeito.'],['SEGURAR','estabiliza a mira, mas o fôlego acaba.'],['VENTO','empurra a bala. Conte as marcas da retícula.']];
+  const L2=[['MIRAR','olha pela luneta. A EXPOSIÇÃO sobe; em 100% ele atira.'],['ABAIXAR','volta para trás do muro e esfria a exposição.'],['DESLIZAR','muda de trecho do muro. Trocar de lugar o confunde.'],['FRESTA','observar com pouco risco (só nos trechos ●).'],['ISCA','capacete, pedra ou espelho para fazê-lo se revelar.'],['RÁDIO','provocar, conversar ou blefar. Cada um tem um efeito.'],['SEGURAR','estabiliza a mira, mas o fôlego acaba.'],['VENTO','empurra a bala. Conte as marcas da retícula.']];
   L2.forEach((r,i)=>{if(PORT){const y=py+84+i*72;txt(r[0],px+24,y,22,'#e3c86a','left',700);txt(r[1],px+24,y+28,18,'#eee6c8','left',500)}else{const y=py+72+i*34;txt(r[0],px+30,y,22,'#e3c86a','left',700);txt(r[1],px+190,y,20,'#eee6c8','left',500)}});
   btn('help',VW/2-80,PORT?py+ph-62:VH-122,160,48,'CONTINUAR',{fs:22});
 }
@@ -1474,9 +1522,9 @@ addEventListener('keyup',e=>{if(g&&e.key===' ')g.held=false});
 // ---------------------------------------------------------------- telas (DOM), todas em tela cheia
 const TUT=[
  {t:'Ele está no lixo. Você, atrás do muro.',p:'Um atirador inimigo está escondido no campo de lixo. Ele também está caçando você. Só um dos dois sai daqui.',n:'nar_tut_1'},
- {t:'Espiar expõe você.',p:'Quanto mais tempo você olha pela luneta, mais sobe a barra de EXPOSIÇÃO. Em 100%, ele atira. Abaixe para esfriar. Espiar sempre do mesmo trecho faz com que ele espere você ali.',n:'nar_tut_2'},
- {t:'Deslize pelo muro.',p:'O muro tem 5 trechos. ▲ ALTO protege bem, mas espiar por cima expõe mais. ◣ QUEBRADO é frágil e mostra só um setor. ● FRESTA deixa observar com pouco risco, mas não dá para atirar dela. Trocar de trecho confunde o atirador.',n:'nar_tut_3'},
- {t:'Faça ele se revelar.',p:'Use iscas, rádio, poeira, brilho e som. Um brilho curto e preciso é dele. Um brilho largo e demorado pode ser uma isca. E ele também pensa: aprende por onde você espia.',n:'nar_tut_4'},
+ {t:'Mirar expõe você.',p:'Quanto mais tempo você olha pela luneta, mais sobe a barra de EXPOSIÇÃO. Em 100%, ele atira. Abaixe para esfriar. Mirar sempre do mesmo trecho faz com que ele espere você ali.',n:'nar_tut_2'},
+ {t:'Deslize pelo muro.',p:'O muro tem 5 trechos. ▲ ALTO protege bem, mas mirar por cima expõe mais. ◣ QUEBRADO é frágil e mostra só um setor. ● FRESTA deixa observar com pouco risco, mas não dá para atirar dela. Trocar de trecho confunde o atirador.',n:'nar_tut_3'},
+ {t:'Faça ele se revelar.',p:'Use iscas, rádio, poeira, brilho e som. Um brilho curto e preciso é dele. Um brilho largo e demorado pode ser uma isca. E ele também pensa: aprende por onde você mira.',n:'nar_tut_4'},
  {t:'Ache e firme a mira.',p:'Mantenha a mira sobre ele por 1,5 s e um círculo discreto aparece ao redor dele. SEGURAR estabiliza a mira, mas o fôlego acaba. Só a cabeça e a luneta dele contam como acerto.',n:'nar_tut_5'},
  {t:'Só o vento empurra a bala.',p:'A mira já compensa a queda. O vento empurra a bala para o lado: veja o aviso VENTO ao lado da distância e ponha o alvo do lado para onde a seta aponta, contando as marcas da retícula. O X vermelho mostra onde sua bala caiu.',n:'nar_tut_6'},
  {t:'Quatro duelos, uma operação.',p:'Vidas e ferimentos passam de um duelo para o outro. Depois de cada duelo, escolha 1 entre 3 equipamentos (ou pule e recupere 1 vida). Cada equipamento tem um ganho e um custo, e vale pelo resto da operação. Antes de cada duelo, escolha o muro: o arriscado tem vento forte e inimigo mais atento, mas dá 4 equipamentos.',n:null},
