@@ -114,6 +114,18 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
 .bmain .bl{font:700 clamp(12px,3vh,20px) 'Oswald',sans-serif;letter-spacing:.4em;color:#8f8a73;margin-bottom:3vh}
 .bmain p{font:600 clamp(22px,7vh,56px)/1.2 'Oswald',sans-serif;color:#f2ebc9;margin:1.6vh 0;opacity:0;min-height:1em;transition:opacity 1s,transform 1s;transform:translateY(8px)}.bmain p.show{opacity:1;transform:none}
 .bmain .btn{margin-top:4vh;align-self:flex-start;font-size:clamp(15px,4vh,28px);padding:1.6vh 2.4vw}
+
+.ccard{gap:1vh;padding:1.6vh 1.2vw}.ccard .on{font-size:clamp(15px,4.4vh,32px)}
+.ccard .op,.ccard .oc{font-size:clamp(11px,2.9vh,20px)}
+.cg{font:700 clamp(9px,2vh,14px) 'Oswald',sans-serif;letter-spacing:.2em;color:#8f8a73}
+.cico{height:clamp(34px,13vh,96px);display:flex;align-items:center;justify-content:center}.cico svg{height:100%;width:auto;max-width:100%}
+.ccard.inst .cg::after{content:' · USO IMEDIATO';color:#e3c86a}
+.ki.lst b{font:400 clamp(11px,2.6vh,17px)/1.35 Arial,sans-serif;color:#d8d2ba}
+.ki.lst{justify-content:flex-start;overflow:hidden}
+.hearts{letter-spacing:.1em;color:#e0624a}
+.opmeta{font:400 clamp(12px,3vh,22px)/1.4 Arial,sans-serif;color:#d8d2ba;margin:.4vh 0}
+.sumlist{font:400 clamp(12px,3.1vh,20px)/1.5 Arial,sans-serif;color:#d8d2ba;margin:.6vh 0}
+.opwin .endk{color:#8fd16a}
 </style>
 </head>
 <body>
@@ -395,7 +407,7 @@ function buildSceneArt(seed){
 }
 function onArtDone(){
   const ov=$('#ov');
-  if(scene==='menu'){buildScene(12345);g=makeG(sel);g.e=newEnemy();if(ov.dataset.screen==='wz')wzRender(wz.step,true)}
+  if(scene==='menu'){buildScene(12345);g=makeG(sel);g.e=newEnemy();if(ov.dataset.screen==='wz')wzRender(wz.step,true);if(ov.dataset.screen==='opmap')opMap()}
 }
 
 // ---------------------------------------------------------------- muro (pré-render, 3 tipos de trecho)
@@ -610,14 +622,144 @@ function hint(key,dur){if(!g||hintsSeen[key]||!HINTS[key])return;hintsSeen[key]=
 let g=null, scene='menu', sel={condicao:'integro',suprimento:'iscas',arma:'padrao',radio:'campo'}, btns=[], tutSeen=false;
 try{tutSeen=localStorage.getItem('ds_tut')==='1';const sv=JSON.parse(localStorage.getItem('ds_sel')||'null');if(sv&&EQ_ORDER.every(k=>sv[k]&&EQ[k].opts[sv[k]]))sel=sv}catch(e){}
 
-function makeTypes(){const base=['alto','quebrado','buraco'];const arr=[...base];while(arr.length<NPOS)arr.push(pick(base));for(let i=arr.length-1;i>0;i--){const j=(R()*(i+1))|0;[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
-function makeG(s){
-  const lo=buildLoadout(s),types=makeTypes(),maxHp=types.map(t=>TYPE[t].hp);
-  return {diff:DIFF[diffKey],sel:s,lo,t:0,timeMax:lo.time,time:lo.time,lives:lo.lives,maxLives:lo.lives,bullets:lo.bullets,helm:lo.helm,rocks:lo.rocks,mirrors:lo.mirrors,
+function makeTypes(){const base=['alto','quebrado','buraco'];const bs=(typeof op!=='undefined'&&op&&op.map)?base.concat([op.map.bias,op.map.bias]):base;const arr=[...base];while(arr.length<NPOS)arr.push(pick(bs));for(let i=arr.length-1;i>0;i--){const j=(R()*(i+1))|0;[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+function makeG(s,o2){
+  const lo=o2?buildOpLoadout(o2):buildLoadout(s),types=makeTypes(),maxHp=types.map(t=>TYPE[t].hp);
+  let diff=DIFF[diffKey];
+  if(o2){const sc=(1+.08*(o2.n-1))*(o2.n===4?1.1:1)*(o2.map&&o2.map.hard?1.15:1);diff={exp:diff.exp*sc,bel:diff.bel*sc}}
+  return {diff,windK:o2&&o2.map?o2.map.windK:1,sel:s,lo,t:0,timeMax:lo.time,time:lo.time,lives:lo.lives,maxLives:o2?o2.maxLives:lo.lives,bullets:lo.bullets,helm:lo.helm,rocks:lo.rocks,mirrors:lo.mirrors,
    view:'cover',pos:2,posF:2,moveFrom:2,moveTo:2,moveT:1,moveDur:2.4,crawl:'slow',exp:0,wind:{base:rr(-2,2),tgt:0,next:2,val:0,gust:0},
    cam:{x:posCenter(2),y:520},held:false,stam:1,gasp:0,wounds:{arm:lo.w.arm,lens:lo.w.lens||0,leg:lo.w.leg},types,maxHp,wall:maxHp.slice(),radioCd:0,radioLeft:lo.radioUses,
    log:[],stare:0,noiseWin:0,flash:0,shake:0,hbT:1,shots:0,over:false,menu:null,decoy:null,clues:[],glints:[],parts:[],impacts:[],missed:0,won:false,endAt:0,ammoOutAt:0};
 }
+
+// ---------------------------------------------------------------- operação (4 duelos + cartas)
+const GRP={arma:'ARMA',sup:'SUPRIMENTO',radio:'RÁDIO',corpo:'CORPO'};
+const CARDS=[
+ {id:'luneta',g:'arma',n:'Luneta longa',pro:'Zoom maior e mira 15% mais firme.',con:'O fôlego dura 25% menos.',f:o=>{o.zoom+=.6;o.sway*=.85;o.breath*=.75}},
+ {id:'cano',g:'arma',n:'Cano pesado',pro:'A mira fica 30% mais firme.',con:'Errar expõe +15%.',f:o=>{o.sway*=.7;o.missPen+=15}},
+ {id:'silenc',g:'arma',n:'Silenciador',pro:'Errar expõe 18% a menos.',con:'A mira fica 20% mais instável.',f:o=>{o.missPen=Math.max(6,o.missPen-18);o.sway*=1.2}},
+ {id:'binoc',g:'arma',n:'Binóculo de campo',pro:'Você nota os movimentos dele melhor.',con:'A mira fica 20% mais instável.',f:o=>{o.perceive+=.5;o.sway*=1.2}},
+ {id:'coronha',g:'arma',n:'Coronha almofadada',pro:'O fôlego volta 40% mais rápido.',con:'−1 bala por duelo.',f:o=>{o.breathRec*=1.4;o.bullets-=1}},
+ {id:'ferrolho',g:'arma',n:'Ferrolho polido',pro:'A mira fica 40% mais firme.',con:'Errar expõe +25%.',f:o=>{o.sway*=.6;o.missPen+=25}},
+ {id:'caixa',g:'sup',n:'Caixa de munição',pro:'+2 balas por duelo.',con:'O tempo corre 10% mais rápido.',f:o=>{o.bullets+=2;o.tScale*=1.1}},
+ {id:'capac',g:'sup',n:'Capacetes extras',pro:'+2 capacetes de isca por duelo.',con:'−1 bala por duelo.',f:o=>{o.helm+=2;o.bullets-=1}},
+ {id:'pedras',g:'sup',n:'Pedras e espelho',pro:'+2 pedras e +1 espelho por duelo.',con:'A mira fica 10% mais instável (peso).',f:o=>{o.rocks+=2;o.mirrors+=1;o.sway*=1.1}},
+ {id:'mochila',g:'sup',n:'Mochila leve',pro:'+60 segundos por duelo.',con:'−1 bala por duelo.',f:o=>{o.time+=60;o.bullets-=1}},
+ {id:'racao',g:'sup',n:'Água e ração',pro:'O fôlego volta 60% mais rápido.',con:'O tempo corre 10% mais rápido.',f:o=>{o.breathRec*=1.6;o.tScale*=1.1}},
+ {id:'perfume',g:'sup',n:'Isca perfumada',pro:'Ele cai 40% mais nas iscas.',con:'−1 pedra por duelo.',f:o=>{o.bite*=1.4;o.rocks-=1}},
+ {id:'escuta',g:'radio',n:'Rádio de escuta',pro:'Mostra o lado da voz dele, sem custo de exposição.',con:'Só 3 usos por duelo.',f:o=>{o.hearSide=true;o.radioCost=0;o.radioUses=Math.min(o.radioUses,3)}},
+ {id:'campo',g:'radio',n:'Rádio de campo',pro:'Mostra de que lado vem a voz dele.',con:'Cada uso expõe +12%.',f:o=>{o.hearSide=true;o.radioCost=Math.max(o.radioCost,12)}},
+ {id:'mudo',g:'radio',n:'Silêncio total',pro:'A exposição sobe 20% mais devagar.',con:'Sem rádio: não dá para falar com ele nem ouvi-lo.',f:o=>{o.noRadio=true;o.expMult*=.8}},
+ {id:'bateria',g:'radio',n:'Bateria reserva',pro:'A espera entre usos do rádio cai pela metade.',con:'Cada uso expõe +6%.',f:o=>{o.radioCd*=.5;o.radioCost+=6}},
+ {id:'bandagem',g:'corpo',n:'Bandagem',pro:'+2 vidas e cura 1 ferimento.',con:'Gasta sua escolha: nenhuma vantagem permanente.',inst:true,pick:p=>{p.lives=Math.min(p.maxLives,p.lives+2);const k=['arm','leg','lens'].sort((a,b)=>p.w[b]-p.w[a])[0];if(p.w[k]>0)p.w[k]--}},
+ {id:'colete',g:'corpo',n:'Colete reforçado',pro:'+1 vida máxima (e +1 vida agora).',con:'O fôlego dura 15% menos.',pick:p=>{p.maxLives++;p.lives++},f:o=>{o.breath*=.85}},
+ {id:'estim',g:'corpo',n:'Estimulante',pro:'A mira fica 15% mais firme.',con:'O fôlego volta 30% mais devagar.',f:o=>{o.sway*=.85;o.breathRec*=.7}},
+ {id:'treino',g:'corpo',n:'Treino de fôlego',pro:'+0,8 s de fôlego.',con:'A exposição sobe 10% mais rápido.',f:o=>{o.breath+=.8;o.expMult*=1.1}},
+ {id:'camuf',g:'corpo',n:'Pintura de camuflagem',pro:'A exposição sobe 15% mais devagar.',con:'Zoom menor (−0,3).',f:o=>{o.expMult*=.85;o.zoom-=.3}},
+ {id:'aguia',g:'corpo',n:'Olho de águia',pro:'Você nota os movimentos dele 30% melhor.',con:'A lente fica trincada (+1 ferimento na luneta).',pick:p=>{p.w.lens++},f:o=>{o.perceive*=1.3}},
+ {id:'analg',g:'corpo',n:'Analgésico',pro:'+2 vidas máximas (e +2 vidas agora).',con:'O braço fica ferido (+1): a mira treme mais.',pick:p=>{p.maxLives+=2;p.lives+=2;p.w.arm++}}
+];
+const CARD={};CARDS.forEach(c=>CARD[c.id]=c);
+let op=null,mapOpts=[],offerIds=[],cardSel=null,mapSel=null,curScr=null,afterTut=null;
+const MAPS=[{id:'fabrica',nome:'Muro da fábrica',bias:'alto',desc:'Muros altos: boa cobertura, mas espiar por cima expõe mais.'},
+ {id:'escombros',nome:'Escombros do bairro',bias:'quebrado',desc:'Muros frágeis: cobertura fraca e visão de um só setor.'},
+ {id:'galpao',nome:'Galpão aberto',bias:'buraco',desc:'Mais seteiras: dá para observar com segurança.'}];
+function newOp(){const L=diffKey==='recruta'?7:6;op={n:1,lives:L,maxLives:L,w:{arm:0,leg:0,lens:0},cards:[],hist:[],map:null,start:true}}
+function buildOpLoadout(p){
+  const o={sway:1,bullets:5,lives:p.lives,helm:1,rocks:1,mirrors:0,zoom:2.4,range:100,perceive:1,bite:1,radioCost:0,breath:2.5,breathRec:6,missPen:30,radioUses:Infinity,radioCd:15,hearSide:false,noRadio:false,expMult:1,w:{arm:p.w.arm,leg:p.w.leg,lens:p.w.lens},time:300,tScale:1};
+  for(const id of p.cards){const c=CARD[id];if(c&&c.f)c.f(o)}
+  o.bullets=Math.max(1,o.bullets);o.helm=Math.max(0,o.helm);o.rocks=Math.max(0,o.rocks);o.zoom=Math.max(1.5,o.zoom);o.sway=Math.max(.3,o.sway);o.breath=Math.max(1,o.breath);
+  return o}
+function offerCards(n,noInst){const own=new Set(op.cards);return shuffle(CARDS.filter(c=>!own.has(c.id)&&!(noInst&&c.inst))).slice(0,n).map(c=>c.id)}
+function drawMaps(){
+  const a=shuffle(MAPS.slice()).slice(0,2),safe={windK:.6,hard:false,vento:'fraco',cards:3},risk={windK:1.5,hard:true,vento:'forte',cards:4};
+  const sides=Math.random()<.5?[safe,risk]:[risk,safe];
+  mapOpts=a.map((m,i)=>Object.assign({},m,sides[i]));
+}
+const CICO={
+ arma:'<svg viewBox="0 0 100 60"><g fill="none" stroke="#e3c86a" stroke-width="4" stroke-linecap="round"><circle cx="50" cy="30" r="20"/><path d="M50 4v14M50 42v14M24 30h14M62 30h14"/></g></svg>',
+ sup:'<svg viewBox="0 0 100 60"><g fill="none" stroke="#e3c86a" stroke-width="4" stroke-linejoin="round"><path d="M20 20l30-12 30 12v30l-30 8-30-8z"/><path d="M20 20l30 10 30-10M50 30v28"/></g></svg>',
+ radio:'<svg viewBox="0 0 100 60"><g fill="none" stroke="#e3c86a" stroke-width="4" stroke-linecap="round"><rect x="28" y="22" width="44" height="30" rx="5"/><path d="M60 22L74 6M38 36h16M38 44h24"/></g></svg>',
+ corpo:'<svg viewBox="0 0 100 60"><g fill="none" stroke="#e3c86a" stroke-width="4" stroke-linecap="round"><rect x="30" y="8" width="40" height="44" rx="6"/><path d="M50 18v24M38 30h24"/></g></svg>'};
+const CARD_ART=false;
+const cardIcon=c=>CARD_ART?`<img src="art/cards/${c.id}.webp" alt="" style="height:100%">`:CICO[c.g];
+function opPanel(){
+  const w=[];if(op.w.arm)w.push('Braço'+(op.w.arm>1?' ×'+op.w.arm:''));if(op.w.lens)w.push('Luneta'+(op.w.lens>1?' ×'+op.w.lens:''));if(op.w.leg)w.push('Perna'+(op.w.leg>1?' ×'+op.w.leg:''));
+  const own=op.cards.map(id=>CARD[id].n);
+  return `<div class="kit"><div class="kt">OPERAÇÃO</div>
+   <div class="ki cur"><small>VIDAS</small><b class="hearts">${'♥'.repeat(op.lives)}<span style="color:#55583c">${'♥'.repeat(Math.max(0,op.maxLives-op.lives))}</span></b></div>
+   <div class="ki ${w.length?'':'ok'}"><small>FERIDAS</small><b>${w.length?w.join(', '):'Nenhuma'}</b></div>
+   <div class="ki lst"><small>CARTAS</small><b>${own.length?own.join(' · '):'Nenhuma ainda'}</b></div></div>`;
+}
+function cardBtn(id){const c=CARD[id];return `<button class="opt ccard ${c.inst?'inst':''} ${cardSel===id?'sel':''}" data-cpick="${id}"><div class="cg">${GRP[c.g]}</div><div class="cico">${cardIcon(c)}</div><div class="on">${c.n}</div><div class="op">+ ${c.pro}</div><div class="oc">− ${c.con}</div></button>`}
+function opHome(){
+  scene='menu';AU.heart(0);curScr=opHome;
+  const ov=$('#ov');ov.dataset.screen='ophome';ov.classList.add('on','title');
+  ov.innerHTML=`<div class="scr th-modo"><div class="tint"></div>
+   <div class="wh"><div class="whl">DIRTY SHOT</div><div class="whr">OPERAÇÃO</div></div>
+   <div class="wmain"><div class="q">4 DUELOS. UMA OPERAÇÃO.</div>
+    <div class="opmeta" style="max-width:min(88vw,820px);text-align:center">Vidas e ferimentos passam de um duelo para o outro.<br>Depois de cada duelo você escolhe 1 entre 3 cartas, ou pula e recupera 1 vida.<br>Antes de cada duelo você escolhe o muro: o mais arriscado dá 4 cartas.</div>
+    <div class="dif"><span>DIFICULDADE</span><button class="chip ${diffKey==='recruta'?'sel':''}" data-d="recruta">RECRUTA</button><button class="chip ${diffKey==='veterano'?'sel':''}" data-d="veterano">VETERANO</button><em>${diffKey==='recruta'?'7 vidas. Ele demora mais para te achar.':'6 vidas. Ele te caça no ritmo normal.'}</em></div>
+    <button class="btn" data-a="opstart">INICIAR OPERAÇÃO ›</button>
+   </div>
+   <div class="wfoot"><button class="btn sec" data-a="how">COMO JOGAR</button><button class="btn sec" data-a="snd">TESTAR SOM</button><span class="snd" id="sndst">${AU.diag()}</span></div></div>`;
+}
+function opPick(){
+  scene='menu';AU.heart(0);curScr=opPick;
+  const ov=$('#ov');ov.dataset.screen='oppick';ov.classList.add('on','title');
+  const first=op.start;
+  const title=first?'EQUIPAMENTO INICIAL':'DUELO '+(op.n-1)+' CONCLUÍDO';
+  ov.innerHTML=`<div class="scr th-arma"><div class="tint"></div>
+   <div class="wh"><div class="whl">${title}</div><div class="whr">ESCOLHA 1 CARTA</div></div>
+   <div class="wbody">${opPanel()}<div class="wmain2"><div class="cards">${offerIds.map(cardBtn).join('')}</div></div></div>
+   <div class="wnav">${first?'<span></span>':'<button class="btn sec" data-a="cskip">PULAR (+1 VIDA)</button>'}<span class="hintn">${cardSel?'':'Toque em uma carta para escolher'}</span><button class="btn" data-a="cgo" ${cardSel?'':'disabled style="opacity:.45"'}>ESCOLHER ›</button></div></div>`;
+}
+function opMap(){
+  scene='menu';AU.heart(0);curScr=opMap;
+  const ov=$('#ov');ov.dataset.screen='opmap';ov.classList.add('on','title');
+  const cards=mapOpts.map((m,i)=>`<button class="opt ${mapSel===i?'sel':''}" data-mpick="${i}"><div class="cg" style="font:700 clamp(9px,2vh,14px) 'Oswald',sans-serif;letter-spacing:.2em;color:#8f8a73">${m.hard?'ARRISCADO':'SEGURO'}</div><div class="on">${m.nome}</div><div class="opmeta">${m.desc}</div>
+    ${m.hard?`<div class="op">+ Recompensa de 4 cartas.</div><div class="oc">− Vento forte e inimigo 15% mais atento.</div>`:`<div class="op">+ Vento fraco.</div><div class="oc">− Recompensa de 3 cartas.</div>`}</button>`).join('');
+  ov.innerHTML=`<div class="scr th-resumo"><div class="tint"></div>
+   <div class="wh"><div class="whl">ESCOLHA O MURO</div><div class="whr">DUELO ${op.n} DE 4</div></div>
+   <div class="wbody">${opPanel()}<div class="wmain2"><div class="cards">${cards}</div></div></div>
+   <div class="wnav"><span></span><span class="hintn">${mapSel===null?'Toque em um muro para escolher':''}</span><button class="btn" data-a="mgo" ${mapSel!==null&&ART.done?'':'disabled style="opacity:.45"'}>${ART.done?'IR PARA O MURO ›':'CARREGANDO…'}</button></div></div>`;
+}
+function opGoMap(){drawMaps();mapSel=null;opMap()}
+function opReward(){const n=op.map&&op.map.hard?4:3;offerIds=offerCards(n);cardSel=null;opPick()}
+function opFinish(win,kind){
+  scene='menu';AU.heart(0);curScr=null;
+  const ov=$('#ov');ov.dataset.screen='opend';ov.classList.add('on','title');
+  const names=op.cards.map(id=>CARD[id].n),done=op.n-(win?0:1)+(win?0:0);
+  const reach=win?4:op.n-1;
+  const T={win:['OPERAÇÃO CONCLUÍDA','Você abateu os 4 atiradores.'],head:['OPERAÇÃO ENCERRADA','Tiro na cabeça no duelo '+op.n+'. Você apareceu tempo demais.'],wounds:['OPERAÇÃO ENCERRADA','No duelo '+op.n+', os ferimentos se acumularam.'],ammo:['OPERAÇÃO ENCERRADA','No duelo '+op.n+' você ficou sem balas.'],time:['OPERAÇÃO ENCERRADA','No duelo '+op.n+' o tempo esgotou.']}[win?'win':kind]||['OPERAÇÃO ENCERRADA',''];
+  let reveal='';
+  if(!win){try{const c=mkc(560,300),x=c.getContext('2d'),e=g.e;x.fillStyle='#222';x.fillRect(0,0,560,300);
+    drawWorld(x,e.x,e.y+6,2.2,280,150);
+    x.strokeStyle='rgba(255,70,50,.95)';x.lineWidth=3;x.beginPath();x.arc(280,150,36,0,6.3);x.stroke();
+    x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,270,560,30);x.fillStyle='#fff';x.font='600 18px Oswald,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('ELE ESTAVA AQUI · '+distM(e.y)+' m',280,285);
+    reveal='<img src="'+c.toDataURL('image/jpeg',.85)+'" style="max-width:min(60vw,360px);max-height:28vh;border:2px solid #6c6c55;border-radius:8px;margin:.4vh 0" alt="">'}catch(err){}}
+  ov.innerHTML=`<div class="panel ${win?'opwin':''}"><div class="endk ${win?'w':'l'}">${T[0]}</div><p class="tut-p">${T[1]}</p>${reveal}
+   <div class="sumlist">Duelos vencidos: ${reach} de 4 · Dificuldade: ${diffKey==='recruta'?'Recruta':'Veterano'}<br>Cartas: ${names.length?names.join(' · '):'nenhuma'}</div>
+   <div class="row"><button class="btn" data-a="again">NOVA OPERAÇÃO</button></div></div>`;
+}
+function opAfterDuel(){
+  // chamado por showEnd quando há operação
+  const k=g.endKind;
+  if(k!=='win'){opFinish(false,k);return}
+  op.hist.push({n:op.n,card:null});
+  op.lives=Math.min(op.maxLives,g.lives+1);op.w={arm:g.wounds.arm,leg:g.wounds.leg,lens:g.wounds.lens};
+  if(op.n>=4){opFinish(true);return}
+  op.n++;op.start=false;opReward();
+}
+function goDuel(){
+  AU.stopNarr();
+  op.map=mapOpts[mapSel];
+  const run=()=>startGame(sel);
+  if(!tutSeen){tutSeen=true;try{localStorage.setItem('ds_tut','1')}catch(err){}tutI=0;afterTut=run;showTut();return}
+  run();
+}
+
 function newEnemy(){
   const h=pick(HID);
   return {h,x:h.x,y:h.y,s:h.s,belief:new Array(NPOS).fill(1/NPOS),focus:2,nextFocus:3,threat:0,bites:0,tw:0,spotted:0,lockUntil:0,
@@ -633,7 +775,7 @@ function saveEq(){try{localStorage.setItem('ds_eq',JSON.stringify({d:diffKey,m:e
 function startGame(s){
   sel=Object.assign({},s||sel);RQ.clear();
   buildScene((Date.now()%1000000007)|0);
-  g=makeG(sel);g.e=newEnemy();scene='play';
+  g=makeG(sel,op);g.e=newEnemy();scene='play';
   $('#ov').classList.remove('on');$('#ov').classList.remove('title');
   setTimeout(()=>{if(g&&scene==='play')hint('t_'+g.types[g.pos])},900);
   log('RÁDIO',g.lo.noRadio?'Sem rádio. Silêncio total.':'Canal aberto. Ele está lá fora, no lixo.');
@@ -687,11 +829,11 @@ function update(dt){
   if(!g.hint&&g.hq&&g.hq.length){g.hint=g.hq.shift();g.hint.t0=g.t}
   if(g.hint&&g.t-g.hint.t0>g.hint.dur)g.hint=null;
   if(g.over){updateFx(dt);if(g.endAt&&g.t>g.endAt){g.endAt=0;showEnd()}return}
-  g.time-=dt*(g.wounds.leg?1.25:1);
+  g.time-=dt*(g.wounds.leg?1.25:1)*(g.lo.tScale||1);
   if(g.time<=0){g.time=0;end('time');return}
   g.radioCd=Math.max(0,g.radioCd-dt);
   g.flash=Math.max(0,g.flash-dt*1.4);g.shake=Math.max(0,g.shake-dt*2);g.noiseWin=Math.max(0,g.noiseWin-dt);
-  const w=g.wind;w.next-=dt;if(w.next<=0){w.next=rr(3,7);w.tgt=rr(-3.5,3.5)*(R()<.3?1.6:1)}
+  const w=g.wind;w.next-=dt;if(w.next<=0){w.next=rr(3,7);w.tgt=rr(-3.5,3.5)*(R()<.3?1.6:1)*(g.windK||1)}
   w.gust+=(w.tgt-w.gust)*Math.min(1,dt*.7);w.base+=rr(-.2,.2)*dt;w.base=clamp(w.base,-3,3);w.val=clamp(w.base*.6+w.gust,-6,6);
   if(g.held&&g.view==='scope'){g.stam-=dt/g.lo.breath;if(g.stam<=0){g.stam=0;g.held=false;g.gasp=1.4}}else g.stam=Math.min(1,g.stam+dt/g.lo.breathRec);
   g.gasp=Math.max(0,g.gasp-dt);
@@ -856,6 +998,7 @@ function end(kind){
   if(kind==='win'&&'speechSynthesis' in window)try{speechSynthesis.cancel()}catch(e){}
 }
 function showEnd(){
+  if(op&&!op.over){opAfterDuel();return}
   const k=g.endKind,ov=$('#ov');
   const T={win:['ALVO ABATIDO','w','Tiro certeiro na cabeça. O silêncio voltou.'],head:['MORTO PELO INIMIGO','l','Tiro na cabeça. Você apareceu tempo demais.'],wounds:['MORTO PELO INIMIGO','l','Os ferimentos se acumularam. Ele te minou aos poucos.'],ammo:['SEM MUNIÇÃO','l','Sem balas, sem como acabar com ele.'],time:['TEMPO ESGOTADO','l','O sol baixou e ele continua lá.']}[k];
   const sec=Math.round(g.timeMax-g.time);
@@ -1041,7 +1184,7 @@ function hud(){
   ctx.fillStyle='rgba(8,9,6,.72)';rrect(ctx,14,14,372,128,10);ctx.fill();
   const t=Math.max(0,g.time),mm=Math.floor(t/60),ss=Math.floor(t%60);
   txt(mm+':'+String(ss).padStart(2,'0'),28,38,34,'#f2ebc9','left',700);
-  txt('♥'.repeat(Math.max(0,g.lives))+'♡'.repeat(Math.max(0,g.maxLives-g.lives)),150,38,26,'#e0624a','left');
+  txt(g.maxLives>5?'♥ '+Math.max(0,g.lives)+'/'+g.maxLives:'♥'.repeat(Math.max(0,g.lives))+'♡'.repeat(Math.max(0,g.maxLives-g.lives)),150,38,26,'#e0624a','left');
   txt('BALAS '+g.bullets,28,74,24,g.bullets<=1?'#e0624a':'#f2ebc9','left');
   txt('ISCAS '+(g.helm+g.rocks+g.mirrors),132,74,24,'#f2ebc9','left');
   const w=g.wind.val;txt('VENTO '+(w>0?'→ ':w<0?'← ':'')+Math.abs(w).toFixed(1),28,108,22,'#cfe3e8','left');
@@ -1137,13 +1280,15 @@ const TUT=[
  {t:'Deslize pelo muro.',p:'O muro tem 5 trechos. ▲ ALTO protege bem, mas espiar por cima expõe mais. ◣ QUEBRADO é frágil e mostra só um setor. ● SETEIRA deixa observar com pouco risco, mas não dá para atirar dela. Trocar de trecho confunde o atirador.',n:'nar_tut_3'},
  {t:'Faça ele se revelar.',p:'Use iscas, rádio, poeira, brilho e som. Um brilho curto e preciso é dele. Um brilho largo e demorado pode ser uma isca. E ele também pensa: aprende por onde você espia.',n:'nar_tut_4'},
  {t:'Ache e firme a mira.',p:'Mantenha a mira sobre ele por 1,5 s e um círculo discreto aparece ao redor dele. SEGURAR estabiliza a mira, mas o fôlego acaba. Só a cabeça e a luneta dele contam como acerto.',n:'nar_tut_5'},
- {t:'Só o vento empurra a bala.',p:'A mira já compensa a queda. O vento empurra a bala para o lado: veja o aviso VENTO ao lado da distância e ponha o alvo do lado para onde a seta aponta, contando as marcas da retícula. O X vermelho mostra onde sua bala caiu.',n:'nar_tut_6'}
+ {t:'Só o vento empurra a bala.',p:'A mira já compensa a queda. O vento empurra a bala para o lado: veja o aviso VENTO ao lado da distância e ponha o alvo do lado para onde a seta aponta, contando as marcas da retícula. O X vermelho mostra onde sua bala caiu.',n:'nar_tut_6'},
+ {t:'Quatro duelos, uma operação.',p:'Vidas e ferimentos passam de um duelo para o outro. Depois de cada duelo, escolha 1 entre 3 cartas (ou pule e recupere 1 vida). Cada carta tem um ganho e um custo, e vale pelo resto da operação. Antes de cada duelo, escolha o muro: o arriscado tem vento forte e inimigo mais atento, mas dá 4 cartas.',n:null}
 ];
 function tutVisual(i){
   switch(i){
    case 0:return `<img class="vi" src="art/wall1.webp" alt="">`;
    case 1:return `<div class="eye">👁️</div><div class="vbar"><i style="width:68%"></i><b>EXPOSIÇÃO 68%</b></div>`;
    case 2:return `<div class="walls"><div><img src="art/wall0.webp" alt=""><span>▲ ALTO</span></div><div><img src="art/wall1.webp" alt=""><span>◣ QUEBRADO</span></div><div><img src="art/wall2.webp" alt=""><span>● SETEIRA</span></div></div>`;
+   case 6:return `<div class="walls"><div style="font-size:clamp(30px,12vh,80px)">🎴</div><div style="font-size:clamp(30px,12vh,80px)">🧱</div><div style="font-size:clamp(30px,12vh,80px)">♥</div></div>`;
    case 3:return `<div class="baits"><img src="art/bait0.webp" alt=""><img src="art/bait1.webp" alt=""><img src="art/bait2.webp" alt=""></div>`;
    case 4:return `<div class="scope"><img src="art/sniper0.webp" alt=""><div class="ring"></div></div>`;
    default:return `<svg viewBox="0 0 400 260" class="vsvg"><circle cx="200" cy="130" r="118" fill="rgba(0,0,0,.35)" stroke="#e3c86a" stroke-width="4"/><line x1="82" y1="130" x2="318" y2="130" stroke="#eee6c8" stroke-width="2"/><line x1="200" y1="12" x2="200" y2="248" stroke="#eee6c8" stroke-width="2"/>${[1,2,3,4].map(k=>`<line x1="${200+k*30}" y1="122" x2="${200+k*30}" y2="138" stroke="#eee6c8" stroke-width="3"/><line x1="${200-k*30}" y1="122" x2="${200-k*30}" y2="138" stroke="#eee6c8" stroke-width="3"/><text x="${200+k*30}" y="112" fill="#eee6c8" font-size="15" text-anchor="middle">${k}</text><text x="${200-k*30}" y="112" fill="#eee6c8" font-size="15" text-anchor="middle">${k}</text>`).join('')}<circle cx="290" cy="130" r="9" fill="none" stroke="#ff5a3a" stroke-width="4"/><path d="M230 218 L330 218 L318 206 M330 218 L318 230" stroke="#cfe3e8" stroke-width="6" fill="none"/><text x="200" y="250" fill="#cfe3e8" font-size="22" text-anchor="middle" font-weight="700">VENTO → 3 marcas</text></svg>`;
@@ -1157,7 +1302,7 @@ function showTut(){
    <div class="wh"><div class="whl">COMO JOGAR</div><div class="whr">${tutI+1} DE ${TUT.length}</div></div>
    <div class="tut2"><div class="tl">${tutVisual(tutI)}</div><div class="tr"><h2>${t.t}</h2><p>${t.p}</p></div></div>
    <div class="wnav"><button class="btn sec" data-a="tprev" ${tutI?'':'style="visibility:hidden"'}>‹ VOLTAR</button><button class="btn sec" data-a="tspeak">🔊 OUVIR</button><button class="btn" data-a="tnext">${last?'ENTENDI':'PRÓXIMO ›'}</button></div></div>`;
-  AU.whenReady(()=>{if(ov.dataset.screen==='tut')AU.narr(t.n)},6000);
+  if(t.n)AU.whenReady(()=>{if(ov.dataset.screen==='tut')AU.narr(t.n)},6000);
 }
 
 // ---- montagem do kit em etapas
@@ -1224,26 +1369,30 @@ function showBrief(){
 $('#ov').addEventListener('click',e=>{
   AU.init();AU.unlock();
   const t=e.target;
+  const cp=t.closest('[data-cpick]');if(cp){cardSel=cp.dataset.cpick;opPick();return}
+  const mp=t.closest('[data-mpick]');if(mp){mapSel=+mp.dataset.mpick;opMap();return}
   const mc=t.closest('[data-wmode]');if(mc){eqMode=mc.dataset.wmode;saveEq();drawOffers();picked={};wzRender(1);return}
   const pk=t.closest('[data-wpick]');if(pk){const [k,o]=pk.dataset.wpick.split(':');sel[k]=o;picked[k]=true;wzRender(wz.step,true);return}
   if(t.closest('[data-wnext]')){if(!t.closest('[disabled]'))wzRender(Math.min(5,wz.step+1));return}
   if(t.closest('[data-wback]')){wzRender(Math.max(0,wz.step-1),true);return}
   if(t.closest('[data-wredo]')){drawOffers();picked={};wz.said={};wzRender(0);return}
   const sw=t.closest('[data-wswap]');if(sw){if(swapUsed)return;const k=sw.dataset.wswap,keys=Object.keys(EQ[k].opts).filter(x=>x!==sel[k]);sel[k]=pick(keys);swapUsed=true;wzRender(wz.step,true);return}
-  const df=t.closest('[data-d]');if(df){diffKey=df.dataset.d;saveEq();wzRender(wz.step,true);return}
+  const df=t.closest('[data-d]');if(df){diffKey=df.dataset.d;saveEq();opHome();return}
   const a=t.closest('[data-a]');if(!a)return;const v=a.dataset.a;
-  if(v==='start'){let seen=false;try{seen=localStorage.getItem('ds_brief')==='1'}catch(err){}if(seen){wzRender(0)}else{try{localStorage.setItem('ds_brief','1')}catch(err){}showBrief()}return}
-  if(v==='tomenu'){AU.stopNarr();wzRender(0);return}
-  if(v==='again'||v==='menu'){AU.stopNarr();drawOffers();picked={};wz.said={};wzRender(0);return}
+  if(v==='opstart'){AU.stopNarr();newOp();offerIds=offerCards(4,true);cardSel=null;opPick();return}
+  if(v==='cgo'){if(!cardSel)return;const c=CARD[cardSel];if(c.pick)c.pick(op);if(c.inst)op.hist.push({n:op.n,card:c.id});else op.cards.push(c.id);cardSel=null;opGoMap();return}
+  if(v==='cskip'){op.lives=Math.min(op.maxLives,op.lives+1);cardSel=null;opGoMap();return}
+  if(v==='mgo'){if(mapSel===null||!ART.done)return;goDuel();return}
+  if(v==='start'){let seen=false;try{seen=localStorage.getItem('ds_brief')==='1'}catch(err){}if(seen){opHome()}else{try{localStorage.setItem('ds_brief','1')}catch(err){}showBrief()}return}
+  if(v==='tomenu'){AU.stopNarr();opHome();return}
+  if(v==='again'||v==='menu'){AU.stopNarr();opHome();return}
   if(v==='snd'){AU.test();const st=$('#sndst');if(st)st.textContent=AU.diag();setTimeout(()=>{const s2=$('#sndst');if(s2)s2.textContent=AU.diag()},1500);return}
-  if(v==='play'&&!ART.done)return;
-  if(v==='play'){AU.stopNarr();if(!tutSeen){tutSeen=true;try{localStorage.setItem('ds_tut','1')}catch(err){}tutI=0;tutReturn=5;showTut();return}startGame(sel)}
-  else if(v==='how'){tutI=0;tutReturn=wz.step;showTut()}
+  if(v==='how'){tutI=0;afterTut=curScr||opHome;showTut()}
   else if(v==='tprev'){tutI=Math.max(0,tutI-1);showTut()}
-  else if(v==='tspeak'){AU.narr(TUT[tutI].n)}
-  else if(v==='tnext'){if(tutI>=TUT.length-1){AU.stopNarr();wzRender(tutReturn)}else{tutI++;showTut()}}
+  else if(v==='tspeak'){if(TUT[tutI].n)AU.narr(TUT[tutI].n)}
+  else if(v==='tnext'){if(tutI>=TUT.length-1){AU.stopNarr();(afterTut||opHome)()}else{tutI++;showTut()}}
 });
-setInterval(()=>{const st=$('#sndst');if(st&&$('#ov').dataset.screen==='wz')st.textContent=AU.diag()},1000);
+setInterval(()=>{const st=$('#sndst');if(st&&$('#ov').dataset.screen==='ophome')st.textContent=AU.diag()},1000);
 
 // ---------------------------------------------------------------- laço
 let last=performance.now();
@@ -1254,7 +1403,7 @@ function frame(ts){
 }
 resize();buildScene(12345);g=makeG(sel);g.e=newEnemy();scene='menu';drawOffers();showTitle();loadArt();
 requestAnimationFrame(frame);
-window.__DS={get g(){return g},start:startGame,act,fire,sway,HID:()=>HID,mode,end,step:dt=>update(dt),render,get scene(){return scene},EQ,EQ_ORDER,ART,AU,RQ,DIFF};
+window.__DS={get g(){return g},start:startGame,act,fire,sway,HID:()=>HID,mode,end,step:dt=>update(dt),render,get scene(){return scene},get op(){return op},newOp,opHome,opPick,opMap,opGoMap,opReward,opAfterDuel,CARDS,CARD,offerCards,mapOpts:()=>mapOpts,setMap:i=>{mapSel=i;},goDuel,EQ,EQ_ORDER,ART,AU,RQ,DIFF};
 })();
 </script>
 </body>
