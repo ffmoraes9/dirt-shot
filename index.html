@@ -118,7 +118,7 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
 .ccard{gap:1vh;padding:1.6vh 1.2vw}.ccard .on{font-size:clamp(15px,4.4vh,32px)}
 .ccard .op,.ccard .oc{font-size:clamp(11px,2.9vh,20px)}
 .cg{font:700 clamp(9px,2vh,14px) 'Oswald',sans-serif;letter-spacing:.2em;color:#8f8a73}
-.cico{height:clamp(34px,13vh,96px);display:flex;align-items:center;justify-content:center}.cico svg{height:100%;width:auto;max-width:100%}
+.cico{height:clamp(34px,13vh,96px);display:flex;align-items:center;justify-content:center}.cico svg{height:100%;width:auto;max-width:100%}.cico img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,.55))}
 .ccard.inst .cg::after{content:' · USO IMEDIATO';color:#e3c86a}
 .ki.lst b{font:400 clamp(11px,2.6vh,17px)/1.35 Arial,sans-serif;color:#d8d2ba}
 .ki.lst{justify-content:flex-start;overflow:hidden}
@@ -142,7 +142,7 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
  .cards{flex-direction:column;gap:2.4vw;flex:1}
  .opt{flex:0 0 auto;padding:3vw 4vw;gap:1.2vw;border-radius:12px}
  .opt .on{font-size:clamp(17px,5.6vw,28px)}.opt .op,.opt .oc,.ccard .op,.ccard .oc{font-size:clamp(12px,3.6vw,18px)}
- .ccard .on{font-size:clamp(16px,5vw,26px)}.cico{height:clamp(26px,9vw,44px)}
+ .ccard .on{font-size:clamp(16px,5vw,26px)}.cico{height:clamp(50px,15vw,84px)}
  .wnav{padding:2vw 4vw 5vw;flex-wrap:wrap;justify-content:space-between}.wnav .btn{font-size:clamp(13px,4vw,20px);padding:2.6vw 4vw}
  .hintn{font-size:clamp(10px,3vw,14px);flex-basis:100%;order:3;text-align:center}
  .sumgrid{grid-template-columns:1fr;padding:1vw 4vw;overflow:auto}
@@ -158,7 +158,7 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
  .deco,.deco3{display:none}
  .wh{flex-wrap:wrap;gap:1vw}.whl{font-size:clamp(18px,6vw,34px)}.whr{white-space:nowrap}
  .wbody,.tut2,.sumgrid,.cards{touch-action:pan-y}
- .ccard{display:grid;grid-template-columns:clamp(44px,13vw,64px) 1fr;column-gap:3vw;row-gap:.8vw;align-items:center}
+ .ccard{display:grid;grid-template-columns:clamp(76px,24vw,120px) 1fr;column-gap:3vw;row-gap:.8vw;align-items:center}
  .ccard .cg{grid-column:1/-1}.ccard .cico{grid-row:2/5;grid-column:1;height:auto;align-self:start}.ccard .on,.ccard .op,.ccard .oc{grid-column:2}
  .walls span{font-size:clamp(11px,3.4vw,16px);text-align:center}
  .kit{padding:2.4vw 3vw}
@@ -681,25 +681,25 @@ const CARDS=[
  {id:'cano',g:'arma',n:'Cano pesado',pro:'A mira fica 30% mais firme.',con:'Errar expõe +15%.',f:o=>{o.sway*=.7;o.missPen+=15}},
  {id:'silenc',g:'arma',n:'Silenciador',pro:'Errar expõe 18% a menos.',con:'A mira fica 20% mais instável.',f:o=>{o.missPen=Math.max(6,o.missPen-18);o.sway*=1.2}},
  {id:'binoc',g:'arma',n:'Binóculo de campo',pro:'Você nota os movimentos dele melhor.',con:'A mira fica 20% mais instável.',f:o=>{o.perceive+=.5;o.sway*=1.2}},
- {id:'coronha',g:'arma',n:'Coronha almofadada',pro:'O fôlego volta 40% mais rápido.',con:'−1 bala por duelo.',f:o=>{o.breathRec*=1.4;o.bullets-=1}},
+ {id:'coronha',g:'arma',n:'Coronha almofadada',pro:'O fôlego volta 40% mais rápido.',con:'Perde 1 bala por duelo.',f:o=>{o.breathRec*=1.4;o.bullets-=1}},
  {id:'ferrolho',g:'arma',n:'Ferrolho polido',pro:'A mira fica 40% mais firme.',con:'Errar expõe +25%.',f:o=>{o.sway*=.6;o.missPen+=25}},
- {id:'caixa',g:'sup',n:'Caixa de munição',pro:'+2 balas por duelo.',con:'O tempo corre 10% mais rápido.',f:o=>{o.bullets+=2;o.tScale*=1.1}},
- {id:'capac',g:'sup',n:'Capacetes extras',pro:'+2 capacetes de isca por duelo.',con:'−1 bala por duelo.',f:o=>{o.helm+=2;o.bullets-=1}},
- {id:'pedras',g:'sup',n:'Pedras e espelho',pro:'+2 pedras e +1 espelho por duelo.',con:'A mira fica 10% mais instável (peso).',f:o=>{o.rocks+=2;o.mirrors+=1;o.sway*=1.1}},
- {id:'mochila',g:'sup',n:'Mochila leve',pro:'+60 segundos por duelo.',con:'−1 bala por duelo.',f:o=>{o.time+=60;o.bullets-=1}},
+ {id:'caixa',g:'sup',n:'Caixa de munição',pro:'2 balas a mais por duelo.',con:'O tempo corre 10% mais rápido.',f:o=>{o.bullets+=2;o.tScale*=1.1}},
+ {id:'capac',g:'sup',n:'Capacetes extras',pro:'2 capacetes de isca a mais por duelo.',con:'Perde 1 bala por duelo.',f:o=>{o.helm+=2;o.bullets-=1}},
+ {id:'pedras',g:'sup',n:'Pedras e espelho',pro:'2 pedras e 1 espelho a mais por duelo.',con:'A mira fica 10% mais instável (peso).',f:o=>{o.rocks+=2;o.mirrors+=1;o.sway*=1.1}},
+ {id:'mochila',g:'sup',n:'Mochila leve',pro:'60 segundos a mais por duelo.',con:'Perde 1 bala por duelo.',f:o=>{o.time+=60;o.bullets-=1}},
  {id:'racao',g:'sup',n:'Água e ração',pro:'O fôlego volta 60% mais rápido.',con:'O tempo corre 10% mais rápido.',f:o=>{o.breathRec*=1.6;o.tScale*=1.1}},
- {id:'perfume',g:'sup',n:'Isca perfumada',pro:'Ele cai 40% mais nas iscas.',con:'−1 pedra por duelo.',f:o=>{o.bite*=1.4;o.rocks-=1}},
+ {id:'perfume',g:'sup',n:'Isca perfumada',pro:'Ele cai 40% mais nas iscas.',con:'Perde 1 pedra por duelo.',f:o=>{o.bite*=1.4;o.rocks-=1}},
  {id:'escuta',g:'radio',n:'Rádio de escuta',pro:'Mostra o lado da voz dele, sem custo de exposição.',con:'Só 3 usos por duelo.',f:o=>{o.hearSide=true;o.radioCost=0;o.radioUses=Math.min(o.radioUses,3)}},
  {id:'campo',g:'radio',n:'Rádio de campo',pro:'Mostra de que lado vem a voz dele.',con:'Cada uso expõe +12%.',f:o=>{o.hearSide=true;o.radioCost=Math.max(o.radioCost,12)}},
  {id:'mudo',g:'radio',n:'Silêncio total',pro:'A exposição sobe 20% mais devagar.',con:'Sem rádio: não dá para falar com ele nem ouvi-lo.',f:o=>{o.noRadio=true;o.expMult*=.8}},
  {id:'bateria',g:'radio',n:'Bateria reserva',pro:'A espera entre usos do rádio cai pela metade.',con:'Cada uso expõe +6%.',f:o=>{o.radioCd*=.5;o.radioCost+=6}},
- {id:'bandagem',g:'corpo',n:'Bandagem',pro:'+2 vidas e cura 1 ferimento.',con:'Gasta sua escolha: nenhuma vantagem permanente.',inst:true,pick:p=>{p.lives=Math.min(p.maxLives,p.lives+2);const k=['arm','leg','lens'].sort((a,b)=>p.w[b]-p.w[a])[0];if(p.w[k]>0)p.w[k]--}},
- {id:'colete',g:'corpo',n:'Colete reforçado',pro:'+1 vida máxima (e +1 vida agora).',con:'O fôlego dura 15% menos.',pick:p=>{p.maxLives++;p.lives++},f:o=>{o.breath*=.85}},
+ {id:'bandagem',g:'corpo',n:'Bandagem',pro:'Ganha 2 vidas e cura 1 ferimento.',con:'Gasta sua escolha: nenhuma vantagem permanente.',inst:true,pick:p=>{p.lives=Math.min(p.maxLives,p.lives+2);const k=['arm','leg','lens'].sort((a,b)=>p.w[b]-p.w[a])[0];if(p.w[k]>0)p.w[k]--}},
+ {id:'colete',g:'corpo',n:'Colete reforçado',pro:'Ganha 1 vida máxima (e 1 vida agora).',con:'O fôlego dura 15% menos.',pick:p=>{p.maxLives++;p.lives++},f:o=>{o.breath*=.85}},
  {id:'estim',g:'corpo',n:'Estimulante',pro:'A mira fica 15% mais firme.',con:'O fôlego volta 30% mais devagar.',f:o=>{o.sway*=.85;o.breathRec*=.7}},
- {id:'treino',g:'corpo',n:'Treino de fôlego',pro:'+0,8 s de fôlego.',con:'A exposição sobe 10% mais rápido.',f:o=>{o.breath+=.8;o.expMult*=1.1}},
+ {id:'treino',g:'corpo',n:'Treino de fôlego',pro:'0,8 s a mais de fôlego.',con:'A exposição sobe 10% mais rápido.',f:o=>{o.breath+=.8;o.expMult*=1.1}},
  {id:'camuf',g:'corpo',n:'Pintura de camuflagem',pro:'A exposição sobe 15% mais devagar.',con:'Zoom menor (−0,3).',f:o=>{o.expMult*=.85;o.zoom-=.3}},
  {id:'aguia',g:'corpo',n:'Olho de águia',pro:'Você nota os movimentos dele 30% melhor.',con:'A lente fica trincada (+1 ferimento na luneta).',pick:p=>{p.w.lens++},f:o=>{o.perceive*=1.3}},
- {id:'analg',g:'corpo',n:'Analgésico',pro:'+2 vidas máximas (e +2 vidas agora).',con:'O braço fica ferido (+1): a mira treme mais.',pick:p=>{p.maxLives+=2;p.lives+=2;p.w.arm++}},
+ {id:'analg',g:'corpo',n:'Analgésico',pro:'Ganha 2 vidas máximas (e 2 vidas agora).',con:'O braço fica ferido (+1): a mira treme mais.',pick:p=>{p.maxLives+=2;p.lives+=2;p.w.arm++}},
  {id:'observ',g:'arma',n:'Luneta de observação',pro:'Zoom 50% maior, sem tremor e a exposição sobe só metade.',con:'Não atira: trocar para o rifle leva 2 s e expõe +10%.',f:o=>{o.spotter=true}}
 ];
 const CARD={};CARDS.forEach(c=>CARD[c.id]=c);
@@ -735,8 +735,8 @@ const CICO={
  sup:'<svg viewBox="0 0 100 60"><g fill="none" stroke="#e3c86a" stroke-width="4" stroke-linejoin="round"><path d="M20 20l30-12 30 12v30l-30 8-30-8z"/><path d="M20 20l30 10 30-10M50 30v28"/></g></svg>',
  radio:'<svg viewBox="0 0 100 60"><g fill="none" stroke="#e3c86a" stroke-width="4" stroke-linecap="round"><rect x="28" y="22" width="44" height="30" rx="5"/><path d="M60 22L74 6M38 36h16M38 44h24"/></g></svg>',
  corpo:'<svg viewBox="0 0 100 60"><g fill="none" stroke="#e3c86a" stroke-width="4" stroke-linecap="round"><rect x="30" y="8" width="40" height="44" rx="6"/><path d="M50 18v24M38 30h24"/></g></svg>'};
-const CARD_ART=false;
-const cardIcon=c=>CARD_ART?`<img src="art/cards/${c.id}.webp" alt="" style="height:100%">`:CICO[c.g];
+const CARD_ART=true;
+const cardIcon=c=>CARD_ART?`<img src="art/cards/${c.id}.webp" alt="">`:CICO[c.g];
 function opPanel(){
   const w=[];if(op.w.arm)w.push('Braço'+(op.w.arm>1?' ×'+op.w.arm:''));if(op.w.lens)w.push('Luneta'+(op.w.lens>1?' ×'+op.w.lens:''));if(op.w.leg)w.push('Perna'+(op.w.leg>1?' ×'+op.w.leg:''));
   const own=op.cards.map(id=>CARD[id].n);
