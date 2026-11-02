@@ -699,12 +699,12 @@ const HINTS={
  iscas:'ISCAS: fazem ele atirar ou brilhar e se revelar.',
  radio:'RÁDIO: PROVOCAR o faz brilhar. CONVERSAR baixa sua exposição.',
  folego:'SEGURAR firma a mira, mas o fôlego acaba.',
- zoom:'ZOOM: mais zoom mostra detalhe, mas a mira treme. Ele é pequeno: aproxime.',
- inicio:'Toque em MIRAR para olhar o campo e procurar o atirador. Cuidado: mirar sobe a EXPOSIÇÃO.',
+ zoom:'ZOOM: afaste ou aproxime dois dedos (pinça) na mira. Mais zoom mostra detalhe, mas a mira treme mais.',
+ inicio:'Toque em qualquer ponto do campo para mirar ali. Cuidado: mirar sobe a EXPOSIÇÃO.',
  caderno:'CADERNO: o quadro junta as pistas por objeto. Aposte (SUSPEITO) no objeto com mais tipos de pista diferentes. Acertar reduz a camuflagem dele.',
  foco:'FOCO: nítido só em uma distância. Troque entre 100, 200 e 300 m.',
  som:'O som chega atrasado: quanto maior o atraso, mais longe o tiro.',
- observ:'LUNETA: não atira, mas vê mais e expõe metade.',
+ observ:'BINÓCULO: toque no botão BINÓCULO (à esquerda) para trocar. Ele só observa, mas vê mais e expõe metade.',
  noite:'ANOITECENDO: ele fica mais difícil de ver, mas clarões e brilhos aparecem mais.',
  ambiente:'O ambiente reagiu: algo se mexeu perto. Pode ser engano.',
  ferido:'Você foi ferido. Cada ferimento piora algo: braço (mira), luneta (visão), perna (tempo). Quando as vidas acabam, você morre.'
@@ -731,7 +731,7 @@ const CARDS=[
  {id:'luneta',g:'arma',n:'Luneta longa',pro:'Zoom maior e mira 15% mais firme.',con:'O fôlego dura 25% menos.',f:o=>{o.zoom+=.6;o.sway*=.85;o.breath*=.75}},
  {id:'cano',g:'arma',n:'Cano pesado',pro:'A mira fica 30% mais firme.',con:'Errar expõe +15%.',f:o=>{o.sway*=.7;o.missPen+=15}},
  {id:'silenc',g:'arma',n:'Silenciador',pro:'Errar expõe 18% a menos.',con:'A mira fica 20% mais instável.',f:o=>{o.missPen=Math.max(6,o.missPen-18);o.sway*=1.2}},
- {id:'binoc',g:'arma',n:'Binóculo de campo',pro:'Você nota os movimentos dele melhor.',con:'A mira fica 20% mais instável.',f:o=>{o.perceive+=.5;o.sway*=1.2}},
+ {id:'binoc',g:'arma',n:'Olhar de campo',pro:'Você nota os movimentos dele melhor.',con:'A mira fica 20% mais instável.',f:o=>{o.perceive+=.5;o.sway*=1.2}},
  {id:'coronha',g:'arma',n:'Coronha almofadada',pro:'O fôlego volta 40% mais rápido.',con:'Perde 1 bala por duelo.',f:o=>{o.breathRec*=1.4;o.bullets-=1}},
  {id:'ferrolho',g:'arma',n:'Ferrolho polido',pro:'A mira fica 40% mais firme.',con:'Errar expõe +25%.',f:o=>{o.sway*=.6;o.missPen+=25}},
  {id:'caixa',g:'sup',n:'Caixa de munição',pro:'2 balas a mais por duelo.',con:'O tempo corre 10% mais rápido.',f:o=>{o.bullets+=2;o.tScale*=1.1}},
@@ -751,7 +751,7 @@ const CARDS=[
  {id:'camuf',g:'corpo',n:'Pintura de camuflagem',pro:'A exposição sobe 15% mais devagar.',con:'Zoom menor (−0,3).',f:o=>{o.expMult*=.85;o.zoom-=.3}},
  {id:'aguia',g:'corpo',n:'Olho de águia',pro:'Você nota os movimentos dele 30% melhor.',con:'A lente fica trincada (+1 ferimento na luneta).',pick:p=>{p.w.lens++},f:o=>{o.perceive*=1.3}},
  {id:'analg',g:'corpo',n:'Analgésico',pro:'Ganha 2 vidas máximas (e 2 vidas agora).',con:'O braço fica ferido (+1): a mira treme mais.',pick:p=>{p.maxLives+=2;p.lives+=2;p.w.arm++}},
- {id:'observ',g:'arma',n:'Luneta de observação',pro:'Zoom 50% maior, sem tremor e a exposição sobe só metade.',con:'Não atira: trocar para o rifle leva 2 s e expõe +10%.',f:o=>{o.spotter=true}}
+ {id:'observ',g:'arma',n:'Binóculo',pro:'Botão BINÓCULO na mira: zoom 50% maior, sem tremor e a exposição sobe só metade.',con:'Não atira: voltar ao rifle leva 2 s e expõe +10%.',f:o=>{o.spotter=true}}
 ];
 const CARD={};CARDS.forEach(c=>CARD[c.id]=c);
 const WEAP=[
@@ -1341,7 +1341,7 @@ function act(id){
   if(g.menu==='notes'&&id.indexOf('q')!==0&&id!=='close'&&id!=='notes'&&id!=='sound')return;
   if(id.indexOf('qs')===0){const bd=board(),o=bd[+id.slice(2)];if(o)markSuspect(o.lm);return}
   switch(id){
-   case 'peek':if(g.view==='cover'){g.peeks=(g.peeks||0)+1;if(g.peeks>1&&R()<.3)eLine(g.pos<=1?'lado_e':g.pos===2?'lado_m':'lado_d',{p:1});hint('peek');g.view='scope';g.cam.x=posCenter(g.pos);g.cam.y=520;g.stare=0;g.menu=null}break;
+   case 'peek':if(g.view==='cover'){if(g.lo.spotter)hint('observ',6.5);g.peeks=(g.peeks||0)+1;if(g.peeks>1&&R()<.3)eLine(g.pos<=1?'lado_e':g.pos===2?'lado_m':'lado_d',{p:1});hint('peek');g.view='scope';g.cam.x=posCenter(g.pos);g.cam.y=520;g.stare=0;g.menu=null}break;
    case 'duck':g.view='cover';g.held=false;g.spot=false;g.swapUntil=0;break;
    case 'zin':if(g.view==='scope')g.zoomCur=Math.min(zMax(),+(g.zoomCur*1.18).toFixed(2));break;
    case 'fin':if(g.view==='scope'){hint('foco');g.focus=Math.min(2,g.focus+1)}break;
@@ -1503,14 +1503,14 @@ function btn(id,x,y,w,h,label,o){
   rrect(ctx,x,y,w,h,o.round?w/2:12);
   ctx.fillStyle=o.dis?'rgba(30,32,22,.7)':(o.fill||'rgba(52,60,30,.9)');ctx.fill();
   ctx.lineWidth=3;ctx.strokeStyle=o.dis?'rgba(110,108,86,.6)':(o.stroke||'#d7bd62');ctx.stroke();}
-  const fs=o.fs||26,lines=label.split('\n'),capH=o.cap?15:0,icI=o.ic&&ART.img[o.ic];let cy0=y+(h-capH)/2;
+  const fs=o.fs||26,lines=label.split('\n'),capH=o.cap?15:0,icI=o.ic&&ART.img[o.ic];let cy0=y+(h-capH)/2,tcx=x+w/2;
   if(icI){const ih=o.icH||(label?(h>=80?30:26):h-14),iw=Math.min(icI.width*ih/icI.height,w-12),ih2=iw*icI.height/icI.width;
     if(!label){ctx.globalAlpha=o.dis?.4:1;ctx.drawImage(icI,x+w/2-iw/2,y+h/2-ih2/2,iw,ih2);ctx.globalAlpha=1}
-    else if(o.icL&&w>=140){const sz=h-12;ctx.globalAlpha=o.dis?.4:1;ctx.drawImage(icI,x+8,y+h/2-sz*icI.height/Math.max(icI.width,icI.height)/2,sz*icI.width/Math.max(icI.width,icI.height),sz*icI.height/Math.max(icI.width,icI.height));ctx.globalAlpha=1}
+    else if(o.icL&&w>=140){const sz=h-12,dw2=sz*icI.width/Math.max(icI.width,icI.height);ctx.globalAlpha=o.dis?.4:1;ctx.drawImage(icI,x+8,y+h/2-sz*icI.height/Math.max(icI.width,icI.height)/2,dw2,sz*icI.height/Math.max(icI.width,icI.height));ctx.globalAlpha=1;tcx=x+14+dw2+(w-14-dw2)/2}
     else{ctx.globalAlpha=o.dis?.4:1;ctx.drawImage(icI,x+w/2-iw/2,y+6,iw,ih2);ctx.globalAlpha=1;cy0=y+6+ih2+(h-6-ih2-capH)/2}}
   ctx.fillStyle=o.dis?'#8d8870':'#f2ebc9';ctx.font=`600 ${fs}px Oswald,Arial Narrow,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-  lines.forEach((ln,i)=>ctx.fillText(ln,x+w/2,cy0+(i-(lines.length-1)/2)*fs*1.05));
-  if(o.cap){ctx.font=`500 ${o.capfs||13}px Oswald,Arial Narrow,sans-serif`;ctx.fillStyle=o.dis?'#77735f':'#cfc8aa';ctx.fillText(o.cap,x+w/2,y+h-13)}
+  lines.forEach((ln,i)=>ctx.fillText(ln,tcx,cy0+(i-(lines.length-1)/2)*fs*1.05));
+  if(o.cap){ctx.font=`500 ${o.capfs||13}px Oswald,Arial Narrow,sans-serif`;ctx.fillStyle=o.dis?'#77735f':'#cfc8aa';ctx.fillText(o.cap,tcx,y+h-13)}
   ctx.restore();
 }
 function txt(s,x,y,size,color,align,weight){ctx.font=`${weight||600} ${size}px Oswald,Arial Narrow,sans-serif`;ctx.fillStyle=color||'#eee6c8';ctx.textAlign=align||'left';ctx.textBaseline='middle';ctx.fillText(s,x,y)}
@@ -1541,15 +1541,14 @@ function drawCoverLandmarks(m){
   ctx.globalAlpha=1}
 function renderCoverBase(){
   const m=coverMap(),cz=m.cz,cyS=m.cyS,yEnd=cyS+(WH-560)*cz;
-  const lw=Math.ceil(VW*.5),lh=Math.ceil(VH*.5);
+  const lw=Math.ceil(VW*.7),lh=Math.ceil(VH*.7);
   if(lowC.width!==lw||lowC.height!==lh){lowC.width=lw;lowC.height=lh}
   const w2=Math.ceil(VW*.2),h2=Math.ceil(VH*.2);if(lowC2.width!==w2||lowC2.height!==h2){lowC2.width=w2;lowC2.height=h2}
-  lowX.setTransform(.5,0,0,.5,0,0);
+  lowX.setTransform(.7,0,0,.7,0,0);
   const gg=lowX.createLinearGradient(0,0,0,VH);gg.addColorStop(0,'#c9b98e');gg.addColorStop(Math.min(1,yEnd/VH),'#7a4a2c');gg.addColorStop(Math.min(1,(yEnd+40)/VH),'#3a2618');gg.addColorStop(1,'#241710');
   lowX.fillStyle=gg;lowX.fillRect(0,0,VW,VH);
   drawWorld(lowX,m.cx,560,cz,VW/2,cyS,{cover:true});
-  {let t=lowC;const st=[.34,.22,.3,.5,.75];st.forEach((f,i)=>{t=smoothCopy(t,Math.ceil(VW*f),Math.ceil(VH*f),i)});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(t,0,0,VW,VH)}
-  drawCoverLandmarks(m);
+  {let t=lowC;const st=[.34,.22,.3,.5,.75];st.forEach((f,i)=>{t=smoothCopy(t,Math.ceil(VW*f),Math.ceil(VH*f),i)});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(t,0,0,VW,VH);ctx.globalAlpha=.78;ctx.drawImage(lowC,0,0,VW,VH);ctx.globalAlpha=1}
 }
 const yBase=()=>PORT?VH-250:VH-34;
 const wallY=k=>ART.ready?yBase()-wallH[k]:yBase()-306;
@@ -1705,7 +1704,7 @@ function renderScope(){
   if(PORT){btn('zout',20,my-2,84,64,'',{ic:'n/ic3'});btn('zin',VW-104,my-2,84,64,'',{ic:'n/ic2'})}
   else{btn('zin',VW-100,VH/2-170,76,64,'',{ic:'n/ic2'});btn('zout',VW-100,VH/2-100,76,64,'',{ic:'n/ic3'});txt('ZOOM '+g.zoomCur.toFixed(1)+'×',VW-62,VH/2-186,16,'#cfe3e8','center')}
   btn('mark',PORT?445:VW-170,PORT?VH-166:VH/2+120,PORT?100:150,PORT?84:56,'MARCAR',{ic:'n/ic5',icL:1,fs:PORT?19:22,cap:g.pins.length+'/4 marcas',capfs:PORT?11:12});
-  if(g.lo.spotter)btn('swap',PORT?20:VW-170,PORT?VH-256:VH/2+45,150,62,g.spot?'USAR RIFLE':'BINÓCULO',{ic:g.spot?null:'n/ic0',icL:1,fs:22,dis:g.t<g.swapUntil,cap:g.t<g.swapUntil?'trocando…':(g.spot?'2 s para poder atirar':'só observa · sem tremor · ½ exposição'),capfs:PORT?11:12});
+  if(g.lo.spotter)btn('swap',PORT?20:VW-190,PORT?VH-262:VH/2+45,170,70,g.spot?'USAR RIFLE':'BINÓCULO',{ic:g.spot?null:'n/ic0',icL:1,fs:22,dis:g.t<g.swapUntil,cap:g.t<g.swapUntil?'trocando…':(g.spot?'2 s para atirar':'só observa · ½ exposição'),capfs:PORT?11:12});
 }
 function edgeVig(r,gc,b,a){if(a<=0)return;const R2=Math.hypot(VW,VH)/2,gr=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.3,VW/2,VH/2,R2);gr.addColorStop(0,`rgba(${r},${gc},${b},0)`);gr.addColorStop(1,`rgba(${r},${gc},${b},${a})`);ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VH)}
 function hud(){
@@ -1798,15 +1797,22 @@ const toL=e=>{const k=PORT?720/innerWidth:720/innerHeight;return {x:e.clientX*k,
 function hit(p){for(let i=btns.length-1;i>=0;i--){const b=btns[i];if(!b.dis&&p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h)return b}return null}
 cv.addEventListener('pointerdown',e=>{
   AU.init();if(!g||scene!=='play')return;e.preventDefault();if(g.bcam&&bcamActive()){g.bcam=null;return}
-  const p=toL(e),b=hit(p);cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);
+  const p=toL(e),b=hit(p);try{cv.setPointerCapture&&cv.setPointerCapture(e.pointerId)}catch(er){}
   if(b){AU.click();pressId=b.id;if(b.hold){hint('folego');g.held=true;ptr.set(e.pointerId,{hold:true})}else{ptr.set(e.pointerId,{btn:true});act(b.id)}}
-  else if(!g.menu&&(g.view==='scope'||g.view==='hole'))ptr.set(e.pointerId,{drag:true,x:p.x,y:p.y});
+  else if(!g.menu&&g.view==='cover'){
+    const wtop=yBase()-Math.max(wallH.alto||0,wallH.quebrado||0,wallH.buraco||0,120),fb=PORT?wtop-125:VH*.52;
+    if(p.y>200&&p.y<fb){const m=coverMap(),wx=m.cx+(p.x-VW/2)/m.cz,wy=560+(p.y-m.cyS)/m.cz;AU.click();act('peek');if(g.view==='scope'){g.cam.x=wx;g.cam.y=clamp(wy,430,690);g.focus=planeOfY(g.cam.y);camBounds()}}
+  }
+  else if(!g.menu&&(g.view==='scope'||g.view==='hole')){ptr.set(e.pointerId,{drag:true,x:p.x,y:p.y});const ds=dragPtrs();if(ds.length>=2&&g.view==='scope')pinch={d0:Math.hypot(ds[0].x-ds[1].x,ds[0].y-ds[1].y)||1,z0:g.zoomCur}}
 },{passive:false});
+let pinch=null;
+function dragPtrs(){const a=[];ptr.forEach(s2=>{if(s2&&s2.drag)a.push(s2)});return a}
 cv.addEventListener('pointermove',e=>{
-  const s=ptr.get(e.pointerId);if(!s||!s.drag||!g)return;const p=toL(e);
-  const z=g.view==='hole'?1.8:curZoom();g.cam.x-=(p.x-s.x)/z*1.15;g.cam.y-=(p.y-s.y)/z*1.15;s.x=p.x;s.y=p.y;camBounds();
+  const s=ptr.get(e.pointerId);if(!s||!s.drag||!g)return;const p=toL(e);const ox=s.x,oy=s.y;s.x=p.x;s.y=p.y;
+  if(pinch){const ds=dragPtrs();if(ds.length>=2&&g.view==='scope'){const d=Math.hypot(ds[0].x-ds[1].x,ds[0].y-ds[1].y);g.zoomCur=clamp(+(pinch.z0*d/pinch.d0).toFixed(2),zMin(),zMax());hint('zoom')}return}
+  const z=g.view==='hole'?1.8:curZoom();g.cam.x-=(p.x-ox)/z*1.15;g.cam.y-=(p.y-oy)/z*1.15;camBounds();
 });
-const up=e=>{pressId=null;const s=ptr.get(e.pointerId);if(s&&s.hold&&g)g.held=false;ptr.delete(e.pointerId)};
+const up=e=>{pressId=null;const s=ptr.get(e.pointerId);if(s&&s.hold&&g)g.held=false;ptr.delete(e.pointerId);if(dragPtrs().length<2)pinch=null};
 cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
 addEventListener('keydown',e=>{
   if(!g||scene!=='play')return;AU.init();
