@@ -182,6 +182,22 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
 .rpw{display:flex;gap:2.4vw;justify-content:center;align-items:flex-start;margin:.8vh 0}.rpw>div{text-align:center;font:600 clamp(9px,2.2vh,13px) 'Oswald',sans-serif;letter-spacing:.14em;color:#9a937a}
 .rpw canvas,.rpw img{position:static;inset:auto;width:clamp(110px,30vh,250px);height:clamp(110px,30vh,250px);object-fit:cover;border:2px solid #55583c;border-radius:10px;background:#000;display:block;margin:0 auto .4vh}
 @media (orientation:portrait){.rpw{gap:2vw}.rpw canvas,.rpw img{width:29vw;height:29vw}}
+
+.story{position:absolute;inset:0;background:#050504;overflow:hidden;cursor:pointer}
+.story .sbg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s}
+.story .sbg.on{opacity:1;animation:kb 16s ease-out forwards}
+@keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.13)}}
+.story .sgr{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,0) 58%)}
+.story .stx{position:absolute;left:0;right:0;bottom:8vh;padding:0 9vw;text-align:center;font:600 clamp(18px,5vh,38px)/1.28 'Oswald',sans-serif;color:#f2ebc9;text-shadow:0 2px 12px #000;opacity:0;transition:opacity .9s}
+.story .stx.on{opacity:1}
+.pgs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0b0a07;cursor:pointer}
+.pgp{position:relative;width:min(92vw,780px);max-height:96vh;overflow:auto;background:#d8c690 url(art/n/paper.webp) center/cover;border-radius:10px;box-shadow:0 10px 50px #000;padding:3vh 4vw 3.4vh;color:#2a2012;text-align:left}
+.pgh{font:700 clamp(10px,2.2vh,14px) 'Oswald',sans-serif;letter-spacing:.16em;color:#6b5a36;margin-bottom:1.6vh}
+.pgl{font:italic 500 clamp(15px,3.4vh,24px)/1.3 Georgia,serif;color:#4a2a1a;margin:0 0 1.6vh;padding-left:2vw;border-left:3px solid #8a3a24}
+.pgt{font:500 clamp(18px,4.4vh,32px)/1.3 'Bradley Hand','Noteworthy','Segoe Script','Comic Sans MS',cursive;color:#1f2a44;margin:1vh 0 1.6vh}
+.pgi{float:left;max-height:36vh;max-width:44%;margin:0 3vw 1vh 0;border-radius:4px;box-shadow:0 3px 14px rgba(0,0,0,.5);transform:rotate(-2deg)}
+.pgc{clear:both;font:600 clamp(13px,2.8vh,19px) 'Oswald',sans-serif;letter-spacing:.06em;color:#7a2a1a;margin:.6vh 0 1.4vh}
+.pgp .btn{display:block;margin:1.2vh 0 0 auto;clear:both}
 </style>
 </head>
 <body>
@@ -410,6 +426,7 @@ function loadArt(){
   names.forEach(n=>{const im=new Image();im.onload=()=>{ART.img[n]=im;fin()};im.onerror=()=>{fail=true;fin()};im.src='art/'+n+'.webp'});
   setTimeout(()=>{if(!ART.done){fired=true;ART.done=true;ART.ready=false;onArtDone()}},25000);
 }
+['ic_apoio','ic_ferido'].forEach(n=>{const im=new Image();im.onload=()=>{ART.img['h/'+n]=im};im.src='art/hist/'+n+'.webp'});
 function sniperAvg(){for(let i=0;i<2;i++){const im=ART.img['sniper'+i],c=mkc(40,40),x=c.getContext('2d');x.drawImage(im,0,0,40,40);const d=x.getImageData(0,0,40,40).data;let r=0,gg=0,b=0,n=0;for(let k=0;k<d.length;k+=4){if(d[k+3]>200){r+=d[k];gg+=d[k+1];b+=d[k+2];n++}}ART.avg[i]=[r/n,gg/n,b/n]}}
 function makeSprArt(i,base){
   const lm=ART.meta.sniper_lens[i],img=ART.img['sniper'+i],av=ART.avg[i];
@@ -568,6 +585,10 @@ const AU={c:null,m:null,level:2,nb:null,voice:null,
 function g_alive(){return !!(g&&scene==='play'&&!g.over)}
 
 // ---------------------------------------------------------------- áudio gravado (ElevenLabs): sons e falas
+const RO_TXT={"nar_h1": "Aterro Nove. Atrás do muro, mil e duzentas pessoas. Na frente, o campo de lixo.", "nar_h2": "Uma empresa quer a terra. Contratou quatro atiradores. Cada um sabe esperar.", "nar_h3": "Eles entraram no lixo. Se você cair, o muro cai.", "nar_h4": "Você aprendeu com alguém que ensinava uma regra só: quem se mexe primeiro, perde.", "nar_f1": "O portão abre. Os caminhões entram.", "nar_f2": "A cerca da empresa cai. Atrás do muro, o acampamento escuta o motor.", "nar_f3": "Regra Um.", "ro_pre1": "Primeiro. Ele não vai se mexer. Você também não.", "ro_pre2": "Esse é mais novo. Nervoso erra. Espere o erro.", "ro_pre3": "Esse caça. Não deixa rastro. Cuidado com o seu.", "ro_pre4": "Só sobrou um. Não sei quem é. Ele não fala.", "ro_hit": "Fui atingido! Me cubra, atirador!", "ro_out": "Estou vivo. Mas não consigo mais te ajudar. Segura o muro.", "ro_alone": "Esse você faz sozinho. Eu confio em você.", "ro_nomore": "Não tenho mais o que ver daqui.", "ro_v_ef_c": "O vento vai virar para a esquerda. Fraco. Tenho certeza.", "ro_v_ef_a": "Acho que o vento vai virar para a esquerda. Fraco.", "ro_v_em_c": "O vento vai virar para a esquerda. Médio. Tenho certeza.", "ro_v_em_a": "Acho que o vento vai virar para a esquerda. Médio.", "ro_v_eg_c": "O vento vai virar para a esquerda. Forte. Tenho certeza.", "ro_v_eg_a": "Acho que o vento vai virar para a esquerda. Forte.", "ro_v_df_c": "O vento vai virar para a direita. Fraco. Tenho certeza.", "ro_v_df_a": "Acho que o vento vai virar para a direita. Fraco.", "ro_v_dm_c": "O vento vai virar para a direita. Médio. Tenho certeza.", "ro_v_dm_a": "Acho que o vento vai virar para a direita. Médio.", "ro_v_dg_c": "O vento vai virar para a direita. Forte. Tenho certeza.", "ro_v_dg_a": "Acho que o vento vai virar para a direita. Forte.", "ro_o0_c": "Brilho perto do carro vermelho. Tenho certeza.", "ro_o0_a": "Acho que vi um brilho perto do carro vermelho.", "ro_o1_c": "Brilho perto do sofá rosa. Tenho certeza.", "ro_o1_a": "Acho que vi um brilho perto do sofá rosa.", "ro_o2_c": "Brilho perto do moinho. Tenho certeza.", "ro_o2_a": "Acho que vi um brilho perto do moinho.", "ro_o3_c": "Brilho perto da TV velha. Tenho certeza.", "ro_o3_a": "Acho que vi um brilho perto da TV velha.", "ro_o4_c": "Brilho perto da bicicleta. Tenho certeza.", "ro_o4_a": "Acho que vi um brilho perto da bicicleta.", "ro_o5_c": "Brilho perto do fogão. Tenho certeza.", "ro_o5_a": "Acho que vi um brilho perto do fogão.", "ro_o6_c": "Brilho perto da porta azul. Tenho certeza.", "ro_o6_a": "Acho que vi um brilho perto da porta azul.", "ro_o7_c": "Brilho perto do ônibus amarelo. Tenho certeza.", "ro_o7_a": "Acho que vi um brilho perto do ônibus amarelo.", "ro_o8_c": "Brilho perto do carrinho de supermercado. Tenho certeza.", "ro_o8_a": "Acho que vi um brilho perto do carrinho de supermercado.", "ro_o9_c": "Brilho perto da placa de trânsito. Tenho certeza.", "ro_o9_a": "Acho que vi um brilho perto da placa de trânsito.", "ro_o10_c": "Brilho perto do ursinho de pelúcia. Tenho certeza.", "ro_o10_a": "Acho que vi um brilho perto do ursinho de pelúcia.", "ro_o11_c": "Brilho perto da banheira. Tenho certeza.", "ro_o11_a": "Acho que vi um brilho perto da banheira.", "ro_o12_c": "Brilho perto do pneu. Tenho certeza.", "ro_o12_a": "Acho que vi um brilho perto do pneu.", "ro_o13_c": "Brilho perto da pilha de pneus. Tenho certeza.", "ro_o13_a": "Acho que vi um brilho perto da pilha de pneus.", "ro_o14_c": "Brilho perto do saco preto. Tenho certeza.", "ro_o14_a": "Acho que vi um brilho perto do saco preto.", "ro_o15_c": "Brilho perto do saco azul. Tenho certeza.", "ro_o15_a": "Acho que vi um brilho perto do saco azul.", "ro_o16_c": "Brilho perto da lona azul. Tenho certeza.", "ro_o16_a": "Acho que vi um brilho perto da lona azul.", "ro_o17_c": "Brilho perto da lona enrolada. Tenho certeza.", "ro_o17_a": "Acho que vi um brilho perto da lona enrolada.", "ro_o18_c": "Brilho perto do barril enferrujado. Tenho certeza.", "ro_o18_a": "Acho que vi um brilho perto do barril enferrujado.", "ro_o19_c": "Brilho perto do palete. Tenho certeza.", "ro_o19_a": "Acho que vi um brilho perto do palete.", "ro_o20_c": "Brilho perto do colchão. Tenho certeza.", "ro_o20_a": "Acho que vi um brilho perto do colchão.", "ro_o21_c": "Brilho perto da geladeira. Tenho certeza.", "ro_o21_a": "Acho que vi um brilho perto da geladeira.", "ro_o22_c": "Brilho perto das caixas de papelão. Tenho certeza.", "ro_o22_a": "Acho que vi um brilho perto das caixas de papelão.", "ro_o23_c": "Brilho perto da máquina de lavar. Tenho certeza.", "ro_o23_a": "Acho que vi um brilho perto da máquina de lavar.", "en_u1": "O Mestre disse que você viria.", "en_u2": "Ele me ensinou a esperar. Não ensinou a perder.", "en_u3": "Ele sabe o seu jeito. Sempre soube.", "av_0": "Você demorou.", "av_1": "Você ainda mexe o ombro.", "av_2": "Eu avisei."};
+const STORY_FILES=["nar_h1", "nar_h2", "nar_h3", "nar_h4", "nar_f1", "nar_f2", "nar_f3", "ro_pre1", "ro_pre2", "ro_pre3", "ro_pre4", "ro_hit", "ro_out", "ro_alone", "ro_nomore", "ro_v_ef_c", "ro_v_ef_a", "ro_v_em_c", "ro_v_em_a", "ro_v_eg_c", "ro_v_eg_a", "ro_v_df_c", "ro_v_df_a", "ro_v_dm_c", "ro_v_dm_a", "ro_v_dg_c", "ro_v_dg_a", "ro_o0_c", "ro_o0_a", "ro_o1_c", "ro_o1_a", "ro_o2_c", "ro_o2_a", "ro_o3_c", "ro_o3_a", "ro_o4_c", "ro_o4_a", "ro_o5_c", "ro_o5_a", "ro_o6_c", "ro_o6_a", "ro_o7_c", "ro_o7_a", "ro_o8_c", "ro_o8_a", "ro_o9_c", "ro_o9_a", "ro_o10_c", "ro_o10_a", "ro_o11_c", "ro_o11_a", "ro_o12_c", "ro_o12_a", "ro_o13_c", "ro_o13_a", "ro_o14_c", "ro_o14_a", "ro_o15_c", "ro_o15_a", "ro_o16_c", "ro_o16_a", "ro_o17_c", "ro_o17_a", "ro_o18_c", "ro_o18_a", "ro_o19_c", "ro_o19_a", "ro_o20_c", "ro_o20_a", "ro_o21_c", "ro_o21_a", "ro_o22_c", "ro_o22_a", "ro_o23_c", "ro_o23_a", "en_u1", "en_u2", "en_u3", "av_0", "av_1", "av_2"];
+const RO_NAMES=["o carro vermelho", "o sofá rosa", "o moinho", "a TV velha", "a bicicleta", "o fogão", "a porta azul", "o ônibus amarelo", "o carrinho de supermercado", "a placa de trânsito", "o ursinho de pelúcia", "a banheira", "o pneu", "a pilha de pneus", "o saco preto", "o saco azul", "a lona azul", "a lona enrolada", "o barril enferrujado", "o palete", "o colchão", "a geladeira", "as caixas de papelão", "a máquina de lavar"],RO_IDX={};RO_NAMES.forEach((n,i)=>RO_IDX[n]=i);
+const RO_DE=n=>{const p=n.split(' ');return ({o:'do',a:'da',as:'das',os:'dos'})[p[0]]+' '+p.slice(1).join(' ')};
 const NARR_FILES=['nar_brief_01','nar_brief_02','nar_brief_03','nar_tut_1','nar_tut_2','nar_tut_3','nar_tut_4','nar_tut_5','nar_tut_6','nar_kit_modo','nar_kit_condicao','nar_kit_suprimento','nar_kit_arma','nar_kit_radio','nar_kit_pronto'];
 const SFX_FILES=['vento','rastejar_lento','rastejar_rapido','metal_1','metal_2','tiro_longe','tiro_proprio','ricochete','impacto_terra','radio_estatica','batimento','amb_passaros','amb_revoada','amb_latido','amb_moinho','amb_goteira','amb_portao'];
 const JOG_MAP={"Ei, lixeiro! Cansou de deitar no chão?": "jog_prov_01", "Fala! Ou perdeu a coragem?": "jog_prov_02", "Estou aqui. Vem me pegar.": "jog_prov_03", "Calma. A gente pode sair dessa.": "jog_talk_01", "Vamos conversar. Sem tiro.": "jog_talk_02", "Ninguém precisa morrer aqui.": "jog_talk_03", "Já te vi.": "jog_seen_01", "Te achei.": "jog_seen_02", "Eu sei onde você está.": "jog_seen_03"};
@@ -580,7 +601,7 @@ Object.assign(VOZ_MAP,E_MAP,RAD_E);Object.values(RAD_E).forEach(f=>VOZ_FILES.pus
 Object.assign(AU,{buf:{},loaded:false,loading:false,_curve:null,curVoice:null,windSrc:null,heartSrc:null,heartG:null,
  loadAll(){
   if(this.loading||!this.c)return;this.loading=true;
-  const jobs=[];SFX_FILES.forEach(n=>jobs.push(['sfx/'+n+'.mp3',n]));VOZ_FILES.forEach(n=>jobs.push(['voz/'+n+'.mp3','v_'+n]));NARR_FILES.forEach(n=>jobs.push(['voz/'+n+'.mp3','v_'+n]));this.total=jobs.length;
+  const jobs=[];SFX_FILES.forEach(n=>jobs.push(['sfx/'+n+'.mp3',n]));VOZ_FILES.forEach(n=>jobs.push(['voz/'+n+'.mp3','v_'+n]));NARR_FILES.forEach(n=>jobs.push(['voz/'+n+'.mp3','v_'+n]));STORY_FILES.forEach(n=>jobs.push(['voz/'+n+'.mp3','v_'+n]));this.total=jobs.length;
   let ok=0;
   Promise.all(jobs.map(([u,k])=>fetch(u).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((res,rej)=>this.c.decodeAudioData(b,res,rej))).then(a=>{this.buf[k]=a;ok++}).catch(()=>{this.fail=(this.fail||0)+1}))).then(()=>{
     this.loaded=ok>0;
@@ -689,7 +710,7 @@ let diffKey='recruta',eqMode='escolher',offers={},swapUsed=false;
 try{const sv=JSON.parse(localStorage.getItem('ds_eq')||'null');if(sv){if(DIFF[sv.d])diffKey=sv.d;if(sv.m==='sorteio'||sv.m==='escolher')eqMode=sv.m}}catch(e){}
 const HINTS={
  peek:'Cada segundo mirando sobe a EXPOSIÇÃO. Em 100% ele atira. ABAIXAR esfria.',
- vento:'VENTO: o círculo IMPACTO mostra onde a bala cai. Ponha o alvo dentro dele.',
+ apoio:'APOIO: o Rocha prevê a próxima rajada de vento ou vigia o campo. Cada pedido te expõe um pouco, e o "acho que" pode estar errado.',vento:'VENTO: o círculo IMPACTO mostra onde a bala cai. Ponha o alvo dentro dele.',
  queda:'O muro está caindo. Trechos caídos não protegem. Seu espaço diminui.',
  exposicao:'A marca branca é a exposição mínima agora. Ela sobe com o tempo. Troque de trecho.',
  fresta:'FRESTA: observa com pouco risco, mas não dá para atirar daqui.',
@@ -719,7 +740,7 @@ function makeG(s,o2){
   const lo=o2?buildOpLoadout(o2):buildLoadout(s),types=makeTypes(),maxHp=types.map(t=>TYPE[t].hp);
   let diff=DIFF[diffKey];
   if(o2){const sc=(1+.08*(o2.n-1))*(o2.n===4?1.1:1)*(o2.map&&o2.map.hard?1.15:1);diff={exp:diff.exp*sc,bel:diff.bel*sc}}
-  return {diff,windK:o2&&o2.map?o2.map.windK:1,zoomCur:Math.max(1.0,lo.zoom*.45)*1.25,focus:1,notes:[],pins:[],noteFlash:-9,col:[false,false,false,false,false],nextCol:.2,spot:false,swapUntil:0,amb:[],ambNext:30,sel:s,lo,t:0,timeMax:lo.time,time:lo.time,lives:lo.lives,maxLives:o2?o2.maxLives:lo.lives,bullets:lo.bullets,helm:lo.helm,rocks:lo.rocks,mirrors:lo.mirrors,
+  return {ro:(o2&&o2.n>=4)?null:{left:4,cd:0,hurt:false,w:null},diff,windK:o2&&o2.map?o2.map.windK:1,zoomCur:Math.max(1.0,lo.zoom*.45)*1.25,focus:1,notes:[],pins:[],noteFlash:-9,col:[false,false,false,false,false],nextCol:.2,spot:false,swapUntil:0,amb:[],ambNext:30,sel:s,lo,t:0,timeMax:lo.time,time:lo.time,lives:lo.lives,maxLives:o2?o2.maxLives:lo.lives,bullets:lo.bullets,helm:lo.helm,rocks:lo.rocks,mirrors:lo.mirrors,
    view:'cover',pos:2,posF:2,moveFrom:2,moveTo:2,moveT:1,moveDur:2.4,crawl:'slow',exp:0,wind:{base:rr(-2,2),tgt:0,next:2,val:0,gust:0},
    cam:{x:posCenter(2),y:520},held:false,stam:1,gasp:0,wounds:{arm:lo.w.arm,lens:lo.w.lens||0,leg:lo.w.leg},types,maxHp,wall:maxHp.slice(),radioCd:0,radioLeft:lo.radioUses,
    log:[],stare:0,noiseWin:0,flash:0,shake:0,hbT:1,shots:0,over:false,menu:null,decoy:null,clues:[],glints:[],parts:[],impacts:[],missed:0,won:false,endAt:0,ammoOutAt:0};
@@ -798,6 +819,50 @@ function opPanel(){
    <div class="ki lst"><small>EQUIPAMENTOS</small><b>${own.length?own.join(' · '):'Nenhum ainda'}</b></div>${op.lastRep?`<div class="ki lst"><small>ÚLTIMO DUELO</small><b style="font-weight:500;font-size:.8em">${op.lastRep}</b></div>`:''}</div>`;
 }
 function cardBtn(id){const c=CARD[id];return `<button class="opt ccard ${c.inst?'inst':''} ${cardSel===id?'sel':''}" data-cpick="${id}"><div class="cg">${GRP[c.g]}</div><div class="cico">${cardIcon(c)}</div><div class="on">${c.n}</div><div class="op">+ ${c.pro}</div><div class="oc">− ${c.con}</div></button>`}
+const STORY_INTRO=[
+ {img:'h_aterro',t:'Aterro Nove. Atrás do muro, mil e duzentas pessoas. Na frente, o campo de lixo.',a:'nar_h1'},
+ {img:'h_empresa',t:'Uma empresa quer a terra. Contratou quatro atiradores. Cada um sabe esperar.',a:'nar_h2'},
+ {img:'h_quatro',t:'Eles entraram no lixo. Se você cair, o muro cai.',a:'nar_h3'},
+ {img:'h_regra',t:'Você aprendeu com alguém que ensinava uma regra só: quem se mexe primeiro, perde.',a:'nar_h4'}];
+const STORY_FIM=[
+ {img:'h_fim',t:'O portão abre. Os caminhões entram.',a:'nar_f1'},
+ {img:'h_fim',t:'A cerca da empresa cai. Atrás do muro, o acampamento escuta o motor.',a:'nar_f2'},
+ {img:'h_fim',t:'Regra Um.',a:'nar_f3'}];
+const PAGES=[
+ {who:'O PACIENTE',last:'O Mestre disse que você viria.',a:'en_u1',txt:'Regra Um: quem se mexe primeiro, perde.'},
+ {who:'O NERVOSO',last:'Ele me ensinou a esperar. Não ensinou a perder.',a:'en_u2',txt:'Todo atirador tem um tique. O meu aluno mais novo mexe o ombro antes do tiro.'},
+ {who:'O CAÇADOR',last:'Ele sabe o seu jeito. Sempre soube.',a:'en_u3',txt:'Me pagaram para tirar vocês daí. Não perguntei o preço da terra.'},
+ {who:'O FANTASMA',last:'',a:null,txt:'Se for você que chegar até aqui, não se mexa.',photo:true}];
+const ST={slides:[],i:-1,done:null,timer:null,cur:null,pg:null};
+function showStory(slides,done){
+  AU.stopNarr();clearTimeout(ST.timer);ST.slides=slides;ST.i=-1;ST.done=done;ST.cur=null;
+  slides.forEach(sl=>{const im=new Image();im.src='art/hist/'+sl.img+'.webp'});
+  scene='menu';AU.heart(0);
+  const ov=$('#ov');ov.dataset.screen='story';ov.classList.add('on','title');
+  ov.innerHTML='<div class="story" data-a="storynext"><div class="sbg" id="sb0"></div><div class="sbg" id="sb1"></div><div class="sgr"></div><div class="stx" id="stx"></div><div class="skip" data-a="storyskip">PULAR ›</div></div>';
+  AU.whenReady(()=>{if(ov.dataset.screen==='story'&&ST.i<0)storyNext()},4000);
+}
+function storyNext(){
+  const ov=$('#ov');if(ov.dataset.screen!=='story')return;
+  clearTimeout(ST.timer);AU.stopNarr();ST.i++;
+  if(ST.i>=ST.slides.length){const d=ST.done;ST.done=null;if(d)d();return}
+  const sl=ST.slides[ST.i],tx=$('#stx');tx.classList.remove('on');
+  if(sl.img!==ST.cur){const a=$('#sb'+(ST.i%2)),b=$('#sb'+((ST.i+1)%2));a.style.backgroundImage='url(art/hist/'+sl.img+'.webp)';a.classList.remove('on');void a.offsetWidth;a.classList.add('on');b.classList.remove('on');ST.cur=sl.img}
+  setTimeout(()=>{if(ov.dataset.screen==='story'){tx.textContent=sl.t;tx.classList.add('on')}},500);
+  const d=AU.narr(sl.a)||0;
+  ST.timer=setTimeout(storyNext,((d||3.2)+1.6)*1000);
+}
+function storySkip(){clearTimeout(ST.timer);AU.stopNarr();const d=ST.done;ST.done=null;if(d)d()}
+function storyPage(n,done){
+  const p=PAGES[n-1];if(!p){done();return}
+  scene='menu';AU.heart(0);ST.pg=done;
+  const ov=$('#ov');ov.dataset.screen='page';ov.classList.add('on','title');
+  ov.innerHTML='<div class="pgs" data-a="pgnext"><div class="pgp"><div class="pgh">PÁGINA '+n+' DE 4 · ARRANCADA DO CADERNO DO MESTRE'+(p.photo?'':' · ENCONTRADA COM '+p.who)+'</div>'+
+   (p.last?'<div class="pgl">“'+p.last+'”</div>':'')+(p.photo?'<img class="pgi" src="art/hist/h_polaroid.webp" alt="">':'')+
+   '<div class="pgt">'+p.txt+'</div>'+(p.photo?'<div class="pgc">O Fantasma era Aurélio Vaz, seu instrutor.</div>':'')+
+   '<button class="btn" data-a="pgnext">CONTINUAR ›</button></div></div>';
+  if(p.a)AU.whenReady(()=>{if(ov.dataset.screen==='page')AU.narr(p.a)},4000);
+}
 function opHome(){
   scene='menu';AU.heart(0);curScr=opHome;
   const ov=$('#ov');ov.dataset.screen='ophome';ov.classList.add('on','title');
@@ -809,7 +874,7 @@ function opHome(){
     <div class="dif"><span>MODO FONE</span><button class="chip ${phoneMode?'sel':''}" data-fone="1">${phoneMode?'LIGADO':'DESLIGADO'}</button><em>Tiros sem aviso na tela: ouça de que lado vêm (use fone).</em></div>
     <button class="btn" data-a="opstart">INICIAR OPERAÇÃO ›</button>
    </div>
-   <div class="wfoot"><button class="btn sec" data-a="how">COMO JOGAR</button><button class="btn sec" data-a="snd">TESTAR SOM</button><span class="snd" id="sndst">${AU.diag()}</span></div></div>`;
+   <div class="wfoot"><button class="btn sec" data-a="how">COMO JOGAR</button><button class="btn sec" data-a="story">HISTÓRIA</button><button class="btn sec" data-a="snd">TESTAR SOM</button><span class="snd" id="sndst">${AU.diag()}</span></div></div>`;
 }
 function opPick(){
   scene='menu';AU.heart(0);curScr=opPick;
@@ -893,8 +958,7 @@ function opAfterDuel(){
   if(k!=='win'){opFinish(false,k);return}
   op.hist.push({n:op.n,card:null});
   op.lives=Math.min(op.maxLives,g.lives+1);op.w={arm:g.wounds.arm,leg:g.wounds.leg,lens:g.wounds.lens};
-  if(op.n>=4){opFinish(true);return}
-  op.n++;op.start=false;opReward();
+  storyPage(op.n,()=>{if(op.n>=4){showStory(STORY_FIM,()=>opFinish(true));return}op.n++;op.start=false;opReward()});
 }
 function goDuel(){
   AU.stopNarr();
@@ -1019,7 +1083,7 @@ function addNote(kind,text,side,plane,x,y){
 const EVW={tiro:1.2,brilho:1,poeira:.7,ambiente:.6},EVN={tiro:'tiro',brilho:'brilho',poeira:'poeira',ambiente:'ambiente'};
 function stt(){return g.stats||(g.stats={real:0,fake:0,first:null,ok:0,bad:0,tl:[]})}
 function logEvt(k){if(!g||!g.timeMax||g.over)return;const s2=stt();if(!s2.tl)s2.tl=[];s2.tl.push([Math.max(0,g.timeMax-g.time),k])}
-const DEC_IDS=['peek','moveL','moveR','decoy','radio','mark','notes','hole','swap','fin','fout','d_helm','d_rock','d_mirror','r_prov','r_talk','r_seen'];
+const DEC_IDS=['apoio','a_vento','a_vigia','peek','moveL','moveR','decoy','radio','mark','notes','hole','swap','fin','fout','d_helm','d_rock','d_mirror','r_prov','r_talk','r_seen'];
 function idleStats(){const s2=g&&g.stats;if(!s2||!s2.tl)return {idle:0,dpm:0};const el=Math.max(1,g.timeMax-g.time),tt=[0].concat(s2.tl.map(x=>x[0]),[el]).sort((a,b)=>a-b);let mx=0;for(let i=1;i<tt.length;i++)mx=Math.max(mx,tt[i]-tt[i-1]);const dc=s2.tl.filter(x=>x[1]==='d'||x[1]==='s').length;return {idle:Math.round(mx),dpm:Math.round(dc/(el/60)*10)/10}}
 function addEv(kind,x,y){
   if(!g||!g.e)return;logEvt('c');const e=g.e,s2=stt(),real=Math.hypot(x-e.x,(y-e.y)*2)<160;
@@ -1150,6 +1214,7 @@ function startGame(s){
   $('#ov').classList.remove('on');$('#ov').classList.remove('title');
   setTimeout(()=>{if(g&&scene==='play')hint('inicio',7)},700);
   log('RÁDIO',g.lo.noRadio?'Sem rádio. Silêncio total.':'Canal aberto. Ele está lá fora, no lixo.');
+  if(op&&op.n){const n=op.n,gg=g,ok=()=>g===gg&&scene==='play'&&!g.over;setTimeout(()=>{if(ok())roSay('ro_pre'+n)},2200);if(n===4){setTimeout(()=>{if(ok())roSay('ro_alone')},6800);setTimeout(()=>{if(ok())eClip('av_0')},13000)}}
 }
 function mode(){const e=g.e;return e.impUntil>g.t?'impatient':e.alertUntil>g.t?'alert':e.suspUntil>g.t?'suspicious':'calm'}
 const BASE={calm:6,alert:10,impatient:14,suspicious:8};
@@ -1187,6 +1252,7 @@ function eLine(cat,opt){
   const pool=(E_MAN[ty]&&E_MAN[ty][cat])||null;if(!pool||!pool.length)return false;
   if(!opt.force&&g.t-(g.eSaid||-99)<E_GAP[ty])return false;
   if(opt.p!=null&&R()>opt.p)return false;
+  if(ty===3&&(cat==='errp'||cat==='wall')&&R()<.6){if(!opt.force&&g.t-(g.eSaid||-99)<E_GAP[ty])return false;eClip(cat==='errp'?'av_1':'av_2');g.eSaid=g.t;return true}
   g.eHist=g.eHist||[];const fresh=pool.filter(f=>g.eHist.indexOf(f)<0),f=pick(fresh.length?fresh:pool);
   g.eHist.push(f);if(g.eHist.length>40)g.eHist.shift();g.eSaid=g.t;
   eSay(E_TXT[f],panOf(e.x),!!opt.force);return true}
@@ -1220,10 +1286,10 @@ function update(dt){
   if(g.over){updateFx(dt);g.wflash=Math.max(0,(g.wflash||0)-dt*2.2);if(g.won&&g.e){g.kz=Math.min(.5,(g.kz||0)+dt*.7);g.cam.x+=(g.e.x-g.cam.x)*Math.min(1,dt*3);g.cam.y+=(g.e.y-g.cam.y)*Math.min(1,dt*3)}if(g.endAt&&g.t>g.endAt){g.endAt=0;showEnd()}return}
   g.time-=dt*(g.wounds.leg?1.25:1)*(g.lo.tScale||1);
   if(g.time<=0){g.time=0;end('time');return}
-  g.radioCd=Math.max(0,g.radioCd-dt);
-  {const prog=clamp(1-g.time/g.timeMax,0,1);g.expFloor=prog*(diffKey==='veterano'?55:40);if(prog>.1)hint('queda');if(prog>.55)hint('noite');if(prog>=.5&&!g.s50){g.s50=1;eLine('t50',{p:1})}if(prog>=.9&&!g.s90){g.s90=1;eLine('t10',{p:1})}g.idx=(g.idx||0)*Math.exp(-dt/110);if(g.view==='scope'){g.scopeT=(g.scopeT||0)+dt;if(g.scopeT>7)hint('zoom');if(g.scopeT>16)hint('vento');if(g.scopeT>26)hint('foco')}if(prog>=g.nextCol&&g.nextCol<.99){g.nextCol+=.2;collapseWall()}if(g.view!=='moving')g.stay=(g.stay||0)+dt;if(g.stay>14)hint('exposicao')}
+  g.radioCd=Math.max(0,g.radioCd-dt);if(g.ro&&g.ro.cd>0&&!g.ro.hurt)g.ro.cd-=dt;
+  {const prog=clamp(1-g.time/g.timeMax,0,1);g.expFloor=prog*(diffKey==='veterano'?55:40);if(g.ro&&typeof op!=='undefined'&&op&&op.n===3&&!g.ro.hurt&&prog>=.4)roHurt();if(prog>.1)hint('queda');if(prog>.55)hint('noite');if(prog>=.5&&!g.s50){g.s50=1;eLine('t50',{p:1})}if(prog>=.9&&!g.s90){g.s90=1;eLine('t10',{p:1})}g.idx=(g.idx||0)*Math.exp(-dt/110);if(g.view==='scope'){g.scopeT=(g.scopeT||0)+dt;if(g.scopeT>7)hint('zoom');if(g.scopeT>16)hint('vento');if(g.scopeT>26)hint('foco')}if(prog>=g.nextCol&&g.nextCol<.99){g.nextCol+=.2;collapseWall()}if(g.view!=='moving')g.stay=(g.stay||0)+dt;if(g.stay>14)hint('exposicao')}
   g.flash=Math.max(0,g.flash-dt*1.4);g.shake=Math.max(0,g.shake-dt*2);g.noiseWin=Math.max(0,g.noiseWin-dt);
-  const w=g.wind;w.next-=dt;if(w.next<=0){w.next=rr(3,7);w.tgt=rr(-3.5,3.5)*(R()<.3?1.6:1)*(g.windK||1)}
+  const w=g.wind;if(w.nt===undefined)w.nt=rr(-3.5,3.5)*(R()<.3?1.6:1)*(g.windK||1);w.next-=dt;if(w.next<=0){w.next=rr(3,7);w.tgt=w.nt;w.nt=rr(-3.5,3.5)*(R()<.3?1.6:1)*(g.windK||1)}
   w.gust+=(w.tgt-w.gust)*Math.min(1,dt*.7);w.base+=rr(-.2,.2)*dt;w.base=clamp(w.base,-3,3);w.val=clamp(w.base*.6+w.gust,-6,6);
   if(g.held&&g.view==='scope'){g.stam-=dt/g.lo.breath;if(g.stam<=0){g.stam=0;g.held=false;g.gasp=1.4}}else g.stam=Math.min(1,g.stam+dt/g.lo.breathRec);
   g.gasp=Math.max(0,g.gasp-dt);
@@ -1341,7 +1407,7 @@ function act(id){
   if(g.menu==='notes'&&id.indexOf('q')!==0&&id!=='close'&&id!=='notes'&&id!=='sound')return;
   if(id.indexOf('qs')===0){const bd=board(),o=bd[+id.slice(2)];if(o)markSuspect(o.lm);return}
   switch(id){
-   case 'peek':if(g.view==='cover'){if(g.lo.spotter)hint('observ',6.5);g.peeks=(g.peeks||0)+1;if(g.peeks>1&&R()<.3)eLine(g.pos<=1?'lado_e':g.pos===2?'lado_m':'lado_d',{p:1});hint('peek');g.view='scope';g.cam.x=posCenter(g.pos);g.cam.y=520;g.stare=0;g.menu=null}break;
+   case 'peek':if(g.view==='cover'){if(g.ro)hint('apoio',6.5);if(g.lo.spotter)hint('observ',6.5);g.peeks=(g.peeks||0)+1;if(g.peeks>1&&R()<.3)eLine(g.pos<=1?'lado_e':g.pos===2?'lado_m':'lado_d',{p:1});hint('peek');g.view='scope';g.cam.x=posCenter(g.pos);g.cam.y=520;g.stare=0;g.menu=null}break;
    case 'duck':g.view='cover';g.held=false;g.spot=false;g.swapUntil=0;break;
    case 'zin':if(g.view==='scope')g.zoomCur=Math.min(zMax(),+(g.zoomCur*1.18).toFixed(2));break;
    case 'fin':if(g.view==='scope'){hint('foco');g.focus=Math.min(2,g.focus+1)}break;
@@ -1358,7 +1424,7 @@ function act(id){
    case 'radio':if(!g.lo.noRadio){hint('radio');g.menu=g.menu==='radio'?null:'radio'}break;
    case 'help':g.menu=g.menu==='help'?null:'help';break;
    case 'decoy':if(g.view==='cover'){hint('iscas');g.menu=g.menu==='decoy'?null:'decoy'}break;
-   case 'close':g.menu=null;break;
+   case 'apoio':if(g.ro&&!g.ro.hurt){hint('apoio');g.menu=g.menu==='apoio'?null:'apoio'}break;case 'a_vento':roWind();break;case 'a_vigia':roLook();break;case 'close':g.menu=null;break;
    case 'notes':if(g.view==='cover'){g.menu=g.menu==='notes'?null:'notes'}break;
    case 'mark':if(g.view==='scope'){const i=g.pins.findIndex(q=>Math.hypot(q.x-g.cam.x,q.y-g.cam.y)<40);if(i>=0)g.pins.splice(i,1);else if(g.pins.length<4)g.pins.push({x:g.cam.x,y:g.cam.y,plane:g.focus})}break;
    case 'sound':AU.setLevel((AU.level+2)%3);break;
@@ -1368,6 +1434,27 @@ function act(id){
    case 'd_mirror':if(g.mirrors>0){g.mirrors--;g.menu=null;g.baitFx={kind:'mirror',t0:g.t};if(mode()!=='suspicious'||R()<.3){glint(e.x,e.y+2,3,false);addClue('glint',e.x,e.y,60,6);toast('BRILHO À '+({ESQ:'ESQUERDA',DIR:'DIREITA',CENTRO:'FRENTE'})[sideOf(e.x)],'olhe pela luneta: dura 3 s',4);log('RÁDIO','O espelho pegou o sol. Algo brilhou.')}else{toast('SEM REAÇÃO','ele não olhou para o espelho',3.5);log('RÁDIO','Ele não olhou para o espelho.')}}break;
   }
 }
+function roSay(name){if(!g)return;const t=RO_TXT[name]||'';log('ROCHA',t);toast('ROCHA',t,3.4);AU.play('v_'+name,{gain:1.15})}
+function eClip(name){if(!g||g.over||!g.e)return;const t=RO_TXT[name]||'';log('ELE',t);const b=AU.buf['v_'+name];if(b&&AU.level>0)AU.radioVoice(b,panOf(g.e.x),'ELE')}
+function roHurt(){const r=g.ro;if(!r||r.hurt)return;r.hurt=true;r.cd=999;if(g.menu==='apoio')g.menu=null;try{AU.shot(-.6,260,false)}catch(err){}roSay('ro_hit');setTimeout(()=>{if(g&&!g.over&&g.ro===r)roSay('ro_out')},3800)}
+function roWind(){
+  const r=g.ro;if(!r||r.hurt||r.cd>0||r.left<=0)return;
+  r.cd=16;r.left--;g.menu=null;g.exp=Math.min(100,g.exp+5);
+  const w=g.wind,v=w.nt,cls=x=>Math.abs(x)<1.3?0:Math.abs(x)<2.8?1:2;
+  let d=v>=0?'d':'e',k=cls(v);const sure=R()<.6;
+  if(!sure&&R()>.55){if(R()<.5)d=d==='d'?'e':'d';else k=clamp(k+(R()<.5?-1:1),0,2)}
+  r.w={at:g.t+w.next,d,s:k,sure};
+  roSay('ro_v_'+d+'fmg'[k]+'_'+(sure?'c':'a'))}
+function roLook(){
+  const r=g.ro;if(!r||r.hurt||r.cd>0||r.left<=0)return;
+  r.cd=22;r.left--;g.menu=null;g.exp=Math.min(100,g.exp+6);
+  const e=g.e,nm=LM.filter(m=>RO_IDX[m.n]!==undefined),dist=m=>Math.hypot(m.x-e.x,(m.y-e.y)*2);
+  if(!nm.length){roSay('ro_nomore');return}
+  const near=nm.slice().sort((a,b)=>dist(a)-dist(b))[0],truth=dist(near)<330&&R()<.5;
+  let lm;if(truth)lm=near;else{const far=nm.filter(m=>dist(m)>380);lm=pick(far.length?far:nm)}
+  const sure=R()<(truth?.65:.35),x=lm.x+rr(-30,30),y=lm.y+rr(-10,10);
+  roSay('ro_o'+RO_IDX[lm.n]+'_'+(sure?'c':'a'));
+  addNote('brilho','Rocha: brilho perto '+RO_DE(lm.n)+(sure?'':' (incerto)'),sideOf(x),planeOfY(y),x,y)}
 function radio(kind){
   if(g.radioCd>0||g.lo.noRadio||g.radioLeft<=0)return;const e=g.e,t=g.t;g.radioCd=g.lo.radioCd;g.menu=null;
   if(isFinite(g.radioLeft))g.radioLeft--;
@@ -1696,6 +1783,7 @@ function renderScope(){
   btn('duck',PORT?VW/2-75:24,PORT?VH-166:VH/2-44,150,84,'ABAIXAR',{fs:PORT?24:26,cap:'esfria a exposição',capfs:PORT?11:13});
   btn('fire',VW-166,VH-176,136,136,'ATIRAR',{round:true,fs:27,fill:'rgba(100,36,24,.92)',stroke:'#e58a6a',dis:g.bullets<=0||g.spot||g.t<g.swapUntil});
   btn('radio',VW-170,PORT?VH-256:VH/2-31,150,62,g.lo.noRadio?'SEM RÁDIO':'RÁDIO',{fs:22,dis:g.lo.noRadio||g.radioCd>0||g.radioLeft<=0,cap:g.lo.noRadio?'':(g.radioCd>0?'aguarde '+Math.ceil(g.radioCd)+'s':'falar com ele')});
+  if(g.ro)btn('apoio',PORT?VW/2-75:24,PORT?VH-250:VH/2-130,150,PORT?62:64,g.ro.hurt?'FERIDO':'APOIO',{ic:g.ro.hurt?'h/ic_ferido':'h/ic_apoio',icL:1,fs:22,dis:g.ro.hurt||g.ro.cd>0||g.ro.left<=0,cap:g.ro.hurt?'Rocha caiu':(g.ro.cd>0?'aguarde '+Math.ceil(g.ro.cd)+'s':g.ro.left+' pedidos'),capfs:PORT?11:12});
   // foco
   {const fl='FOCO '+PLANES[g.focus].d+' m';
    if(PORT){btn('fout',VW/2-170,my+68,76,58,'◂',{fs:34,dis:g.focus<=0});txt(fl,VW/2,my+97,24,'#cfe3e8','center',700);btn('fin',VW/2+94,my+68,76,58,'▸',{fs:34,dis:g.focus>=2})}
@@ -1716,6 +1804,7 @@ function hud(){
   {const bw0=IC('n/hud2',30,76,28);txt('BALAS '+g.bullets,30+(bw0||0)+8,76,22,g.bullets<=1?'#e0624a':'#f2ebc9','left')}
   {const hw=IC('n/ic7',170,76,28);txt('ISCAS '+(g.helm+g.rocks+g.mirrors),170+(hw||0)+8,76,22,'#f2ebc9','left')}
   {const w=g.wind.val,ww=IC('n/hud8',30,110,28);txt('VENTO '+(w>0?'→ ':w<0?'← ':'')+Math.abs(w).toFixed(1),30+(ww||0)+8,110,20,'#cfe3e8','left')}
+  {const rw=g.ro&&g.ro.w;if(rw&&g.t<rw.at+4){const left=Math.max(0,rw.at-g.t);txt('ROCHA · '+(left>.3?'EM '+Math.ceil(left)+' s':'AGORA')+': '+(rw.d==='d'?'→ ':'← ')+['FRACO','MÉDIO','FORTE'][rw.s]+(rw.sure?'':' ?'),PORT?20:30,PORT?222:168,19,rw.sure?'#9fe08a':'#e0c46a','left',600)}}
   {let xx=212;const wl=[['arm','n/hud4'],['lens','n/hud5'],['leg','n/hud6']].filter(p=>g.wounds[p[0]]);
    if(!wl.length)txt('SEM FERIMENTOS',xx,110,16,'#b8b39a','left',500);
    else for(const p of wl){const ww=IC(p[1],xx,110,30);if(g.wounds[p[0]]>1)txt('×'+g.wounds[p[0]],xx+ww+2,110,16,'#ff9a7a','left',700);xx+=ww+30}}
@@ -1769,8 +1858,13 @@ function menuOverlay(){
   ctx.fillStyle='rgba(4,5,3,.6)';ctx.fillRect(0,0,VW,VH);
   const pw=440,ph=330,px=VW/2-pw/2,py=VH/2-ph/2;
   ctx.fillStyle='rgba(30,34,20,.97)';rrect(ctx,px,py,pw,ph,14);ctx.fill();ctx.strokeStyle='#d7bd62';ctx.lineWidth=3;ctx.stroke();
-  txt(g.menu==='radio'?'RÁDIO':'ISCAS',VW/2,py+30,26,'#e3c86a','center',700);
-  if(g.menu==='radio'){
+  txt(g.menu==='radio'?'RÁDIO':g.menu==='apoio'?'APOIO · ROCHA':'ISCAS',VW/2,py+30,26,'#e3c86a','center',700);
+  if(g.menu==='apoio'){const r=g.ro,dis=!r||r.cd>0||r.left<=0||r.hurt;
+    btn('a_vento',px+30,py+60,pw-60,60,'PREVER O VENTO: próxima rajada',{fs:16,dis});
+    btn('a_vigia',px+30,py+130,pw-60,60,'VIGIAR O CAMPO: procurar um brilho',{fs:16,dis});
+    if(r){txt('Pedidos restantes: '+r.left+(r.cd>0?' · aguarde '+Math.ceil(r.cd)+' s':''),VW/2,py+222,18,'#cfe3e8','center',500)}
+    txt('Cada pedido te expõe +5%. "Acho que" pode estar errado.',VW/2,py+250,15,'#e58a6a','center',500);
+  }else if(g.menu==='radio'){
     const dis=g.radioCd>0;
     btn('r_prov',px+30,py+60,pw-60,60,'PROVOCAR: ele brilha, mas fica impaciente',{fs:16,dis});
     btn('r_talk',px+30,py+130,pw-60,60,'CONVERSAR: baixa sua exposição, ele fica calmo',{fs:16,dis});
@@ -1882,7 +1976,7 @@ function wzRender(step,silent){
       </div>
       <div class="dif"><span>DIFICULDADE</span><button class="chip ${diffKey==='recruta'?'sel':''}" data-d="recruta">RECRUTA</button><button class="chip ${diffKey==='veterano'?'sel':''}" data-d="veterano">VETERANO</button><em>${diffKey==='recruta'?'Ele demora mais para te achar.':'Ele te caça no ritmo normal.'}</em></div>
      </div>
-     <div class="wfoot"><button class="btn sec" data-a="how">COMO JOGAR</button><button class="btn sec" data-a="snd">TESTAR SOM</button><span class="snd" id="sndst">${AU.diag()}</span></div></div>`;
+     <div class="wfoot"><button class="btn sec" data-a="how">COMO JOGAR</button><button class="btn sec" data-a="story">HISTÓRIA</button><button class="btn sec" data-a="snd">TESTAR SOM</button><span class="snd" id="sndst">${AU.diag()}</span></div></div>`;
   }else if(step>=1&&step<=4){
     const k=EQ_ORDER[step-1],s=EQ[k];
     if(sor)picked[k]=true;
@@ -1935,7 +2029,8 @@ $('#ov').addEventListener('click',e=>{
   const fo=t.closest('[data-fone]');if(fo){phoneMode=!phoneMode;try{localStorage.setItem('ds_fone',phoneMode?'1':'0')}catch(err){}opHome();return}
   const df=t.closest('[data-d]');if(df){diffKey=df.dataset.d;saveEq();opHome();return}
   const a=t.closest('[data-a]');if(!a)return;const v=a.dataset.a;
-  if(v==='opstart'){AU.stopNarr();newOp();offerIds=shuffle(WEAP.map(w=>w.id)).slice(0,3);cardSel=null;opPick();return}
+  if(v==='storynext'){storyNext();return}if(v==='storyskip'){storySkip();return}if(v==='pgnext'){AU.stopNarr();const d=ST.pg;ST.pg=null;if(d)d();return}if(v==='story'){showStory(STORY_INTRO,opHome);return}
+  if(v==='opstart'){AU.stopNarr();let sn=false;try{sn=localStorage.getItem('ds_story')==='1'}catch(err){}const go=()=>{newOp();offerIds=shuffle(WEAP.map(w=>w.id)).slice(0,3);cardSel=null;opPick()};if(sn){go();return}try{localStorage.setItem('ds_story','1')}catch(err){}showStory(STORY_INTRO,go);return}
   if(v==='cgo'){if(!cardSel)return;const c=CARD[cardSel];if(op.stage==='weapon'){op.weapon=cardSel;op.stage=null;offerIds=offerCards(4,true);cardSel=null;opPick();return}if(c.pick)c.pick(op);if(c.inst)op.hist.push({n:op.n,card:c.id});else op.cards.push(c.id);cardSel=null;opGoMap();return}
   if(v==='cskip'){op.lives=Math.min(op.maxLives,op.lives+1);cardSel=null;opGoMap();return}
   if(v==='mgo'){if(mapSel===null||!ART.done)return;goDuel();return}
@@ -1960,7 +2055,7 @@ function frame(ts){
 }
 resize();buildScene(12345);g=makeG(sel);g.e=newEnemy();scene='menu';drawOffers();showTitle();loadArt();
 requestAnimationFrame(frame);
-window.__DS={idleStats,eLine,E_MAN,E_MAP,VOZ_MAP,addEv,markSuspect,board,reportText,seen,LM:()=>LM,get L(){return L},get g(){return g},start:startGame,act,fire,sway,HID:()=>HID,mode,end,step:dt=>update(dt),render,get scene(){return scene},get op(){return op},newOp,opHome,opPick,opMap,opGoMap,opReward,opAfterDuel,CARDS,CARD,offerCards,mapOpts:()=>mapOpts,setMap:i=>{mapSel=i;},goDuel,EQ,EQ_ORDER,ART,AU,RQ,DIFF};
+window.__DS={roWind,roLook,roHurt,showStory,storyPage,storyNext,PAGES,STORY_INTRO,STORY_FIM,RO_TXT,idleStats,eLine,E_MAN,E_MAP,VOZ_MAP,addEv,markSuspect,board,reportText,seen,LM:()=>LM,get L(){return L},get g(){return g},start:startGame,act,fire,sway,HID:()=>HID,mode,end,step:dt=>update(dt),render,get scene(){return scene},get op(){return op},newOp,opHome,opPick,opMap,opGoMap,opReward,opAfterDuel,CARDS,CARD,offerCards,mapOpts:()=>mapOpts,setMap:i=>{mapSel=i;},goDuel,EQ,EQ_ORDER,ART,AU,RQ,DIFF};
 })();
 </script>
 </body>
