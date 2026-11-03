@@ -209,6 +209,7 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
 .ver{position:absolute;left:3vw;bottom:2vh;font:500 12px Oswald,sans-serif;letter-spacing:.1em;color:rgba(240,230,190,.45)}
 .devico{position:absolute;right:3vw;bottom:2.4vh;z-index:5;width:42px;height:42px;border-radius:10px;border:1px solid rgba(215,189,98,.45);background:rgba(10,9,6,.55);color:#f2ebc9;font-size:20px;line-height:1;opacity:.7;cursor:pointer;padding:0}
 .devico:active{opacity:1}
+.tsub .fim{display:inline-block;margin-top:.8vh;color:#ffd24a;font-size:1.3em;letter-spacing:.22em;text-shadow:0 0 14px #000}
 </style>
 </head>
 <body>
@@ -228,7 +229,8 @@ const R=Math.random, rr=(a,b)=>a+R()*(b-a), pick=a=>a[(R()*a.length)|0];
 
 // ---------------------------------------------------------------- constantes
 const WW=1960, WH=800, X0=80, X1=1880, P=160, TICK=18;
-const DSC=3;
+const DSC=10;
+const fmtD=m=>m>=1000?(m/1000).toFixed(1).replace('.',',')+' km':Math.round(m)+' m';
 const distM=y=>DSC*Math.round(Math.max(100,Math.min(420,300-(y-440))));
 const hrOf=s=>Math.max(7,26*s);
 
@@ -242,7 +244,7 @@ const AUTOPC=(()=>{if(TOUCHUA)return false;try{return matchMedia('(hover:hover) 
 let DESK=DEV?DEV==='pc':AUTOPC;
 function viewSize(){const vv=window.visualViewport;let w=innerWidth,h=innerHeight;if(vv&&vv.width>50&&vv.height>50){w=Math.round(vv.width);h=Math.round(vv.height)}return {w,h}}
 const DBGON=/debug/.test(location.search);
-const BUILD='4.3.0';
+const BUILD='4.4.0';
 setTimeout(()=>{try{fetch(location.pathname+'?chk='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([^']+)'/);if(m&&m[1]!==BUILD){let done=false;try{done=sessionStorage.getItem('ds_rl')===m[1]}catch(e){}if(!done){try{sessionStorage.setItem('ds_rl',m[1])}catch(e){}location.replace(location.pathname+'?v='+m[1]+(DBGON?'&debug':''))}}}).catch(()=>{})}catch(e){}},1500);
 let lastVS='';
 let AIM='stick';try{AIM=localStorage.getItem('ds_aim')||'stick'}catch(e){}
@@ -477,8 +479,8 @@ function makeSprArt(i,base){
   return {c,ax:lm.lx/lm.w*W,ay:lm.ly/lm.h*H,w:W,h:H};
 }
 function buildScene(seed){if(ART.ready)buildSceneArt(seed);else buildSceneProc(seed)}
-const FOCOR=['730–900 m','520–680 m','300–470 m'];
-const PLANES=[{y0:440,y1:495,s:.26,d:900},{y0:515,y1:565,s:.38,d:600},{y0:585,y1:640,s:.54,d:300}];
+const FOCOR=['2,4–3,0 km','1,7–2,3 km','1,0–1,6 km'];
+const PLANES=[{y0:440,y1:495,s:.26,d:3000},{y0:515,y1:565,s:.38,d:2000},{y0:585,y1:640,s:.54,d:1000}];
 const planeOfY=y=>y<505?0:y<575?1:2;
 function blurCopy(cv,k){const W2=Math.max(8,Math.round(cv.width/2)),H2=Math.max(8,Math.round(cv.height/2)),w=Math.max(8,Math.round(cv.width/k)),h=Math.max(8,Math.round(cv.height/k));let src=cv;for(let i=0;i<2;i++){const sm=mkc(w,h),x=sm.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(src,0,0,w,h);const bg2=mkc(i?cv.width:W2,i?cv.height:H2),y=bg2.getContext('2d');y.imageSmoothingEnabled=true;y.imageSmoothingQuality='high';y.drawImage(sm,0,0,bg2.width,bg2.height);src=bg2}const out=mkc(W2,H2),o=out.getContext('2d');o.imageSmoothingEnabled=true;o.drawImage(src,0,0,W2,H2);return out}
 function decoyAt(c,x,y,s2){const k=Math.max(.22,s2*3.2),cols=[[96,84,70],[70,74,60],[88,70,58],[60,66,86],[44,44,48],[112,98,70]],cc=cols[(srng()*cols.length)|0];
@@ -768,7 +770,7 @@ const HINTS={
  zoom:'ZOOM: afaste ou aproxime dois dedos (pinça) na mira. Mais zoom mostra detalhe, mas a mira treme mais.',
  inicio:'Toque em qualquer ponto do campo para mirar ali. Cuidado: mirar sobe a EXPOSIÇÃO.',
  caderno:'CADERNO: o quadro junta as pistas por objeto. Aposte (SUSPEITO) no objeto com mais tipos de pista diferentes. Acertar reduz a camuflagem dele.',
- foco:'FOCO: nítido só em uma distância. Troque entre perto (300–470 m), médio (520–680 m) e longe (730–900 m).',
+ foco:'FOCO: nítido só em uma distância. Troque entre perto (1,0–1,6 km), médio (1,7–2,3 km) e longe (2,4–3,0 km).',
  som:'O som chega atrasado: quanto maior o atraso, mais longe o tiro.',
  observ:'BINÓCULO: toque no botão BINÓCULO (à esquerda) para trocar. Ele só observa, mas vê mais e expõe metade.',
  noite:'ANOITECENDO: ele fica mais difícil de ver, mas clarões e brilhos aparecem mais.',
@@ -994,7 +996,7 @@ function opFinish(win,kind){
   if(!win){try{const c=mkc(560,300),x=c.getContext('2d'),e=g.e;x.fillStyle='#222';x.fillRect(0,0,560,300);
     drawWorld(x,e.x,e.y+6,2.2,280,150,{sharp:true});
     x.strokeStyle='rgba(255,70,50,.95)';x.lineWidth=3;x.beginPath();x.arc(280,150,36,0,6.3);x.stroke();
-    x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,270,560,30);x.fillStyle='#fff';x.font='600 18px Oswald,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('ELE ESTAVA AQUI · '+distM(e.y)+' m',280,285);
+    x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,270,560,30);x.fillStyle='#fff';x.font='600 18px Oswald,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('ELE ESTAVA AQUI · '+fmtD(distM(e.y)),280,285);
     reveal='<div class="rpw"><div><img src="'+c.toDataURL('image/jpeg',.85)+'" alt=""><br>ONDE ELE ESTAVA</div><div><canvas id="rp1" width="300" height="300"></canvas><br>SUA VISÃO</div><div><canvas id="rp2" width="300" height="300"></canvas><br>VISÃO DELE</div></div>'}catch(err){}}
   ov.innerHTML=`<div class="panel ${win?'opwin':''}"><div class="endk ${win?'w':'l'}">${T[0]}</div><p class="tut-p">${T[1]}</p>${reveal}<p class="tut-p" style="font-size:clamp(11px,2.6vh,16px);opacity:.85">${reportShort()}</p>
    <div class="sumlist">Duelos vencidos: ${reach} de 4 · Dificuldade: ${diffKey==='recruta'?'Recruta':'Veterano'}<br>Arma: ${op.weapon?CARD[op.weapon].n:'nenhuma'}<br>Equipamentos: ${names.length?names.join(' · '):'nenhum'}</div>
@@ -1036,7 +1038,7 @@ function ambReact(x,y,cause){
 function reactAmb(a,cause){
   const t=g.t;if(a.state!=='idle'||a.bark>0||t<(a.cool||0))return;a.cool=t+AMB_CD[a.kind];a.t0=t;hint('ambiente');
   (g.chips=g.chips||[]).push({k:a.kind,x:a.x,t0:t});if(g.chips.length>4)g.chips.shift();
-  if(cause!=='random'){const pl=planeOfY(a.y),sd=sideOf(a.x),lb={passaros:'Pássaros levantaram voo',cachorro:'Cachorro latiu',moinho:'Moinho parou',goteira:'Goteira parou',portao:'Portão rangeu'}[a.kind];addNote('ambiente',lb+' à '+SIDEW[sd]+' · '+PLANES[pl].d+' m',sd,pl,a.x,a.y)}
+  if(cause!=='random'){const pl=planeOfY(a.y),sd=sideOf(a.x),lb={passaros:'Pássaros levantaram voo',cachorro:'Cachorro latiu',moinho:'Moinho parou',goteira:'Goteira parou',portao:'Portão rangeu'}[a.kind];addNote('ambiente',lb+' à '+SIDEW[sd]+' · '+fmtD(PLANES[pl].d),sd,pl,a.x,a.y)}
   if(a.kind==='passaros'){a.state='fly';a.until=t+9;ambSnd(a,'revoada',.9)}
   else if(a.kind==='cachorro'){a.bark=1;a.barkAt=t}
   else if(a.kind==='moinho'){a.state='stop';a.until=t+6}
@@ -1121,7 +1123,7 @@ function drawAmb(c,pl){
 
 // ---------------------------------------------------------------- caderno de campo
 const SIDEW={ESQ:'esquerda',DIR:'direita',CENTRO:'frente'};
-const planeOfD=d=>d>=750?0:d>=450?1:2;
+const planeOfD=d=>d>=250*DSC?0:d>=150*DSC?1:2;
 const NOTE_LBL={tiro:'TIRO',brilho:'BRILHO',poeira:'POEIRA',ambiente:'AMBIENTE',voz:'VOZ'};
 function addNote(kind,text,side,plane,x,y){
   if(!g||g.over)return;
@@ -1161,7 +1163,7 @@ function reportText(){
 function seen(kind,x,y,label){
   if(!g||g.view!=='scope')return;
   const z=curZoom();if(Math.hypot(x-g.cam.x,y-g.cam.y)>292/z)return;
-  const pl=planeOfY(y),sd=sideOf(x);addNote(kind,label+' à '+SIDEW[sd]+' · '+PLANES[pl].d+' m',sd,pl,x,y);
+  const pl=planeOfY(y),sd=sideOf(x);addNote(kind,label+' à '+SIDEW[sd]+' · '+fmtD(PLANES[pl].d),sd,pl,x,y);
 }
 function candidates(){
   const now=g.t,act=g.notes.filter(n=>now-n.t<110);
@@ -1241,7 +1243,7 @@ function candRings(c,cx,cy,z,Rr){
 function provShot(){
   const e=g.e;let x=e.x,y=e.y;
   if(R()<.55){const o=pick(HID.filter(h=>Math.hypot(h.x-e.x,h.y-e.y)>300));if(o){x=o.x;y=o.y}}
-  {const d0=distM(y);setTimeout(()=>{try{AU.shot(panOf(x),d0,false)}catch(e){}},d0*3)}ambReact(x,y,'tiro');
+  {const d0=distM(y);setTimeout(()=>{try{AU.shot(panOf(x),d0,false)}catch(e){}},d0*9/DSC)}ambReact(x,y,'tiro');
 }
 
 const SN_LENS=[[.50,.42],[.43,.46],[.46,.41],[.46,.42]],SN_CAMO=[1,1.18,1,.82];
@@ -1313,8 +1315,8 @@ const sOfY=y=>PLANES[planeOfY(y)].s;
 function dust(x,y,n,big){if(g&&n>=3&&!big)fx(3+((Math.random()*2)|0),x,y,150*sOfY(y)*(.9+Math.random()*.3),3.2,'n',.5);for(let i=0;i<n;i++)g.parts.push({x:x+rr(-8,8),y:y+rr(-4,8),vx:rr(-8,8),vy:rr(-14,-4),life:0,max:rr(1.6,3.2)*(big?1.7:1),r:rr(6,13)*(big?1.4:1)})}
 function glint(x,y,dur,fake){g.glints.push({x,y,t:0,dur,fake})}
 const SECN=x=>['ESQUERDA','ESQUERDA-CENTRO','CENTRO','CENTRO-DIREITA','DIREITA'][Math.floor(clamp((x-X0)/(X1-X0),0,.999)*5)];
-function shotD(x,y){const d=distM(y),ms=d*3,side=sideOf(x);g.edgeF={side,t0:g.t};hint('som');
-  setTimeout(()=>{try{if(!g)return;AU.shot(panOf(x),d,false);g.shotInd={x,t0:g.t,name:SECN(x),d};try{navigator.vibrate&&navigator.vibrate(45)}catch(er){}log('PISTA','Clarão '+({ESQ:'à esquerda',DIR:'à direita',CENTRO:'à frente'})[side]+' · som '+(ms/1000).toFixed(1)+' s depois');addNote('tiro','Tiro à '+SIDEW[side]+' · som '+(ms/1000).toFixed(1)+' s depois (~'+d+' m)',side,planeOfD(d),x,y)}catch(e){}},ms)}
+function shotD(x,y){const d=distM(y),ms=d*9/DSC,side=sideOf(x);g.edgeF={side,t0:g.t};hint('som');
+  setTimeout(()=>{try{if(!g)return;AU.shot(panOf(x),d,false);g.shotInd={x,t0:g.t,name:SECN(x),d};try{navigator.vibrate&&navigator.vibrate(45)}catch(er){}log('PISTA','Clarão '+({ESQ:'à esquerda',DIR:'à direita',CENTRO:'à frente'})[side]+' · som '+(ms/1000).toFixed(1)+' s depois');addNote('tiro','Tiro à '+SIDEW[side]+' · som '+(ms/1000).toFixed(1)+' s depois (~'+fmtD(d)+')',side,planeOfD(d),x,y)}catch(e){}},ms)}
 function muzzle(){const e=g.e;fx(Math.random()<.5?5:6,e.x,e.y,150*e.s,.3,'lighter',1,'c');ambReact(e.x,e.y,'tiro');e.aimUntil=g.t+.5;{const j=diffKey==='veterano'?140:80;g.ping={x:e.x+rr(-j,j),y:e.y+rr(-j*.6,j*.6),t:g.t,ttl:4.5}};g.glints.push({x:e.x,y:e.y+2,t:0,dur:.16,fake:false,flash:true});dust(e.x,e.y+16,10,true)}
 
 // ---------------------------------------------------------------- atualização
@@ -1352,10 +1354,10 @@ function update(dt){
   if(typeof op!=='undefined'&&op&&op.n===1&&g.e&&!g.over&&!g.e.moving){
     const el=g.timeMax-g.time;
     if(g.guard===undefined)g.guard=32;
-    if(el>=g.guard){g.guard=el+25;const e0=g.e,sd=sideOf(e0.x),pl=planeOfY(e0.y);addNote('ambiente','Algo se mexeu à '+SIDEW[sd]+' · '+PLANES[pl].d+' m',sd,pl,e0.x+rr(-60,60),e0.y+rr(-20,20))}
+    if(el>=g.guard){g.guard=el+25;const e0=g.e,sd=sideOf(e0.x),pl=planeOfY(e0.y);addNote('ambiente','Algo se mexeu à '+SIDEW[sd]+' · '+fmtD(PLANES[pl].d),sd,pl,e0.x+rr(-60,60),e0.y+rr(-20,20))}
     if(g.ro&&!g.ro.hurt&&((el>=60&&!g.rf1&&(g.idx||0)<.25)||(el>=130&&!g.rf2&&(g.idx||0)<.25))){if(el<130)g.rf1=1;else g.rf2=1;roFree()}
   }
-  if(!g.s26&&(g.timeMax-g.time)>=10&&g.e){g.s26=1;const e0=g.e,sd0=sideOf(e0.x),pl0=planeOfY(e0.y);addNote('ambiente','Algo se mexeu à '+SIDEW[sd0]+' · '+PLANES[pl0].d+' m',sd0,pl0,e0.x+rr(-70,70),e0.y+rr(-25,25));try{ambReact(e0.x,e0.y,'mov')}catch(er){}}
+  if(!g.s26&&(g.timeMax-g.time)>=10&&g.e){g.s26=1;const e0=g.e,sd0=sideOf(e0.x),pl0=planeOfY(e0.y);addNote('ambiente','Algo se mexeu à '+SIDEW[sd0]+' · '+fmtD(PLANES[pl0].d),sd0,pl0,e0.x+rr(-70,70),e0.y+rr(-25,25));try{ambReact(e0.x,e0.y,'mov')}catch(er){}}
   g.fkD=(g.fkD==null?rr(20,40):g.fkD)-dt;if(g.fkD<=0){g.fkD=rr(45,75);const o=pick(HID);dust(o.x,o.y+16,(rr(2,5)|0),false);seen('poeira',o.x,o.y,'Poeira')}
   g.fkG=(g.fkG==null?rr(12,20):g.fkG)-dt;if(g.fkG<=0){g.fkG=rr(14,26);const o=pick(HID);glint(o.x+rr(-60,60),o.y+rr(-10,25),rr(.25,.6),true)}
   g.recT=(g.recT||0)-dt;if(g.recT<=0){g.recT=.12;const sw0=sway();(g.rec=g.rec||[]).push({t:g.t,v:g.view,cx:g.cam.x,cy:g.cam.y,z:curZoom(),exp:g.exp,pos:g.pos,sx:sw0.x,sy:sw0.y});if(g.rec.length>70)g.rec.shift()}
@@ -1448,7 +1450,7 @@ function enemyShoots(viaWall){
   hint('ferido');const part=pick(['arm','lens','leg']);g.wounds[part]++;g.lives--;
   log('ELE','Acertei você: '+({arm:'braço',lens:'luneta',leg:'perna'})[part]+'.');
   toast('FERIDO · '+({arm:'BRAÇO',lens:'LUNETA',leg:'PERNA'})[part],({arm:'a mira treme mais',lens:'a lente rachou: a visão piorou',leg:'você troca de trecho mais devagar'})[part],5);g.flash=Math.max(g.flash,.5);g.shake=Math.max(g.shake,.6);
-  {const ms=distM(e.y)*3;try{AU.play('ricochete',{pan:panOf(posCenter(g.pos)),gain:.7})}catch(er){}setTimeout(()=>{if(g&&!g.over)eLine('hit_'+part,{force:true,p:.9})},ms+450)}
+  {const ms=distM(e.y)*9/DSC;try{AU.play('ricochete',{pan:panOf(posCenter(g.pos)),gain:.7})}catch(er){}setTimeout(()=>{if(g&&!g.over)eLine('hit_'+part,{force:true,p:.9})},ms+450)}
   e.alertUntil=g.t+12;
   if(g.lives<=0)end('wounds');
 }
@@ -1574,7 +1576,7 @@ function fire(){
   g.bullets--;g.shots++;
   const ix=ax+g.wind.val*d/(650*DSC)*TICK,iy=ay;
   g.impacts.push({x:ix,y:iy,ttl:6});fx((Math.random()*3)|0,ix,iy+6,260*sOfY(iy),1.9,'n',.95);g.shotMsg={t0:g.t,text:'ERROU',sub:'o ✕ vermelho é onde a sua bala caiu',col:'255,110,90'};ambReact(ix,iy,'tiro');g.tracer={ax,ay,ix,iy,t0:g.t};dust(ix,iy,6,false);
-  AU.shot(0,0,true);AU.impact(d);g.held=false;g.cam.y-=7;g.shake=.25;
+  AU.shot(0,0,true);AU.impact(d*3/DSC);g.held=false;g.cam.y-=7;g.shake=.25;
   const dd=Math.hypot(ix-e.x,iy-e.y),nearB=dd<260;
   {const z0=Math.max(1.2,curZoom()),zE=nearB?clamp(250/Math.max(dd,60),z0*1.15,z0*2.4):z0*1.9;g.bcam={rt0:performance.now(),dur:dd<=e.hr?2.4:(nearB?2.3:1.6),ax,ay,ix,iy,tx:nearB?(ix+e.x)/2:ix,ty:nearB?(iy+e.y)/2:iy,z0,zk:zE/z0,near:nearB}}if(nearB){const s3=stt();s3.shown=(s3.shown||0)+1}
   if(dd<=e.hr){g.won=true;g.shotMsg={t0:g.t,text:'ACERTOU!',sub:'tiro certeiro',col:'120,230,130'};end('win');return}
@@ -1599,7 +1601,7 @@ function showEnd(){
   if(k!=='win'){try{const c=mkc(560,300),x=c.getContext('2d'),e=g.e;x.fillStyle='#222';x.fillRect(0,0,560,300);
     drawWorld(x,e.x,e.y+6,2.2,280,150,{sharp:true});
     x.strokeStyle='rgba(255,70,50,.95)';x.lineWidth=3;x.beginPath();x.arc(280,150,36,0,6.3);x.stroke();
-    x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,270,560,30);x.fillStyle='#fff';x.font='600 18px Oswald,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('ELE ESTAVA AQUI · '+distM(e.y)+' m',280,285);
+    x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,270,560,30);x.fillStyle='#fff';x.font='600 18px Oswald,Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('ELE ESTAVA AQUI · '+fmtD(distM(e.y)),280,285);
     reveal='<img src="'+c.toDataURL('image/jpeg',.85)+'" style="max-width:min(80vw,400px);max-height:32vh;border:2px solid #6c6c55;border-radius:8px;margin:.6vh 0" alt="">'}catch(err){}}
   ov.classList.remove('endw','endl');ov.classList.add(k==='win'?'endw':'endl');
   ov.innerHTML=`<div class="panel"><div class="endk ${T[1]}">${T[0]}</div><p class="tut-p">${T[2]}</p>${reveal}<p class="tut-p">Tempo: ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')} · Tiros: ${g.shots} · Balas restantes: ${g.bullets}</p><div class="row"><button class="btn" data-a="again">JOGAR DE NOVO</button><button class="btn sec" data-a="menu">TROCAR EQUIPAMENTO</button></div></div>`;
@@ -1931,8 +1933,8 @@ function renderScope(){
   if(g.t<g.swapUntil)txt('TROCANDO…',cx,cy+Rr-30,22,'#ffd24a','center',700);
   if(FRI){const D=720*FRS;ctx.drawImage(FRI,cx-D/2,cy-D/2,D,D)}else{ctx.strokeStyle='#161610';ctx.lineWidth=16;ctx.beginPath();ctx.arc(cx,cy,Rr+8,0,6.3);ctx.stroke();
   ctx.strokeStyle=g.spot?'#5f8fb8':'#3b3a2c';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,Rr,0,6.3);ctx.stroke()}
-  const d=distM(g.cam.y+sw.y),r=g.lo.range,shown=r===1?d:Math.round(d/r)*r;
-  txt('DIST '+(r===1?'':'~')+shown+' m',cx-150,cy+Rr+20,24,'#f2ebc9','center');
+  const d=distM(g.cam.y+sw.y),r=g.lo.range,shown=r===1?d:Math.round(d/(r*DSC/10))*(r*DSC/10);
+  txt('DIST '+(r===1?'':'~')+fmtD(shown),cx-150,cy+Rr+20,24,'#f2ebc9','center');
   {const wm=g.wind.val*d/(650*DSC),aw=Math.abs(wm);txt(aw<.3?'VENTO FRACO':'VENTO '+(wm>0?'→ ':'← ')+aw.toFixed(1)+' marcas',cx+170,cy+Rr+20,24,'#cfe3e8','center')}
   if(PORT)txt('TRECHO '+(g.pos+1)+' · '+TYPE[g.types[g.pos]].nome+' · ZOOM '+g.zoomCur.toFixed(1)+'×',cx,cy+Rr+48,17,'#a8a18a','center',600);else{txt('TRECHO '+(g.pos+1),24+75,VH/2-92,18,'#a8a18a','center',600);txt(TYPE[g.types[g.pos]].nome,24+75,VH/2-70,15,'#a8a18a','center',500)}
   const mw=PORT?480:400,mh=PORT?60:48,mx=VW/2-mw/2,my=PORT?cy+Rr+74:8;
@@ -2000,7 +2002,7 @@ function edgeVig(r,gc,b,a){if(a<=0)return;const R2=Math.hypot(VW,VH)/2,gr=ctx.cr
 function drawInd(){
   if(!g)return;const t=g.t,mapX=x=>VW*.08+clamp((x-X0)/(X1-X0),0,1)*VW*.84,yb=PORT?304:300;let off=0;
   if(g.shotInd&&t-g.shotInd.t0<5){const si=g.shotInd,a=Math.min(1,(5-(t-si.t0))/1.5);ctx.save();ctx.globalAlpha=a;
-    const lbl='TIRO · '+si.name+' · ≈'+si.d+' m';ctx.font='700 26px Oswald,Arial Narrow,sans-serif';const w=ctx.measureText(lbl).width+36;
+    const lbl='TIRO · '+si.name+' · ≈'+fmtD(si.d);ctx.font='700 26px Oswald,Arial Narrow,sans-serif';const w=ctx.measureText(lbl).width+36;
     ctx.fillStyle='rgba(60,12,8,.9)';rrect(ctx,VW/2-w/2,yb,w,40,10);ctx.fill();ctx.strokeStyle='#ff8a5a';ctx.lineWidth=2;ctx.stroke();
     txt(lbl,VW/2,yb+21,26,'#ffd2b0','center',700);
     const mx=mapX(si.x);ctx.fillStyle='#ff6a3a';ctx.beginPath();ctx.moveTo(mx,yb+62);ctx.lineTo(mx-11,yb+46);ctx.lineTo(mx+11,yb+46);ctx.closePath();ctx.fill();ctx.restore();off=70}
@@ -2152,7 +2154,7 @@ const TUT=[
  {t:'Ache o atirador inimigo.',p:'Ele está escondido no lixo, pequeno e camuflado. Você está atrás do muro. Quem acertar a cabeça ou a luneta do outro primeiro vence.',n:'nar_tut_1',v:0},
  {t:'Mirar te expõe.',p:'Olhar pela luneta sobe a EXPOSIÇÃO. Em 100%, ele atira. Abaixe para esfriar e deslize pelo muro para trocar de lugar.',n:'nar_tut_2',v:1},
  {t:'Os trechos do muro.',p:'O muro tem 5 trechos. ALTO protege mais. QUEBRADO deixa ver o campo. FRESTA tem buracos: toque em ESPIAR para olhar por eles, sem zoom e com pouca exposição. CAÍDO não protege. Deslize para trocar de trecho.',n:null,v:2},
- {t:'Procure pistas.',p:'Zoom e foco (300, 600, 900 m) revelam detalhes. O CADERNO junta as pistas por objeto. Aposte no objeto com mais tipos de pista. Acertar revela um pouco o inimigo.',n:null,v:9},
+ {t:'Procure pistas.',p:'Zoom e foco (perto, médio e longe, em quilômetros) revelam detalhes. O CADERNO junta as pistas por objeto. Aposte no objeto com mais tipos de pista. Acertar revela um pouco o inimigo.',n:null,v:9},
  {t:'Atire com o vento.',p:'O círculo amarelo IMPACTO mostra onde a bala cai. Coloque o alvo dentro dele e atire. O resto o jogo explica quando você precisar.',n:'nar_tut_6',v:5}
 ];
 function tutVisual(i){
@@ -2228,7 +2230,7 @@ function wzRender(step,silent){
 function showMenu(){wzRender(0)}
 function showTitle(){
   scene='menu';const ov=$('#ov');ov.dataset.screen='title';ov.classList.add('on','title');
-  ov.innerHTML=`<div class="tbox tcv" data-a="start"><div class="tbg"></div><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">DOIS SNIPERS<br>UM MURO QUASE CAINDO ENTRE ELES<br>QUALQUER ERRO É FATAL.</div></div><div class="tap">TOQUE PARA COMEÇAR</div><div class="ver">v${BUILD}</div></div>`;
+  ov.innerHTML=`<div class="tbox tcv" data-a="start"><div class="tbg"></div><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">DOIS SNIPERS<br>UM MURO<br>QUILÔMETROS DE DISTÂNCIA<br><span class="fim">DEFENDA SUA TERRA!</span></div></div><div class="tap">TOQUE PARA COMEÇAR</div><div class="ver">v${BUILD}</div></div>`;
 }
 function startFlow(){let seen=false;try{seen=localStorage.getItem('ds_brief')==='1'}catch(err){}if(seen){opHome()}else{try{localStorage.setItem('ds_brief','1')}catch(err){}showBrief()}}
 function setDev(d){DEV=d;DESK=d==='pc';try{localStorage.setItem('ds_dev2',d)}catch(e){}resize()}
