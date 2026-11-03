@@ -207,6 +207,8 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
 @media (min-aspect-ratio:11/10){.tbox.tcv .tap{left:auto;right:6vw;margin:0}}
 .tbox.tcv .tsub{line-height:1.7}
 .ver{position:absolute;left:3vw;bottom:2vh;font:500 12px Oswald,sans-serif;letter-spacing:.1em;color:rgba(240,230,190,.45)}
+.devico{position:absolute;right:3vw;bottom:2.4vh;z-index:5;width:42px;height:42px;border-radius:10px;border:1px solid rgba(215,189,98,.45);background:rgba(10,9,6,.55);color:#f2ebc9;font-size:20px;line-height:1;opacity:.7;cursor:pointer;padding:0}
+.devico:active{opacity:1}
 </style>
 </head>
 <body>
@@ -240,7 +242,7 @@ const AUTOPC=(()=>{if(TOUCHUA)return false;try{return matchMedia('(hover:hover) 
 let DESK=DEV?DEV==='pc':AUTOPC;
 function viewSize(){const vv=window.visualViewport;let w=innerWidth,h=innerHeight;if(vv&&vv.width>50&&vv.height>50){w=Math.round(vv.width);h=Math.round(vv.height)}return {w,h}}
 const DBGON=/debug/.test(location.search);
-const BUILD='4.1.1';
+const BUILD='4.1.2';
 setTimeout(()=>{try{fetch(location.pathname+'?chk='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([^']+)'/);if(m&&m[1]!==BUILD){let done=false;try{done=sessionStorage.getItem('ds_rl')===m[1]}catch(e){}if(!done){try{sessionStorage.setItem('ds_rl',m[1])}catch(e){}location.replace(location.pathname+'?v='+m[1]+(DBGON?'&debug':''))}}}).catch(()=>{})}catch(e){}},1500);
 let lastVS='';
 let AIM='stick';try{AIM=localStorage.getItem('ds_aim')||'stick'}catch(e){}
@@ -908,11 +910,11 @@ function opHome(){
   const ov=$('#ov');ov.dataset.screen='ophome';ov.classList.add('on','title');
   ov.innerHTML=`<div class="scr th-modo"><div class="tint"></div>
    <div class="wh"><div class="whl">DEAD STILL</div><div class="whr">OPERAÇÃO</div></div>
+   <button class="devico" data-dev="${DESK?'mobile':'pc'}" title="${DESK?'Modo computador. Toque para trocar para celular':'Modo celular. Toque para trocar para computador'}" aria-label="aparelho">${DESK?'🖥️':'📱'}</button>
    <div class="wmain"><div class="q">4 DUELOS. UMA OPERAÇÃO.</div>
     <div class="opmeta" style="max-width:min(88vw,820px);text-align:center">Você começa escolhendo a arma e o primeiro equipamento.<br>Vidas e ferimentos passam de um duelo para o outro.<br>Depois de cada duelo você escolhe 1 entre 3 equipamentos, ou pula e recupera 1 vida.<br>Antes de cada duelo você escolhe o muro: o mais arriscado dá 4 equipamentos.</div>
     <div class="dif"><span>DIFICULDADE</span><button class="chip ${diffKey==='recruta'?'sel':''}" data-d="recruta">RECRUTA</button><button class="chip ${diffKey==='veterano'?'sel':''}" data-d="veterano">VETERANO</button><em>${diffKey==='recruta'?'7 vidas. Ele demora mais para te achar.':'6 vidas. Ele te caça no ritmo normal.'}</em></div>
     <div class="dif"><span>MODO FONE</span><button class="chip ${phoneMode?'sel':''}" data-fone="1">${phoneMode?'LIGADO':'DESLIGADO'}</button><em>${phoneMode?'Ligado: o inimigo dá tiros extras só pelo som, sem aviso na tela. Melhor com fone.':'Desligado: sem tiros extras. Todo tiro mostra aviso e seta na tela.'}</em></div>
-    <div class="dif"><span>DISPOSITIVO</span><button class="chip ${!DESK?'sel':''}" data-dev="mobile">CELULAR</button><button class="chip ${DESK?'sel':''}" data-dev="pc">COMPUTADOR</button><em>${DESK?'Mouse e teclado: as teclas aparecem nos botões.':'Toque na tela.'}</em></div>
     <div class="dif"><span>MIRA</span><button class="chip ${AIM==='stick'?'sel':''}" data-aim="stick">DIRECIONAL</button><button class="chip ${AIM==='drag'?'sel':''}" data-aim="drag">ARRASTAR</button><em>${AIM==='stick'?'Círculo na esquerda: empurre para mover a mira.':'Arraste o dedo pela mira.'}</em></div>
     <button class="btn" data-a="opstart">INICIAR OPERAÇÃO ›</button>
    </div>
@@ -2224,7 +2226,7 @@ $('#ov').addEventListener('click',e=>{
   if(v==='cgo'){if(!cardSel)return;const c=CARD[cardSel];if(op.stage==='weapon'){op.weapon=cardSel;op.stage=null;offerIds=offerCards(4,true);cardSel=null;opPick();return}if(c.pick)c.pick(op);if(c.inst)op.hist.push({n:op.n,card:c.id});else op.cards.push(c.id);cardSel=null;opGoMap();return}
   if(v==='cskip'){op.lives=Math.min(op.maxLives,op.lives+1);cardSel=null;opGoMap();return}
   if(v==='mgo'){if(mapSel===null||!ART.done)return;goDuel();return}
-  if(v==='start'){if(!DEV){showDevPick();return}startFlow();return}
+  if(v==='start'){startFlow();return}
   if(v==='startflow'){startFlow();return}
   if(v==='start_old'){let seen=false;try{seen=localStorage.getItem('ds_brief')==='1'}catch(err){}if(seen){opHome()}else{try{localStorage.setItem('ds_brief','1')}catch(err){}showBrief()}return}
   if(v==='tomenu'){AU.stopNarr();opHome();return}
