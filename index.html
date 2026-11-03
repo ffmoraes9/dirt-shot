@@ -199,6 +199,12 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
 .pgi{float:left;max-height:36vh;max-width:44%;margin:0 3vw 1vh 0;border-radius:4px;box-shadow:0 3px 14px rgba(0,0,0,.5);transform:rotate(-2deg)}
 .pgc{clear:both;font:600 clamp(13px,2.8vh,19px) 'Oswald',sans-serif;letter-spacing:.06em;color:#7a2a1a;margin:.6vh 0 1.4vh}
 .pgp .btn{display:block;margin:1.2vh 0 0 auto;clear:both}
+.tbox.tcv .tbg{background:url(art/capa/capa_l.webp) center/cover;filter:none}
+.tbox.tcv .tmid{align-items:flex-end;justify-content:center;padding:0 6vw 4vh 0;background:linear-gradient(to left,rgba(0,0,0,.55),rgba(0,0,0,0) 70%)}
+.tbox.tcv .tt{font-size:clamp(40px,15vh,120px);text-align:right}.tbox.tcv .tsub{text-align:right}
+@media (max-aspect-ratio:1/1){.tbox.tcv .tbg{background-image:url(art/capa/capa_p.webp);background-position:center bottom}.tbox.tcv .tmid{align-items:center;justify-content:flex-start;padding:9vh 4vw 0;background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,0) 45%)}.tbox.tcv .tt{text-align:center;font-size:clamp(34px,14vw,80px)}.tbox.tcv .tsub{text-align:center}}
+.tbox.tcv .tap{color:#fff0c0;text-shadow:0 0 14px #000,0 0 6px #000;background:rgba(0,0,0,.42);width:max-content;margin:0 auto;padding:1vh 3vw;border-radius:8px}
+@media (min-aspect-ratio:11/10){.tbox.tcv .tap{left:auto;right:6vw;margin:0}}
 </style>
 </head>
 <body>
@@ -437,6 +443,10 @@ function loadArt(){
   setTimeout(()=>{if(!ART.done){fired=true;ART.done=true;ART.ready=false;onArtDone()}},25000);
 }
 ['ic_apoio','ic_ferido'].forEach(n=>{const im=new Image();im.onload=()=>{ART.img['h/'+n]=im};im.src='art/hist/'+n+'.webp'});
+const MURO={ready:false,built:false,img:{},T0:.15,holes:[{x:.2383,y:.3828,w:.2461,h:.2256},{x:.6595,y:.5479,w:.0990,h:.1465}]};
+['alto','quebrado','fresta','caido'].forEach(n=>{const im=new Image();im.onload=()=>{MURO.img[n]=im;if(Object.keys(MURO.img).length===4)MURO.ready=true};im.src='art/muro/'+n+'.webp'});
+const NEWW=()=>MURO.ready&&ART.ready;
+function mGeo(){const yB=VH-4,topT=Math.round(VH*(PORT?.32:.42)),hImg=(yB-topT)/(1-MURO.T0);return {yB,topT,hImg,yImg:yB-hImg,sW:Math.round(VW*(PORT?1.85:.62))}}
 function sniperAvg(){for(let i=0;i<2;i++){const im=ART.img['sniper'+i],c=mkc(40,40),x=c.getContext('2d');x.drawImage(im,0,0,40,40);const d=x.getImageData(0,0,40,40).data;let r=0,gg=0,b=0,n=0;for(let k=0;k<d.length;k+=4){if(d[k+3]>200){r+=d[k];gg+=d[k+1];b+=d[k+2];n++}}ART.avg[i]=[r/n,gg/n,b/n]}}
 function makeSprArt(i,base){
   const lm=ART.meta.sniper_lens[i],img=ART.img['sniper'+i],av=ART.avg[i];
@@ -524,6 +534,7 @@ const GLYPH={alto:'▲',quebrado:'◣',buraco:'●'};
 const posCenter=i=>X0+(X1-X0)*(i+.5)/NPOS;
 let wallV={}, wallH={}, segW=900;
 function buildWall(){
+  if(NEWW()){const G=mGeo();segW=G.sW;['alto','quebrado','buraco'].forEach(k=>{wallH[k]=G.hImg});return}
   segW=Math.ceil(VW*(PORT?1.3:.82));
   if(ART.ready){
     ['alto','quebrado','buraco'].forEach((kind,i)=>{const im=ART.img['wall'+i],h=Math.round(segW*im.height/im.width),cc=mkc(segW,h);cc.getContext('2d').drawImage(im,0,0,segW,h);wallV[kind]=cc;wallH[kind]=h});
@@ -726,12 +737,12 @@ const HINTS={
  fresta:'FRESTA: observa com pouco risco, mas não dá para atirar daqui.',
  t_alto:'MURO ALTO: cobertura forte, mas mirar por cima expõe mais.',
  t_quebrado:'MURO QUEBRADO: mira normal, mas só vê um setor do campo e o muro é frágil.',
- t_buraco:'Este trecho tem uma FRESTA. Use o botão FRESTA para observar com segurança.',
+ t_buraco:'Este trecho tem FRESTAS: as janelas no muro mostram o campo, nítido e sem risco.',
  iscas:'ISCAS: fazem ele atirar ou brilhar e se revelar.',
  radio:'FALAR: PROVOCAR o faz brilhar. CONVERSAR baixa sua exposição. É a conversa com o INIMIGO, não com o Rocha.',
  tempo:'O relógio no canto é o tempo do duelo. Se zerar, você perde 1 vida e ganha mais 60 s.',
  exp60:'Em 100% de EXPOSIÇÃO ele atira em você. ABAIXAR esfria.',
- u2:'NOVO: APOIO (o Rocha prevê o vento ou vigia o campo), MARCAR (fixa um ponto na mira) e FRESTA.',
+ u2:'NOVO: APOIO (o Rocha prevê o vento ou vigia o campo) e MARCAR (fixa um ponto na mira).',
  u3:'NOVO: FALAR com o inimigo (provocar ou conversar) e ISCAS para fazê-lo atirar ou brilhar.',
  u4:'Último duelo. O Rocha não pode mais ajudar. Você está sozinho.',
  folego:'SEGURAR firma a mira, mas o fôlego acaba.',
@@ -1606,7 +1617,7 @@ function slice9(im,x,y,w,h,bs,bd){const iw=im.width,ih=im.height;bd=Math.min(bd,
 let pressId=null;
 const KEYT={peek:'ESPAÇO',fire:'ESPAÇO',moveL:'A',moveR:'D',hole:'B',decoy:'I',radio:'R',notes:'C',duck:'S',hold:'SHIFT',mark:'M',apoio:'E',swap:'Q',fin:'3',fout:'1',zin:'+',zout:'-'};
 const FEAT_N={hole:2,mark:2,apoio:2,decoy:3,radio:3},FEAT_NEW={hole:2,mark:2,apoio:2,decoy:3,radio:3};
-function featOn(id){if(typeof op==='undefined'||!op||!op.n)return true;if(id==='decoy'&&g&&(g.helm+g.rocks+g.mirrors)>0)return true;return op.n>=(FEAT_N[id]||1)}
+function featOn(id){if(id==='hole'&&NEWW())return false;if(typeof op==='undefined'||!op||!op.n)return true;if(id==='decoy'&&g&&(g.helm+g.rocks+g.mirrors)>0)return true;return op.n>=(FEAT_N[id]||1)}
 function pulseOn(id){if(!g||typeof op==='undefined'||!op||!op.n)return false;if(id==='notes')return g.notes&&g.notes.length>0&&!(g.used&&g.used.notes);return op.n===FEAT_NEW[id]&&!(g.used&&g.used[id])}
 function btn(id,x,y,w,h,label,o){
   o=o||{};btns.push({id,x,y,w,h,hold:o.hold,dis:o.dis});
@@ -1640,6 +1651,7 @@ function bar(x,y,w,h,v,c1,c2,label){
 }
 const lowC2=mkc(200,120),lowX2=lowC2.getContext('2d'),lowC3=mkc(10,10),lowX3=lowC3.getContext('2d');
 function coverMap(){
+  if(NEWW()){const sT=PORT?200:56;if(PORT){const cz=1.0;return {cz,cx:g?posCenter(g.posF):WW/2,cyS:sT+(560-440)*cz}}const cz=VW/WW;return {cz,cx:WW/2,cyS:sT+(560-440)*cz}}
   if(!PORT){const cz=VW/WW;return {cz,cx:WW/2,cyS:36+(560-300)*cz}}
   const wt=yBase()-(wallH.alto||150),cz=Math.max(1.3,Math.min(2.4,(wt-24-200-(PORT?120:0))/500));return {cz,cx:g?posCenter(g.posF):WW/2,cyS:200+(560-300)*cz};
 }
@@ -1657,7 +1669,18 @@ function drawCoverLandmarks(m){
     const sg=ctx.createRadialGradient(sx,sy,0,sx,sy,W*.55);sg.addColorStop(0,'rgba(0,0,0,.4)');sg.addColorStop(1,'rgba(0,0,0,0)');ctx.save();ctx.translate(0,sy);ctx.scale(1,.2);ctx.translate(0,-sy);ctx.fillStyle=sg;ctx.beginPath();ctx.arc(sx,sy,W*.55,0,6.3);ctx.fill();ctx.restore();
     ctx.globalAlpha=[.5,.58,.66][l.pl]||.6;ctx.drawImage(im,sx-W/2,sy-H,W,H);ctx.globalAlpha=1}
   ctx.globalAlpha=1}
+const FLD=mkc(10,10),FLX=FLD.getContext('2d');let fldT=-9;
+const GRND=(()=>{const c=mkc(256,256),x=c.getContext('2d');x.fillStyle='#6a4a30';x.fillRect(0,0,256,256);let a=7;const r=()=>{a=(a*16807)%2147483647;return a/2147483647};
+  for(let i=0;i<900;i++){const px=r()*256,py=r()*256,rd=1+r()*5,k=r();x.fillStyle=k<.4?'rgba(40,26,16,.55)':k<.75?'rgba(150,112,76,.5)':'rgba(205,170,125,.38)';x.beginPath();x.ellipse(px,py,rd*1.4,rd,r()*3,0,6.3);x.fill()}
+  for(let i=0;i<120;i++){x.strokeStyle='rgba(30,20,12,.35)';x.lineWidth=1;x.beginPath();x.moveTo(r()*256,r()*256);x.lineTo(r()*256,r()*256);x.stroke()}return c})();
 function renderCoverBase(){
+  if(NEWW()){const m=coverMap(),G=mGeo(),fs=.8,fb=Math.round(Math.max(G.topT+10,G.yB*.86)),w=Math.ceil(VW*fs),h=Math.ceil(fb*fs);
+    const now=performance.now(),mv=g.view==='moving'||Math.abs(g.posF-(g._fp||0))>.001;
+    if(FLD.width!==w||FLD.height!==h){FLD.width=w;FLD.height=h;fldT=-9}
+    if(mv||now-fldT>100){fldT=now;g._fp=g.posF;FLX.setTransform(fs,0,0,fs,0,0);
+      const yEnd=m.cyS+(WH-560)*m.cz,gg=FLX.createLinearGradient(0,0,0,fb);gg.addColorStop(0,'#c9b98e');gg.addColorStop(Math.max(0,Math.min(1,yEnd/fb)),'#7a4a2c');gg.addColorStop(Math.min(1,(yEnd+70)/fb),'#4a3020');gg.addColorStop(1,'#2a1b12');
+      FLX.fillStyle=gg;FLX.fillRect(0,0,VW,fb);{const y0=Math.max(0,yEnd-4);FLX.save();FLX.fillStyle=FLX.createPattern(GRND,'repeat');FLX.fillRect(0,y0,VW,fb-y0);const dg=FLX.createLinearGradient(0,y0,0,fb);dg.addColorStop(0,'rgba(60,36,20,.15)');dg.addColorStop(1,'rgba(20,12,8,.75)');FLX.fillStyle=dg;FLX.fillRect(0,y0,VW,fb-y0);FLX.restore()}drawWorld(FLX,m.cx,560,m.cz,VW/2,m.cyS,{cover:true})}
+    ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(FLD,0,0,VW,fb);ctx.fillStyle='#1b120c';ctx.fillRect(0,fb,VW,VH-fb);return}
   const m=coverMap(),cz=m.cz,cyS=m.cyS,yEnd=cyS+(WH-560)*cz;
   const lw=Math.ceil(VW*.7),lh=Math.ceil(VH*.7);
   if(lowC.width!==lw||lowC.height!==lh){lowC.width=lw;lowC.height=lh}
@@ -1668,9 +1691,31 @@ function renderCoverBase(){
   drawWorld(lowX,m.cx,560,cz,VW/2,cyS,{cover:true});
   {let t=lowC;const st=[.34,.22,.3,.5,.75];st.forEach((f,i)=>{t=smoothCopy(t,Math.ceil(VW*f),Math.ceil(VH*f),i)});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(t,0,0,VW,VH);ctx.globalAlpha=.78;ctx.drawImage(lowC,0,0,VW,VH);ctx.globalAlpha=1}
 }
-const yBase=()=>PORT?VH-250:VH-34;
+const yBase=()=>NEWW()?VH-4:(PORT?VH-250:VH-34);
 const wallY=k=>ART.ready?yBase()-wallH[k]:yBase()-306;
+const WIN={};
+function drawWallNew(){
+  const G=mGeo(),sw2=G.sW,m=coverMap(),KEY={alto:'alto',quebrado:'quebrado',buraco:'fresta'};
+  const x0=VW/2-g.posF*sw2-sw2/2,x1=x0+NPOS*sw2;
+  ctx.fillStyle='rgba(18,16,12,.96)';if(x0>0)ctx.fillRect(0,G.topT,x0,VH-G.topT);if(x1<VW)ctx.fillRect(x1,G.topT,VW-x1,VH-G.topT);
+  for(let i=0;i<NPOS;i++){
+    const x=VW/2+(i-g.posF)*sw2-sw2/2;if(x>VW||x+sw2<0)continue;const kind=g.types[i];
+    if(g.col&&g.col[i]){const im=MURO.img.caido,S=2.2*G.hImg/im.height,swS=sw2/S,sx0=(im.width-swS)/2,dh=im.height*S;ctx.save();ctx.beginPath();ctx.rect(x,0,sw2,VH);ctx.clip();ctx.drawImage(im,sx0,0,swS,im.height,x,G.yB-dh,sw2,dh);ctx.restore();continue}
+    if(kind==='buraco'){MURO.holes.forEach((hh,k)=>{const hx=x+hh.x*sw2,hy=G.yImg+hh.y*G.hImg,hw=hh.w*sw2,ht=hh.h*G.hImg;if(hx+hw<0||hx>VW)return;
+      const wx=m.cx+((hx+hw/2)-VW/2)/m.cz,key=i+'_'+k;let w=WIN[key];if(!w)w=WIN[key]={c:mkc(8,8),t:-9};
+      const ws=.8,cw=Math.ceil(hw*ws)+2,ch=Math.ceil(ht*ws)+2;if(w.c.width!==cw||w.c.height!==ch){w.c.width=cw;w.c.height=ch;w.t=-9}
+      const now=performance.now();if(now-w.t>100||g.view==='moving'){w.t=now;const wc=w.c.getContext('2d');wc.setTransform(ws,0,0,ws,0,0);wc.fillStyle='#6a4a30';wc.fillRect(0,0,hw+4,ht+4);drawWorld(wc,wx,610,m.cz*1.7,hw/2,ht/2,{cover:true})}
+      ctx.drawImage(w.c,hx,hy,hw,ht)})}
+    ctx.drawImage(MURO.img[KEY[kind]],x,G.yImg,sw2,G.hImg);
+    const dmg=g.maxHp[i]-g.wall[i];
+    for(let k=0;k<dmg;k++){const cx2=x+sw2*(.2+.3*k)+Math.sin(i*5+k)*30,cy2=G.yImg+G.hImg*(.55+.08*k);const dci=ART.img['n/dc'+((i*3+k)%4)];if(dci){const dw=80,dh=dci.height*dw/dci.width;ctx.drawImage(dci,cx2-dw/2,cy2-dh/2,dw,dh)}}
+    if(g.wall[i]===0){const c1i=ART.img['n/dc'+(8+(i%2))];if(c1i){const dw=190,dh=c1i.height*dw/c1i.width;ctx.drawImage(c1i,x+sw2*.5-dw/2,G.yImg+G.hImg*.5-dh/2,dw,dh)}}
+  }
+  ctx.save();ctx.globalCompositeOperation='multiply';ctx.fillStyle='#c4b6a4';ctx.fillRect(0,G.topT-20,VW,VH-G.topT+20);ctx.restore();
+  {const nc=nightCol();if(nc){ctx.save();ctx.globalCompositeOperation='multiply';ctx.fillStyle=nc;ctx.fillRect(0,G.topT-20,VW,VH-G.topT+20);ctx.restore()}}
+}
 function drawWallLayer(){
+  if(NEWW()){drawWallNew();return}
   const art=ART.ready,yB=yBase();
   if(art){const gg=ctx.createLinearGradient(0,yB-30,0,VH);gg.addColorStop(0,'rgba(60,40,26,0)');gg.addColorStop(.4,'rgba(60,40,26,.96)');gg.addColorStop(1,'#2a1c12');ctx.fillStyle=gg;ctx.fillRect(0,yB-30,VW,VH-(yB-30))}
   const x0=VW/2-g.posF*segW-segW/2,x1=x0+NPOS*segW,topEnd=art?yB-266:VH-340+60;
@@ -1692,7 +1737,7 @@ function renderCover(){
   renderCoverBase();
   const mm=coverMap(),cz=mm.cz,toS=(x,y)=>[VW/2+(x-mm.cx)*cz,mm.cyS+(y-560)*cz];
   for(const c of g.clues){if(c.kind==='glint')continue;const [sx,sy]=toS(c.x,c.y),a=Math.min(1,c.ttl/2);ctx.strokeStyle=`rgba(255,160,60,${.6*a})`;ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.beginPath();ctx.arc(sx,sy,Math.max(10,c.r*cz),0,6.3);ctx.stroke();ctx.setLineDash([])}
-  const kcur=g.types[g.pos],topY=wallY(kcur)+14;
+  const kcur=g.types[g.pos],topY=(NEWW()?mGeo().topT:wallY(kcur))+14;
   if(g.decoy){const hx=VW*.5,k=Math.min(1,(g.t-g.decoy.t0)/.6);
     if(ART.ready){const im=ART.img.bait0,hh=150,ww=hh*im.width/im.height,ty=topY-110*k+40*(1-k);ctx.drawImage(im,hx-ww/2,ty,ww,hh)}
     else{const yy=topY-70*k;ctx.fillStyle='#4a4d3a';ctx.beginPath();ctx.ellipse(hx,yy,24,15,0,Math.PI,0);ctx.fill();ctx.fillRect(hx-26,yy-2,52,5);ctx.strokeStyle='#5a3a26';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(hx,yy+3);ctx.lineTo(hx,topY+10);ctx.stroke()}}
@@ -1703,7 +1748,7 @@ function renderCover(){
     else if(f.kind==='mirror'){const k=Math.min(1,t/.4),hx=VW/2+40;if(ART.ready){const im=ART.img.bait2,hh=120,ww=hh*im.width/im.height;ctx.drawImage(im,hx-ww/2,topY-90*k+30*(1-k),ww,hh)}
       const fl=Math.max(0,Math.sin(Math.min(1,t/1.0)*Math.PI));const gr=ctx.createRadialGradient(hx,topY-50,0,hx,topY-50,170);gr.addColorStop(0,`rgba(255,255,240,${.9*fl})`);gr.addColorStop(1,'rgba(255,255,240,0)');ctx.fillStyle=gr;ctx.fillRect(hx-180,topY-230,360,360)}}
   // painel dos trechos
-  const wtop=yBase()-Math.max(wallH.alto||0,wallH.quebrado||0,wallH.buraco||0,120),py0=PORT?(wtop-110):54;ctx.fillStyle='rgba(8,9,6,.6)';rrect(ctx,VW/2-300,py0,600,98,12);ctx.fill();
+  const wtop=yBase()-Math.max(wallH.alto||0,wallH.quebrado||0,wallH.buraco||0,120),py0=NEWW()?(mGeo().topT+(PORT?30:8)):(PORT?(wtop-110):54);ctx.fillStyle='rgba(8,9,6,.6)';rrect(ctx,VW/2-300,py0,600,98,12);ctx.fill();
   const by=py0+58,cur=Math.round(g.posF);
   for(let i=0;i<NPOS;i++){const x=VW/2+(i-2)*84,on=i===cur,tp=g.types[i];
     ctx.fillStyle=on?'rgba(255,210,74,.95)':'rgba(30,28,22,.75)';ctx.beginPath();ctx.arc(x,by,17,0,6.3);ctx.fill();ctx.strokeStyle=on?'#fff0a8':'rgba(230,226,200,.5)';ctx.lineWidth=2;ctx.stroke();
@@ -1940,7 +1985,7 @@ cv.addEventListener('pointerdown',e=>{
   if(b){AU.click();pressId=b.id;if(b.hold){hint('folego');g.held=true;ptr.set(e.pointerId,{hold:true})}else{ptr.set(e.pointerId,{btn:true});act(b.id)}}
   else if(!g.menu&&g.view==='cover'){
     const wtop=yBase()-Math.max(wallH.alto||0,wallH.quebrado||0,wallH.buraco||0,120),fb=PORT?wtop-125:VH*.52;
-    if(p.y>200&&p.y<fb){const m=coverMap(),wx=m.cx+(p.x-VW/2)/m.cz,wy=560+(p.y-m.cyS)/m.cz;AU.click();act('peek');if(g.view==='scope'){g.cam.x=wx;g.cam.y=clamp(wy,430,690);g.focus=planeOfY(g.cam.y);camBounds()}}
+    if(NEWW()?(p.y>40&&p.y<mGeo().topT-6):(p.y>200&&p.y<fb)){const m=coverMap(),wx=m.cx+(p.x-VW/2)/m.cz,wy=560+(p.y-m.cyS)/m.cz;AU.click();act('peek');if(g.view==='scope'){g.cam.x=wx;g.cam.y=clamp(wy,430,690);g.focus=planeOfY(g.cam.y);camBounds()}}
   }
   else if(!g.menu&&(g.view==='scope'||g.view==='hole')){ptr.set(e.pointerId,{drag:true,x:p.x,y:p.y});const ds=dragPtrs();if(ds.length>=2&&g.view==='scope')pinch={d0:Math.hypot(ds[0].x-ds[1].x,ds[0].y-ds[1].y)||1,z0:g.zoomCur}}
 },{passive:false});
@@ -2054,7 +2099,7 @@ function wzRender(step,silent){
 function showMenu(){wzRender(0)}
 function showTitle(){
   scene='menu';const ov=$('#ov');ov.dataset.screen='title';ov.classList.add('on','title');
-  ov.innerHTML=`<div class="tbox" data-a="start"><div class="tbg"></div><img class="tsn" src="art/sniper0.webp" alt=""><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">ELE ESTÁ NO LIXO. VOCÊ, ATRÁS DO MURO.</div></div><div class="tap">TOQUE PARA COMEÇAR</div></div>`;
+  ov.innerHTML=`<div class="tbox tcv" data-a="start"><div class="tbg"></div><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">ELE ESTÁ NO LIXO. VOCÊ, ATRÁS DO MURO.</div></div><div class="tap">TOQUE PARA COMEÇAR</div></div>`;
 }
 function startFlow(){let seen=false;try{seen=localStorage.getItem('ds_brief')==='1'}catch(err){}if(seen){opHome()}else{try{localStorage.setItem('ds_brief','1')}catch(err){}showBrief()}}
 function setDev(d){DEV=d;DESK=d==='pc';try{localStorage.setItem('ds_dev',d)}catch(e){}resize()}
@@ -2111,6 +2156,7 @@ setInterval(()=>{const st=$('#sndst');if(st&&$('#ov').dataset.screen==='ophome')
 // ---------------------------------------------------------------- laço
 let last=performance.now();
 function frame(ts){
+  if(NEWW()&&!MURO.built){MURO.built=true;try{buildWall()}catch(err){console.error(err)}}
   const dt=Math.min(.05,(ts-last)/1000);last=ts;
   {const vs=viewSize(),k=vs.w+'x'+vs.h;if(k!==lastVS){try{resize()}catch(err){console.error(err)}}}
   try{let sc=1;if(g&&g.slowT>0){sc=.35;g.slowT-=dt}if(g&&g.bcam&&bcamActive()){render()}else{update(dt*sc);render()}}catch(err){console.error(err)}
