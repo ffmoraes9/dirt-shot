@@ -206,6 +206,7 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
 .tbox.tcv .tap{color:#fff0c0;text-shadow:0 0 14px #000,0 0 6px #000;background:rgba(0,0,0,.42);width:max-content;margin:0 auto;padding:1vh 3vw;border-radius:8px}
 @media (min-aspect-ratio:11/10){.tbox.tcv .tap{left:auto;right:6vw;margin:0}}
 .tbox.tcv .tsub{line-height:1.7}
+.ver{position:absolute;left:3vw;bottom:2vh;font:500 12px Oswald,sans-serif;letter-spacing:.1em;color:rgba(240,230,190,.45)}
 </style>
 </head>
 <body>
@@ -238,13 +239,16 @@ let DEV='';try{DEV=localStorage.getItem('ds_dev2')||''}catch(e){}
 const AUTOPC=(()=>{if(TOUCHUA)return false;try{return matchMedia('(hover:hover) and (pointer:fine)').matches}catch(e){return false}})();
 let DESK=DEV?DEV==='pc':AUTOPC;
 function viewSize(){const vv=window.visualViewport;let w=innerWidth,h=innerHeight;if(vv&&vv.width>50&&vv.height>50){w=Math.round(vv.width);h=Math.round(vv.height)}return {w,h}}
+const DBGON=/debug/.test(location.search);
+const BUILD='4.1.1';
+setTimeout(()=>{try{fetch(location.pathname+'?chk='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([^']+)'/);if(m&&m[1]!==BUILD){let done=false;try{done=sessionStorage.getItem('ds_rl')===m[1]}catch(e){}if(!done){try{sessionStorage.setItem('ds_rl',m[1])}catch(e){}location.replace(location.pathname+'?v='+m[1]+(DBGON?'&debug':''))}}}).catch(()=>{})}catch(e){}},1500);
 let lastVS='';
 let AIM='stick';try{AIM=localStorage.getItem('ds_aim')||'stick'}catch(e){}
 const aimStick=()=>!DESK&&AIM==='stick';
 function stickGeo(){if(PORT)return {cx:170,cy:VH-190,R:110};const m=VW>1400?250:190;return {cx:m,cy:VH-170,R:105}}
 const inStick=p=>{const G=stickGeo();return Math.hypot(p.x-G.cx,p.y-G.cy)<=G.R*1.45};
 function stickSet(p){const G=stickGeo();let dx=p.x-G.cx,dy=p.y-G.cy;const m=Math.hypot(dx,dy);if(m>G.R){dx*=G.R/m;dy*=G.R/m}g.stick={dx,dy}}
-const DBGON=/debug/.test(location.search);let DBG=null;
+let DBG=null;
 const lowC=mkc(200,120), lowX=lowC.getContext('2d');
 const holeC=mkc(160,120), holeX=holeC.getContext('2d');
 let wallC=null;
@@ -1932,8 +1936,12 @@ function renderScope(){
     if(featOn('mark'))btn('mark',zx-50,326,126,50,'MARCAR',{ic:'n/ic5',icL:1,fs:18,cap:g.pins.length+'/4',capfs:10});
   }
 }
+let stickUsed=false;try{stickUsed=localStorage.getItem('ds_stick')==='1'}catch(e){}
 function drawStick(G){
-  const st=g.stick,kx=G.cx+(st?st.dx:0),ky=G.cy+(st?st.dy:0);
+  const st=g.stick;if(st&&!stickUsed){stickUsed=true;try{localStorage.setItem('ds_stick','1')}catch(e){}}
+  if(!stickUsed){const a=.5+.5*Math.sin(performance.now()/260);ctx.save();ctx.strokeStyle='rgba(255,224,120,'+(.35+.55*a)+')';ctx.lineWidth=7;ctx.beginPath();ctx.arc(G.cx,G.cy,G.R*1.18+10,0,6.3);ctx.stroke();ctx.restore()}
+  {ctx.save();ctx.font='700 '+(stickUsed?15:19)+'px Oswald,Arial Narrow,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';const lb=stickUsed?'MOVER A MIRA':'ARRASTE AQUI PARA MOVER A MIRA',tw=ctx.measureText(lb).width+20,ly=G.cy-G.R*1.18-24;ctx.fillStyle='rgba(0,0,0,.65)';rrect(ctx,G.cx-tw/2,ly-14,tw,28,8);ctx.fill();ctx.fillStyle='#ffe08a';ctx.fillText(lb,G.cx,ly+1);ctx.restore()}
+  const kx=G.cx+(st?st.dx:0),ky=G.cy+(st?st.dy:0);
   ctx.save();
   const bg=ctx.createRadialGradient(G.cx,G.cy,8,G.cx,G.cy,G.R*1.18);bg.addColorStop(0,'rgba(40,34,24,.8)');bg.addColorStop(1,'rgba(14,12,9,.9)');
   ctx.fillStyle=bg;ctx.beginPath();ctx.arc(G.cx,G.cy,G.R*1.18,0,6.3);ctx.fill();
@@ -2177,7 +2185,7 @@ function wzRender(step,silent){
 function showMenu(){wzRender(0)}
 function showTitle(){
   scene='menu';const ov=$('#ov');ov.dataset.screen='title';ov.classList.add('on','title');
-  ov.innerHTML=`<div class="tbox tcv" data-a="start"><div class="tbg"></div><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">DOIS SNIPERS<br>UM MURO QUASE CAINDO ENTRE ELES<br>QUALQUER ERRO É FATAL.</div></div><div class="tap">TOQUE PARA COMEÇAR</div></div>`;
+  ov.innerHTML=`<div class="tbox tcv" data-a="start"><div class="tbg"></div><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">DOIS SNIPERS<br>UM MURO QUASE CAINDO ENTRE ELES<br>QUALQUER ERRO É FATAL.</div></div><div class="tap">TOQUE PARA COMEÇAR</div><div class="ver">v${BUILD}</div></div>`;
 }
 function startFlow(){let seen=false;try{seen=localStorage.getItem('ds_brief')==='1'}catch(err){}if(seen){opHome()}else{try{localStorage.setItem('ds_brief','1')}catch(err){}showBrief()}}
 function setDev(d){DEV=d;DESK=d==='pc';try{localStorage.setItem('ds_dev2',d)}catch(e){}resize()}
