@@ -1694,6 +1694,19 @@ function renderCoverBase(){
 }
 const yBase=()=>NEWW()?VH-4:(PORT?VH-250:VH-34);
 const wallY=k=>ART.ready?yBase()-wallH[k]:yBase()-306;
+MURO.mask={};
+function wallMask(name){let m=MURO.mask[name];if(m)return m;const im=MURO.img[name],w=256,h=Math.round(256*im.height/im.width),c=mkc(w,h),x=c.getContext('2d');x.drawImage(im,0,0,w,h);const d=x.getImageData(0,0,w,h).data,a=new Uint8Array(w*h);for(let i=0;i<w*h;i++)a[i]=d[i*4+3];return MURO.mask[name]={w,h,a}}
+function maskA(name,u,v){const m=wallMask(name),x=Math.max(0,Math.min(m.w-1,Math.floor(u*m.w))),y=Math.max(0,Math.min(m.h-1,Math.floor(v*m.h)));return m.a[y*m.w+x]}
+function canAim(p){
+  if(p.y<40)return false;const G=mGeo();if(p.y<G.topT-6)return true;
+  const py0=G.topT+(PORT?30:8);if(p.x>VW/2-300&&p.x<VW/2+300&&p.y>=py0&&p.y<py0+125)return false;
+  const sw2=G.sW;
+  for(let i=0;i<NPOS;i++){const x=VW/2+(i-g.posF)*sw2-sw2/2;if(p.x<x||p.x>=x+sw2)continue;
+    if(g.col&&g.col[i]){const im=MURO.img.caido,S=2.2*G.hImg/im.height,swS=sw2/S,sx0=(im.width-swS)/2,dh=im.height*S,u=(sx0+(p.x-x)/sw2*swS)/im.width,v=(p.y-(G.yB-dh))/dh;if(v<0)return true;return maskA('caido',u,v)<60}
+    const kd=g.types[i],key={alto:'alto',quebrado:'quebrado',buraco:'fresta'}[kd],u=(p.x-x)/sw2,v=(p.y-G.yImg)/G.hImg;if(v<0)return true;
+    if(kd==='buraco'&&MURO.holes.some(h=>u>=h.x&&u<=h.x+h.w&&v>=h.y&&v<=h.y+h.h))return false;
+    return maskA(key,u,v)<60}
+  return false}
 const WIN={};
 function drawWallNew(){
   const G=mGeo(),sw2=G.sW,m=coverMap(),KEY={alto:'alto',quebrado:'quebrado',buraco:'fresta'};
@@ -1941,8 +1954,8 @@ function hud(){
     {const pi=ART.img['n/pt'+(l.who==='ELE'?1:l.who==='VOCÊ'?2:0)];if(pi&&ox){ctx.save();ctx.beginPath();ctx.arc(rx-24,yb+14,24,0,6.3);ctx.clip();ctx.drawImage(pi,rx-48,yb-10,48,pi.height*48/pi.width);ctx.restore();ctx.strokeStyle=l.who==='ELE'?'#ffb070':'#bfe0a0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx-24,yb+14,24,0,6.3);ctx.stroke()}}
     lines.slice(0,PORT?3:2).forEach((ln,k)=>{const wd=ctx.measureText(ln).width;ctx.fillStyle='rgba(8,8,6,.72)';ctx.fillRect(rx-ox-wd-14,yb+k*(fsz+8)-fsz/2-3,wd+22,fsz+8);ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle=col;ctx.fillText(ln,rx-ox,yb+k*(fsz+8))});
     ctx.globalAlpha=1});}
-  if(g.toast){const t=g.toast,k=g.t-t.t0;if(k>t.ttl)g.toast=null;else{const a=Math.min(1,k/.15,(t.ttl-k)/.6);ctx.globalAlpha=a;const ty=PORT?(g.view==='scope'?VH-370:300):(g.view==='scope'?104:290);
-    ctx.fillStyle='rgba(8,9,6,.9)';rrect(ctx,VW/2-210,ty,420,70,10);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
+  if(g.toast){const t=g.toast,k=g.t-t.t0;if(k>t.ttl)g.toast=null;else{const a=Math.min(1,k/.15,(t.ttl-k)/.6);ctx.globalAlpha=a;const hyB=PORT?(g.view==='scope'?VH-380:VH-314):(g.view==='scope'?VH-178:VH-216),ty=PORT?(g.hint?hyB-80:hyB+14):(g.view==='scope'?(g.hint?hyB-80:104):(g.hint?hyB-80:hyB+14));
+    ctx.fillStyle='rgba(8,9,6,.8)';rrect(ctx,VW/2-210,ty,420,70,10);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
     txt(t.a,VW/2,ty+25,26,'#ffd24a','center',700);txt(t.b,VW/2,ty+52,17,'#eee6c8','center',500);ctx.globalAlpha=1}}
   if(g.exp>60&&!g.over){const k=(g.exp-60)/40,pl=.5+.5*Math.sin(g.t*lerp(5,11,k));edgeVig(120,10,10,k*.6*(.65+.35*pl))}
   if(g.hitV>0)edgeVig(210,20,10,g.hitV*.75);
@@ -1951,7 +1964,7 @@ function hud(){
   if(g.wflash>0){ctx.fillStyle=`rgba(255,250,235,${g.wflash*.65})`;ctx.fillRect(0,0,VW,VH)}
   btn('sound',276,20,40,36,['×','♪','♪♪'][AU.level],{fs:19});
   btn('help',326,20,40,36,'?',{fs:22});
-  if(g.hint&&!(g.bcam&&bcamActive())){const h=g.hint,k=Math.min(1,(g.t-h.t0)/.4),w=Math.min(760,VW-120);const hy0=PORT?198:(g.view==='scope'?VH-178:166);ctx.globalAlpha=k;ctx.fillStyle='rgba(8,9,6,.9)';rrect(ctx,VW/2-w/2,hy0,w,96,12);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
+  if(g.hint&&!(g.bcam&&bcamActive())){const h=g.hint,k=Math.min(1,(g.t-h.t0)/.4),w=Math.min(760,VW-120);const hy0=PORT?(g.view==='scope'?VH-380:VH-314):(g.view==='scope'?VH-178:VH-216);ctx.globalAlpha=k;ctx.fillStyle='rgba(8,9,6,.8)';rrect(ctx,VW/2-w/2,hy0,w,96,12);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
     ctx.font='600 22px Oswald,Arial Narrow,sans-serif';ctx.fillStyle='#f6efd0';ctx.textAlign='center';ctx.textBaseline='middle';
     const words=h.text.split(' ');let line='',lines=[];for(const wd of words){const t2=line?line+' '+wd:wd;if(ctx.measureText(t2).width>w-40){lines.push(line);line=wd}else line=t2}lines.push(line);
     lines.slice(0,3).forEach((ln,i)=>ctx.fillText(ln,VW/2,hy0+48+(i-(Math.min(3,lines.length)-1)/2)*27));ctx.globalAlpha=1}
@@ -2009,7 +2022,7 @@ cv.addEventListener('pointerdown',e=>{
   if(b){AU.click();pressId=b.id;if(b.hold){hint('folego');g.held=true;ptr.set(e.pointerId,{hold:true})}else{ptr.set(e.pointerId,{btn:true});act(b.id)}}
   else if(!g.menu&&g.view==='cover'){
     const wtop=yBase()-Math.max(wallH.alto||0,wallH.quebrado||0,wallH.buraco||0,120),fb=PORT?wtop-125:VH*.52;
-    if(NEWW()?(p.y>40&&p.y<mGeo().topT-6):(p.y>200&&p.y<fb)){const m=coverMap(),wx=m.cx+(p.x-VW/2)/m.cz,wy=560+(p.y-m.cyS)/m.cz;AU.click();act('peek');if(g.view==='scope'){g.cam.x=wx;g.cam.y=clamp(wy,430,690);g.focus=planeOfY(g.cam.y);camBounds()}}
+    if(NEWW()?canAim(p):(p.y>200&&p.y<fb)){const m=coverMap(),wx=m.cx+(p.x-VW/2)/m.cz,wy=560+(p.y-m.cyS)/m.cz;AU.click();act('peek');if(g.view==='scope'){g.cam.x=wx;g.cam.y=clamp(wy,430,690);g.focus=planeOfY(g.cam.y);camBounds()}}
   }
   else if(!g.menu&&(g.view==='scope'||g.view==='hole')){ptr.set(e.pointerId,{drag:true,x:p.x,y:p.y});const ds=dragPtrs();if(ds.length>=2&&g.view==='scope')pinch={d0:Math.hypot(ds[0].x-ds[1].x,ds[0].y-ds[1].y)||1,z0:g.zoomCur}}
 },{passive:false});
@@ -2123,7 +2136,7 @@ function wzRender(step,silent){
 function showMenu(){wzRender(0)}
 function showTitle(){
   scene='menu';const ov=$('#ov');ov.dataset.screen='title';ov.classList.add('on','title');
-  ov.innerHTML=`<div class="tbox tcv" data-a="start"><div class="tbg"></div><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">ELE ESTÁ NO LIXO. VOCÊ, ATRÁS DO MURO.</div></div><div class="tap">TOQUE PARA COMEÇAR</div></div>`;
+  ov.innerHTML=`<div class="tbox tcv" data-a="start"><div class="tbg"></div><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">DUELO DE SNIPERS<br>QUEM SE MEXE PRIMEIRO, PERDE.</div></div><div class="tap">TOQUE PARA COMEÇAR</div></div>`;
 }
 function startFlow(){let seen=false;try{seen=localStorage.getItem('ds_brief')==='1'}catch(err){}if(seen){opHome()}else{try{localStorage.setItem('ds_brief','1')}catch(err){}showBrief()}}
 function setDev(d){DEV=d;DESK=d==='pc';try{localStorage.setItem('ds_dev',d)}catch(e){}resize()}
