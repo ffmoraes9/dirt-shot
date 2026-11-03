@@ -446,7 +446,7 @@ function loadArt(){
 const MURO={ready:false,built:false,img:{},T0:.15,holes:[{x:.2383,y:.3828,w:.2461,h:.2256},{x:.6595,y:.5479,w:.0990,h:.1465}]};
 ['alto','quebrado','fresta','caido'].forEach(n=>{const im=new Image();im.onload=()=>{MURO.img[n]=im;if(Object.keys(MURO.img).length===4)MURO.ready=true};im.src='art/muro/'+n+'.webp'});
 const NEWW=()=>MURO.ready&&ART.ready;
-function mGeo(){const yB=VH-4,topT=Math.round(VH*(PORT?.32:.42)),hImg=(yB-topT)/(1-MURO.T0);return {yB,topT,hImg,yImg:yB-hImg,sW:Math.round(VW*(PORT?1.85:.62))}}
+function mGeo(){const yB=VH-4,topT=Math.round(VH*(PORT?.3:.36)),hImg=(yB-topT)/(1-MURO.T0);return {yB,topT,hImg,yImg:yB-hImg,sW:Math.round(VW*(PORT?1.85:.62))}}
 function sniperAvg(){for(let i=0;i<2;i++){const im=ART.img['sniper'+i],c=mkc(40,40),x=c.getContext('2d');x.drawImage(im,0,0,40,40);const d=x.getImageData(0,0,40,40).data;let r=0,gg=0,b=0,n=0;for(let k=0;k<d.length;k+=4){if(d[k+3]>200){r+=d[k];gg+=d[k+1];b+=d[k+2];n++}}ART.avg[i]=[r/n,gg/n,b/n]}}
 function makeSprArt(i,base){
   const lm=ART.meta.sniper_lens[i],img=ART.img['sniper'+i],av=ART.avg[i];
@@ -734,10 +734,10 @@ const HINTS={
  apoio:'APOIO: o Rocha prevê a próxima rajada de vento ou vigia o campo. Cada pedido te expõe um pouco, e o "acho que" pode estar errado.',vento:'VENTO: o círculo IMPACTO mostra onde a bala cai. Ponha o alvo dentro dele.',
  queda:'O muro está caindo. Trechos caídos não protegem. Seu espaço diminui.',
  exposicao:'A marca branca é a exposição mínima agora. Ela sobe com o tempo. Troque de trecho.',
- fresta:'FRESTA: observa com pouco risco, mas não dá para atirar daqui.',
+ fresta:'FRESTA: observa com pouco risco, mas não dá para atirar daqui. As referências do campo aparecem marcadas.',
  t_alto:'MURO ALTO: cobertura forte, mas mirar por cima expõe mais.',
  t_quebrado:'MURO QUEBRADO: mira normal, mas só vê um setor do campo e o muro é frágil.',
- t_buraco:'Este trecho tem FRESTAS: as janelas no muro mostram o campo, nítido e sem risco.',
+ t_buraco:'Este trecho tem FRESTAS: toque no buraco do muro para ESPIAR. Visão curta, sem zoom, com as referências marcadas e pouca exposição.',
  iscas:'ISCAS: fazem ele atirar ou brilhar e se revelar.',
  radio:'FALAR: PROVOCAR o faz brilhar. CONVERSAR baixa sua exposição. É a conversa com o INIMIGO, não com o Rocha.',
  tempo:'O relógio no canto é o tempo do duelo. Se zerar, você perde 1 vida e ganha mais 60 s.',
@@ -1438,6 +1438,7 @@ function act(id){
   const e=g.e;
   if(g.menu==='notes'&&id.indexOf('q')!==0&&id!=='close'&&id!=='notes'&&id!=='sound')return;
   if(id.indexOf('qs')===0){const bd=board(),o=bd[+id.slice(2)];if(o)markSuspect(o.lm);return}
+  if(id==='hole0'||id==='hole1'){if(g.view==='cover'&&g.types[g.pos]==='buraco'&&!g.col[g.pos]){const k=+id.slice(4),hh=MURO.holes[k];hint('fresta');g.view='hole';g.holeK=k;g.cam.x=posCenter(g.pos)+(hh.x+hh.w/2-.5)*((X1-X0)/NPOS)*1.6;g.cam.y=k?570:520;g.focus=planeOfY(g.cam.y);camBounds();g.menu=null}return}
   switch(id){
    case 'peek':if(g.view==='cover'){if(g.ro)hint('apoio',6.5);if(g.lo.spotter)hint('observ',6.5);g.peeks=(g.peeks||0)+1;if(g.peeks>1&&R()<.3)eLine(g.pos<=1?'lado_e':g.pos===2?'lado_m':'lado_d',{p:1});hint('peek');g.view='scope';g.cam.x=posCenter(g.pos);g.cam.y=520;g.stare=0;g.menu=null}break;
    case 'duck':g.view='cover';g.held=false;g.spot=false;g.swapUntil=0;break;
@@ -1563,7 +1564,7 @@ function drawWorld(c,camX,camY,zoom,cx,cy,opt){
     c.imageSmoothingEnabled=true;
     const ep=g.e?enemyPlane():-1;
     for(let p=0;p<3;p++){
-      const bl=!opt.cover&&!opt.sharp&&g.focus!==p;
+      const bl=!opt.cover&&!opt.sharp&&!opt.noblur&&g.focus!==p;
       c.drawImage(bl?L.bb[p]:L.back[p],0,0,WW,WH);
       if(!opt.cover&&g.e&&ep===p)drawEnemy(c,bl,!!opt.sharp);
       if(!opt.cover)for(const q of g.glints)if(planeOfY(q.y)===p)drawGlint(c,q);
@@ -1651,7 +1652,7 @@ function bar(x,y,w,h,v,c1,c2,label){
 }
 const lowC2=mkc(200,120),lowX2=lowC2.getContext('2d'),lowC3=mkc(10,10),lowX3=lowC3.getContext('2d');
 function coverMap(){
-  if(NEWW()){const sT=PORT?200:56;if(PORT){const cz=1.0;return {cz,cx:g?posCenter(g.posF):WW/2,cyS:sT+(560-440)*cz}}const cz=VW/WW;return {cz,cx:WW/2,cyS:sT+(560-440)*cz}}
+  if(NEWW()){const cz=PORT?1.45:1.0,half=VW/(2*cz),cx0=g?posCenter(g.posF):WW/2,cx=clamp(cx0,half,Math.max(half,WW-half));return {cz,cx,cyS:(PORT?230:60)+(560-(PORT?300:330))*cz}}
   if(!PORT){const cz=VW/WW;return {cz,cx:WW/2,cyS:36+(560-300)*cz}}
   const wt=yBase()-(wallH.alto||150),cz=Math.max(1.3,Math.min(2.4,(wt-24-200-(PORT?120:0))/500));return {cz,cx:g?posCenter(g.posF):WW/2,cyS:200+(560-300)*cz};
 }
@@ -1674,7 +1675,7 @@ const GRND=(()=>{const c=mkc(256,256),x=c.getContext('2d');x.fillStyle='#6a4a30'
   for(let i=0;i<900;i++){const px=r()*256,py=r()*256,rd=1+r()*5,k=r();x.fillStyle=k<.4?'rgba(40,26,16,.55)':k<.75?'rgba(150,112,76,.5)':'rgba(205,170,125,.38)';x.beginPath();x.ellipse(px,py,rd*1.4,rd,r()*3,0,6.3);x.fill()}
   for(let i=0;i<120;i++){x.strokeStyle='rgba(30,20,12,.35)';x.lineWidth=1;x.beginPath();x.moveTo(r()*256,r()*256);x.lineTo(r()*256,r()*256);x.stroke()}return c})();
 function renderCoverBase(){
-  if(NEWW()){const m=coverMap(),G=mGeo(),fs=.8,fb=Math.round(Math.max(G.topT+10,G.yB*.86)),w=Math.ceil(VW*fs),h=Math.ceil(fb*fs);
+  if(NEWW()){const m=coverMap(),G=mGeo(),fs=.8,fb=Math.round(G.yB),w=Math.ceil(VW*fs),h=Math.ceil(fb*fs);
     const now=performance.now(),mv=g.view==='moving'||Math.abs(g.posF-(g._fp||0))>.001;
     if(FLD.width!==w||FLD.height!==h){FLD.width=w;FLD.height=h;fldT=-9}
     if(mv||now-fldT>100){fldT=now;g._fp=g.posF;FLX.setTransform(fs,0,0,fs,0,0);
@@ -1702,11 +1703,11 @@ function drawWallNew(){
     const x=VW/2+(i-g.posF)*sw2-sw2/2;if(x>VW||x+sw2<0)continue;const kind=g.types[i];
     if(g.col&&g.col[i]){const im=MURO.img.caido,S=2.2*G.hImg/im.height,swS=sw2/S,sx0=(im.width-swS)/2,dh=im.height*S;ctx.save();ctx.beginPath();ctx.rect(x,0,sw2,VH);ctx.clip();ctx.drawImage(im,sx0,0,swS,im.height,x,G.yB-dh,sw2,dh);ctx.restore();continue}
     if(kind==='buraco'){MURO.holes.forEach((hh,k)=>{const hx=x+hh.x*sw2,hy=G.yImg+hh.y*G.hImg,hw=hh.w*sw2,ht=hh.h*G.hImg;if(hx+hw<0||hx>VW)return;
-      const wx=m.cx+((hx+hw/2)-VW/2)/m.cz,key=i+'_'+k;let w=WIN[key];if(!w)w=WIN[key]={c:mkc(8,8),t:-9};
-      const ws=.8,cw=Math.ceil(hw*ws)+2,ch=Math.ceil(ht*ws)+2;if(w.c.width!==cw||w.c.height!==ch){w.c.width=cw;w.c.height=ch;w.t=-9}
-      const now=performance.now();if(now-w.t>100||g.view==='moving'){w.t=now;const wc=w.c.getContext('2d');wc.setTransform(ws,0,0,ws,0,0);wc.fillStyle='#6a4a30';wc.fillRect(0,0,hw+4,ht+4);drawWorld(wc,wx,610,m.cz*1.7,hw/2,ht/2,{cover:true})}
-      ctx.drawImage(w.c,hx,hy,hw,ht)})}
+      const pl=.5+.5*Math.sin(performance.now()/420+k),rg=ctx.createRadialGradient(hx+hw/2,hy+ht/2,2,hx+hw/2,hy+ht/2,Math.max(hw,ht)*.62);rg.addColorStop(0,'rgba(255,176,96,'+(.42+.2*pl)+')');rg.addColorStop(.55,'rgba(70,40,22,.96)');rg.addColorStop(1,'rgba(10,7,5,1)');
+      ctx.fillStyle=rg;ctx.fillRect(hx-2,hy-2,hw+4,ht+4)})}
     ctx.drawImage(MURO.img[KEY[kind]],x,G.yImg,sw2,G.hImg);
+    if(kind==='buraco'&&g.view==='cover'&&Math.abs(i-g.posF)<.6)MURO.holes.forEach((hh,k)=>{const hx=x+hh.x*sw2,hy=G.yImg+hh.y*G.hImg,hw=hh.w*sw2,ht=hh.h*G.hImg;if(hx+hw<0||hx>VW)return;btns.push({id:'hole'+k,x:hx-8,y:hy-8,w:hw+16,h:ht+16});
+      ctx.save();ctx.font='700 '+(k?17:22)+'px Oswald,Arial Narrow,sans-serif';const lb='ESPIAR',tw=ctx.measureText(lb).width+22;ctx.fillStyle='rgba(0,0,0,.62)';rrect(ctx,hx+hw/2-tw/2,hy+ht/2-15,tw,30,8);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#ffe9a8';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lb,hx+hw/2,hy+ht/2+1);ctx.restore()});
     const dmg=g.maxHp[i]-g.wall[i];
     for(let k=0;k<dmg;k++){const cx2=x+sw2*(.2+.3*k)+Math.sin(i*5+k)*30,cy2=G.yImg+G.hImg*(.55+.08*k);const dci=ART.img['n/dc'+((i*3+k)%4)];if(dci){const dw=80,dh=dci.height*dw/dci.width;ctx.drawImage(dci,cx2-dw/2,cy2-dh/2,dw,dh)}}
     if(g.wall[i]===0){const c1i=ART.img['n/dc'+(8+(i%2))];if(c1i){const dw=190,dh=c1i.height*dw/c1i.width;ctx.drawImage(c1i,x+sw2*.5-dw/2,G.yImg+G.hImg*.5-dh/2,dw,dh)}}
@@ -1770,7 +1771,30 @@ function renderCover(){
   btn('notes',mxi('notes'),ym,mw2,bh,'CADERNO',Object.assign({ic:'n/ic4',fs:PORT?15:22,fill:'rgba(30,50,70,.92)',cap:g.notes.length+(g.notes.length===1?' pista':' pistas')},cs));
   void 0;/*{dis:g.lo.noRadio||g.radioCd>0||g.radioLeft<=0,fs:24,cap:g.lo.noRadio?'sem rádio':(g.radioCd>0?'aguarde '+Math.ceil(g.radioCd)+'s':'falar com ele'+(isFinite(g.radioLeft)?' ('+g.radioLeft+')':''))});*/
 }
+const REFN=new Set(LMN2);
+function renderHoleNew(){
+  renderCoverBase();drawWallLayer();
+  const cx=VW/2,cy=PORT?Math.round(VH*.42):Math.round(VH*.47),rx=PORT?320:440,ry=PORT?270:240,z=1.45;
+  g.focus=planeOfY(g.cam.y);
+  ctx.fillStyle='rgba(6,5,4,.84)';ctx.fillRect(0,0,VW,VH);
+  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,-.06,0,6.3);ctx.clip();
+  ctx.fillStyle='#2a2016';ctx.fillRect(cx-rx,cy-ry,rx*2,ry*2);
+  try{drawWorld(ctx,g.cam.x,g.cam.y,z,cx,cy,{noblur:true})}catch(e){}
+  const rg=ctx.createRadialGradient(cx,cy,Math.min(rx,ry)*.55,cx,cy,Math.max(rx,ry)*1.02);rg.addColorStop(0,'rgba(0,0,0,0)');rg.addColorStop(1,'rgba(0,0,0,.8)');ctx.fillStyle=rg;ctx.fillRect(cx-rx,cy-ry,rx*2,ry*2);
+  const seen=new Set();
+  for(const l of LM){if(!REFN.has(l.n)||seen.has(l.n))continue;const sx=cx+(l.x-g.cam.x)*z,sy=cy+((l.by==null||isNaN(l.by)?l.y:l.by)-g.cam.y)*z;if(Math.pow((sx-cx)/rx,2)+Math.pow((sy-cy)/ry,2)>.8)continue;seen.add(l.n);
+    const nm=l.n.replace(/^(o|a|os|as) /,'').toUpperCase();ctx.font='700 17px Oswald,Arial Narrow,sans-serif';const tw=ctx.measureText(nm).width+18;
+    ctx.fillStyle='rgba(0,0,0,.7)';rrect(ctx,sx-tw/2,sy-34,tw,26,7);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=1.4;ctx.stroke();ctx.fillStyle='#ffe9a8';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(nm,sx,sy-20);
+    ctx.fillStyle='#e3c86a';ctx.beginPath();ctx.arc(sx,sy-2,4,0,6.3);ctx.fill();ctx.strokeStyle='rgba(227,200,106,.7)';ctx.beginPath();ctx.moveTo(sx,sy-8);ctx.lineTo(sx,sy-3);ctx.stroke()}
+  ctx.restore();
+  ctx.strokeStyle='rgba(14,10,7,.96)';ctx.lineWidth=22;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,-.06,0,6.3);ctx.stroke();
+  ctx.strokeStyle='rgba(120,96,64,.6)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(cx,cy,rx+9,ry+9,-.06,0,6.3);ctx.stroke();
+  txt('FRESTA · visão curta, sem zoom, com as referências. Exposição baixa.',VW/2,PORT?cy-ry-34:46,PORT?19:21,'#f2ebc9','center',600);
+  txt('Arraste para olhar um pouco ao lado.',VW/2,PORT?cy+ry+34:VH-40,17,'#cfc8aa','center',500);
+  btn('duck',PORT?VW/2-100:24,PORT?VH-130:VH-106,200,84,'SAIR',{fs:28});
+}
 function renderHole(){
+  if(NEWW()){renderHoleNew();return}
   renderCoverBase();drawWallLayer();
   const hm=ART.ready?ART.meta.wall_hole:null,hx=hm?VW/2+(hm.cx-.5)*segW:VW/2,hy=hm?wallY('buraco')+hm.cy*wallH.buraco:VH-340+170,cz=1.8;
   holeX.setTransform(.5,0,0,.5,0,0);holeX.fillStyle='#1a1a14';holeX.fillRect(0,0,320,240);
@@ -2009,7 +2033,7 @@ addEventListener('keydown',e=>{
   else if(k==='s'||k==='escape'){act(sc?'duck':'peek')}
   else if(k==='w'&&!sc)act('peek');
   else if(k==='a'||k==='arrowleft'){if(!sc)act('moveL')}else if(k==='d'||k==='arrowright'){if(!sc)act('moveR')}
-  else if(k==='b')act('hole');else if(k==='i')act('decoy');else if(k==='r')act('radio');else if(k==='c')act('notes');
+  else if(k==='b')act(NEWW()?'hole0':'hole');else if(k==='i')act('decoy');else if(k==='r')act('radio');else if(k==='c')act('notes');
   else if(k==='m')act('mark');else if(k==='e')act('apoio');else if(k==='q')act('swap');
   else if(k==='1'||k==='2'||k==='3')setFocus(+k-1);
   else if(k==='+'||k==='=')act('zin');else if(k==='-'||k==='_')act('zout');
