@@ -205,6 +205,7 @@ h1{margin:0;font-size:clamp(28px,8vh,64px);letter-spacing:.08em;color:#e3c86a;fo
 @media (max-aspect-ratio:1/1){.tbox.tcv .tbg{background-image:url(art/capa/capa_p.webp);background-position:center bottom}.tbox.tcv .tmid{align-items:center;justify-content:flex-start;padding:9vh 4vw 0;background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,0) 45%)}.tbox.tcv .tt{text-align:center;font-size:clamp(34px,14vw,80px)}.tbox.tcv .tsub{text-align:center}}
 .tbox.tcv .tap{color:#fff0c0;text-shadow:0 0 14px #000,0 0 6px #000;background:rgba(0,0,0,.42);width:max-content;margin:0 auto;padding:1vh 3vw;border-radius:8px}
 @media (min-aspect-ratio:11/10){.tbox.tcv .tap{left:auto;right:6vw;margin:0}}
+.tbox.tcv .tsub{line-height:1.7}
 </style>
 </head>
 <body>
@@ -224,7 +225,8 @@ const R=Math.random, rr=(a,b)=>a+R()*(b-a), pick=a=>a[(R()*a.length)|0];
 
 // ---------------------------------------------------------------- constantes
 const WW=1960, WH=800, X0=80, X1=1880, P=160, TICK=18;
-const distM=y=>Math.round(Math.max(60,Math.min(420,300-(y-440))));
+const DSC=3;
+const distM=y=>DSC*Math.round(Math.max(100,Math.min(420,300-(y-440))));
 const hrOf=s=>Math.max(7,26*s);
 
 
@@ -461,7 +463,7 @@ function makeSprArt(i,base){
   return {c,ax:lm.lx/lm.w*W,ay:lm.ly/lm.h*H,w:W,h:H};
 }
 function buildScene(seed){if(ART.ready)buildSceneArt(seed);else buildSceneProc(seed)}
-const PLANES=[{y0:440,y1:495,s:.26,d:300},{y0:515,y1:565,s:.38,d:200},{y0:585,y1:640,s:.54,d:100}];
+const PLANES=[{y0:440,y1:495,s:.26,d:900},{y0:515,y1:565,s:.38,d:600},{y0:585,y1:640,s:.54,d:300}];
 const planeOfY=y=>y<505?0:y<575?1:2;
 function blurCopy(cv,k){const W2=Math.max(8,Math.round(cv.width/2)),H2=Math.max(8,Math.round(cv.height/2)),w=Math.max(8,Math.round(cv.width/k)),h=Math.max(8,Math.round(cv.height/k));let src=cv;for(let i=0;i<2;i++){const sm=mkc(w,h),x=sm.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(src,0,0,w,h);const bg2=mkc(i?cv.width:W2,i?cv.height:H2),y=bg2.getContext('2d');y.imageSmoothingEnabled=true;y.imageSmoothingQuality='high';y.drawImage(sm,0,0,bg2.width,bg2.height);src=bg2}const out=mkc(W2,H2),o=out.getContext('2d');o.imageSmoothingEnabled=true;o.drawImage(src,0,0,W2,H2);return out}
 function decoyAt(c,x,y,s2){const k=Math.max(.22,s2*3.2),cols=[[96,84,70],[70,74,60],[88,70,58],[60,66,86],[44,44,48],[112,98,70]],cc=cols[(srng()*cols.length)|0];
@@ -606,7 +608,7 @@ const AU={c:null,m:null,level:(()=>{try{const v=localStorage.getItem('ds_snd');r
 function g_alive(){return !!(g&&scene==='play'&&!g.over)}
 
 // ---------------------------------------------------------------- áudio gravado (ElevenLabs): sons e falas
-const RO_TXT={"nar_h1": "Aterro Nove. Atrás do muro, mil e duzentas pessoas. Na frente, o campo de lixo.", "nar_h2": "Uma empresa quer a terra. Contratou quatro atiradores. Cada um sabe esperar.", "nar_h3": "Eles entraram no lixo. Se você cair, o muro cai.", "nar_h4": "Você aprendeu com alguém que ensinava uma regra só: quem se mexe primeiro, perde.", "nar_f1": "O portão abre. Os caminhões entram.", "nar_f2": "A cerca da empresa cai. Atrás do muro, o acampamento escuta o motor.", "nar_f3": "Regra Um.", "ro_pre1": "Primeiro. Ele não vai se mexer. Você também não.", "ro_pre2": "Esse é mais novo. Nervoso erra. Espere o erro.", "ro_pre3": "Esse caça. Não deixa rastro. Cuidado com o seu.", "ro_pre4": "Só sobrou um. Não sei quem é. Ele não fala.", "ro_hit": "Fui atingido! Me cubra, atirador!", "ro_out": "Estou vivo. Mas não consigo mais te ajudar. Segura o muro.", "ro_alone": "Esse você faz sozinho. Eu confio em você.", "ro_nomore": "Não tenho mais o que ver daqui.", "ro_v_ef_c": "O vento vai virar para a esquerda. Fraco. Tenho certeza.", "ro_v_ef_a": "Acho que o vento vai virar para a esquerda. Fraco.", "ro_v_em_c": "O vento vai virar para a esquerda. Médio. Tenho certeza.", "ro_v_em_a": "Acho que o vento vai virar para a esquerda. Médio.", "ro_v_eg_c": "O vento vai virar para a esquerda. Forte. Tenho certeza.", "ro_v_eg_a": "Acho que o vento vai virar para a esquerda. Forte.", "ro_v_df_c": "O vento vai virar para a direita. Fraco. Tenho certeza.", "ro_v_df_a": "Acho que o vento vai virar para a direita. Fraco.", "ro_v_dm_c": "O vento vai virar para a direita. Médio. Tenho certeza.", "ro_v_dm_a": "Acho que o vento vai virar para a direita. Médio.", "ro_v_dg_c": "O vento vai virar para a direita. Forte. Tenho certeza.", "ro_v_dg_a": "Acho que o vento vai virar para a direita. Forte.", "ro_o0_c": "Brilho perto do carro vermelho. Tenho certeza.", "ro_o0_a": "Acho que vi um brilho perto do carro vermelho.", "ro_o1_c": "Brilho perto do sofá rosa. Tenho certeza.", "ro_o1_a": "Acho que vi um brilho perto do sofá rosa.", "ro_o2_c": "Brilho perto do moinho. Tenho certeza.", "ro_o2_a": "Acho que vi um brilho perto do moinho.", "ro_o3_c": "Brilho perto da TV velha. Tenho certeza.", "ro_o3_a": "Acho que vi um brilho perto da TV velha.", "ro_o4_c": "Brilho perto da bicicleta. Tenho certeza.", "ro_o4_a": "Acho que vi um brilho perto da bicicleta.", "ro_o5_c": "Brilho perto do fogão. Tenho certeza.", "ro_o5_a": "Acho que vi um brilho perto do fogão.", "ro_o6_c": "Brilho perto da porta azul. Tenho certeza.", "ro_o6_a": "Acho que vi um brilho perto da porta azul.", "ro_o7_c": "Brilho perto do ônibus amarelo. Tenho certeza.", "ro_o7_a": "Acho que vi um brilho perto do ônibus amarelo.", "ro_o8_c": "Brilho perto do carrinho de supermercado. Tenho certeza.", "ro_o8_a": "Acho que vi um brilho perto do carrinho de supermercado.", "ro_o9_c": "Brilho perto da placa de trânsito. Tenho certeza.", "ro_o9_a": "Acho que vi um brilho perto da placa de trânsito.", "ro_o10_c": "Brilho perto do ursinho de pelúcia. Tenho certeza.", "ro_o10_a": "Acho que vi um brilho perto do ursinho de pelúcia.", "ro_o11_c": "Brilho perto da banheira. Tenho certeza.", "ro_o11_a": "Acho que vi um brilho perto da banheira.", "ro_o12_c": "Brilho perto do pneu. Tenho certeza.", "ro_o12_a": "Acho que vi um brilho perto do pneu.", "ro_o13_c": "Brilho perto da pilha de pneus. Tenho certeza.", "ro_o13_a": "Acho que vi um brilho perto da pilha de pneus.", "ro_o14_c": "Brilho perto do saco preto. Tenho certeza.", "ro_o14_a": "Acho que vi um brilho perto do saco preto.", "ro_o15_c": "Brilho perto do saco azul. Tenho certeza.", "ro_o15_a": "Acho que vi um brilho perto do saco azul.", "ro_o16_c": "Brilho perto da lona azul. Tenho certeza.", "ro_o16_a": "Acho que vi um brilho perto da lona azul.", "ro_o17_c": "Brilho perto da lona enrolada. Tenho certeza.", "ro_o17_a": "Acho que vi um brilho perto da lona enrolada.", "ro_o18_c": "Brilho perto do barril enferrujado. Tenho certeza.", "ro_o18_a": "Acho que vi um brilho perto do barril enferrujado.", "ro_o19_c": "Brilho perto do palete. Tenho certeza.", "ro_o19_a": "Acho que vi um brilho perto do palete.", "ro_o20_c": "Brilho perto do colchão. Tenho certeza.", "ro_o20_a": "Acho que vi um brilho perto do colchão.", "ro_o21_c": "Brilho perto da geladeira. Tenho certeza.", "ro_o21_a": "Acho que vi um brilho perto da geladeira.", "ro_o22_c": "Brilho perto das caixas de papelão. Tenho certeza.", "ro_o22_a": "Acho que vi um brilho perto das caixas de papelão.", "ro_o23_c": "Brilho perto da máquina de lavar. Tenho certeza.", "ro_o23_a": "Acho que vi um brilho perto da máquina de lavar.", "en_u1": "O Mestre disse que você viria.", "en_u2": "Ele me ensinou a esperar. Não ensinou a perder.", "en_u3": "Ele sabe o seu jeito. Sempre soube.", "av_0": "Você demorou.", "av_1": "Você ainda mexe o ombro.", "av_2": "Eu avisei."};
+const RO_TXT={"nar_h1": "Aterro Nove. Atrás do muro, mil e duzentas pessoas. Na frente, o campo de lixo.", "nar_h2": "Uma empresa quer a terra. Contratou quatro atiradores. Cada um sabe esperar.", "nar_h3": "Eles entraram no lixo. Se você cair, o muro cai.", "nar_h4": "Você aprendeu com alguém que ensinava uma regra só: quem se denuncia primeiro, perde.", "nar_f1": "O portão abre. Os caminhões entram.", "nar_f2": "A cerca da empresa cai. Atrás do muro, o acampamento escuta o motor.", "nar_f3": "Regra Um.", "ro_pre1": "Primeiro. Ele não vai se mexer. Você também não.", "ro_pre2": "Esse é mais novo. Nervoso erra. Espere o erro.", "ro_pre3": "Esse caça. Não deixa rastro. Cuidado com o seu.", "ro_pre4": "Só sobrou um. Não sei quem é. Ele não fala.", "ro_hit": "Fui atingido! Me cubra, atirador!", "ro_out": "Estou vivo. Mas não consigo mais te ajudar. Segura o muro.", "ro_alone": "Esse você faz sozinho. Eu confio em você.", "ro_nomore": "Não tenho mais o que ver daqui.", "ro_v_ef_c": "O vento vai virar para a esquerda. Fraco. Tenho certeza.", "ro_v_ef_a": "Acho que o vento vai virar para a esquerda. Fraco.", "ro_v_em_c": "O vento vai virar para a esquerda. Médio. Tenho certeza.", "ro_v_em_a": "Acho que o vento vai virar para a esquerda. Médio.", "ro_v_eg_c": "O vento vai virar para a esquerda. Forte. Tenho certeza.", "ro_v_eg_a": "Acho que o vento vai virar para a esquerda. Forte.", "ro_v_df_c": "O vento vai virar para a direita. Fraco. Tenho certeza.", "ro_v_df_a": "Acho que o vento vai virar para a direita. Fraco.", "ro_v_dm_c": "O vento vai virar para a direita. Médio. Tenho certeza.", "ro_v_dm_a": "Acho que o vento vai virar para a direita. Médio.", "ro_v_dg_c": "O vento vai virar para a direita. Forte. Tenho certeza.", "ro_v_dg_a": "Acho que o vento vai virar para a direita. Forte.", "ro_o0_c": "Brilho perto do carro vermelho. Tenho certeza.", "ro_o0_a": "Acho que vi um brilho perto do carro vermelho.", "ro_o1_c": "Brilho perto do sofá rosa. Tenho certeza.", "ro_o1_a": "Acho que vi um brilho perto do sofá rosa.", "ro_o2_c": "Brilho perto do moinho. Tenho certeza.", "ro_o2_a": "Acho que vi um brilho perto do moinho.", "ro_o3_c": "Brilho perto da TV velha. Tenho certeza.", "ro_o3_a": "Acho que vi um brilho perto da TV velha.", "ro_o4_c": "Brilho perto da bicicleta. Tenho certeza.", "ro_o4_a": "Acho que vi um brilho perto da bicicleta.", "ro_o5_c": "Brilho perto do fogão. Tenho certeza.", "ro_o5_a": "Acho que vi um brilho perto do fogão.", "ro_o6_c": "Brilho perto da porta azul. Tenho certeza.", "ro_o6_a": "Acho que vi um brilho perto da porta azul.", "ro_o7_c": "Brilho perto do ônibus amarelo. Tenho certeza.", "ro_o7_a": "Acho que vi um brilho perto do ônibus amarelo.", "ro_o8_c": "Brilho perto do carrinho de supermercado. Tenho certeza.", "ro_o8_a": "Acho que vi um brilho perto do carrinho de supermercado.", "ro_o9_c": "Brilho perto da placa de trânsito. Tenho certeza.", "ro_o9_a": "Acho que vi um brilho perto da placa de trânsito.", "ro_o10_c": "Brilho perto do ursinho de pelúcia. Tenho certeza.", "ro_o10_a": "Acho que vi um brilho perto do ursinho de pelúcia.", "ro_o11_c": "Brilho perto da banheira. Tenho certeza.", "ro_o11_a": "Acho que vi um brilho perto da banheira.", "ro_o12_c": "Brilho perto do pneu. Tenho certeza.", "ro_o12_a": "Acho que vi um brilho perto do pneu.", "ro_o13_c": "Brilho perto da pilha de pneus. Tenho certeza.", "ro_o13_a": "Acho que vi um brilho perto da pilha de pneus.", "ro_o14_c": "Brilho perto do saco preto. Tenho certeza.", "ro_o14_a": "Acho que vi um brilho perto do saco preto.", "ro_o15_c": "Brilho perto do saco azul. Tenho certeza.", "ro_o15_a": "Acho que vi um brilho perto do saco azul.", "ro_o16_c": "Brilho perto da lona azul. Tenho certeza.", "ro_o16_a": "Acho que vi um brilho perto da lona azul.", "ro_o17_c": "Brilho perto da lona enrolada. Tenho certeza.", "ro_o17_a": "Acho que vi um brilho perto da lona enrolada.", "ro_o18_c": "Brilho perto do barril enferrujado. Tenho certeza.", "ro_o18_a": "Acho que vi um brilho perto do barril enferrujado.", "ro_o19_c": "Brilho perto do palete. Tenho certeza.", "ro_o19_a": "Acho que vi um brilho perto do palete.", "ro_o20_c": "Brilho perto do colchão. Tenho certeza.", "ro_o20_a": "Acho que vi um brilho perto do colchão.", "ro_o21_c": "Brilho perto da geladeira. Tenho certeza.", "ro_o21_a": "Acho que vi um brilho perto da geladeira.", "ro_o22_c": "Brilho perto das caixas de papelão. Tenho certeza.", "ro_o22_a": "Acho que vi um brilho perto das caixas de papelão.", "ro_o23_c": "Brilho perto da máquina de lavar. Tenho certeza.", "ro_o23_a": "Acho que vi um brilho perto da máquina de lavar.", "en_u1": "O Mestre disse que você viria.", "en_u2": "Ele me ensinou a esperar. Não ensinou a perder.", "en_u3": "Ele sabe o seu jeito. Sempre soube.", "av_0": "Você demorou.", "av_1": "Você ainda mexe o ombro.", "av_2": "Eu avisei."};
 const STORY_FILES=["nar_h1", "nar_h2", "nar_h3", "nar_h4", "nar_f1", "nar_f2", "nar_f3", "ro_pre1", "ro_pre2", "ro_pre3", "ro_pre4", "ro_hit", "ro_out", "ro_alone", "ro_nomore", "ro_v_ef_c", "ro_v_ef_a", "ro_v_em_c", "ro_v_em_a", "ro_v_eg_c", "ro_v_eg_a", "ro_v_df_c", "ro_v_df_a", "ro_v_dm_c", "ro_v_dm_a", "ro_v_dg_c", "ro_v_dg_a", "ro_o0_c", "ro_o0_a", "ro_o1_c", "ro_o1_a", "ro_o2_c", "ro_o2_a", "ro_o3_c", "ro_o3_a", "ro_o4_c", "ro_o4_a", "ro_o5_c", "ro_o5_a", "ro_o6_c", "ro_o6_a", "ro_o7_c", "ro_o7_a", "ro_o8_c", "ro_o8_a", "ro_o9_c", "ro_o9_a", "ro_o10_c", "ro_o10_a", "ro_o11_c", "ro_o11_a", "ro_o12_c", "ro_o12_a", "ro_o13_c", "ro_o13_a", "ro_o14_c", "ro_o14_a", "ro_o15_c", "ro_o15_a", "ro_o16_c", "ro_o16_a", "ro_o17_c", "ro_o17_a", "ro_o18_c", "ro_o18_a", "ro_o19_c", "ro_o19_a", "ro_o20_c", "ro_o20_a", "ro_o21_c", "ro_o21_a", "ro_o22_c", "ro_o22_a", "ro_o23_c", "ro_o23_a", "en_u1", "en_u2", "en_u3", "av_0", "av_1", "av_2"];
 const RO_NAMES=["o carro vermelho", "o sofá rosa", "o moinho", "a TV velha", "a bicicleta", "o fogão", "a porta azul", "o ônibus amarelo", "o carrinho de supermercado", "a placa de trânsito", "o ursinho de pelúcia", "a banheira", "o pneu", "a pilha de pneus", "o saco preto", "o saco azul", "a lona azul", "a lona enrolada", "o barril enferrujado", "o palete", "o colchão", "a geladeira", "as caixas de papelão", "a máquina de lavar"],RO_IDX={};RO_NAMES.forEach((n,i)=>RO_IDX[n]=i);
 const RO_DE=n=>{const p=n.split(' ');return ({o:'do',a:'da',as:'das',os:'dos'})[p[0]]+' '+p.slice(1).join(' ')};
@@ -656,7 +658,7 @@ Object.assign(AU,{buf:{},loaded:false,loading:false,_curve:null,curVoice:null,wi
 {
  const _init=AU.init.bind(AU),_shot=AU.shot.bind(AU),_metal=AU.metal.bind(AU),_crawl=AU.crawl.bind(AU),_stat=AU.stat.bind(AU),_beat=AU.beat.bind(AU),_say=AU.say.bind(AU);
  AU.init=function(){const had=!!this.c;_init();if(!had&&this.c){this.loadAll();try{const b=this.c.createBuffer(1,1,22050),s=this.c.createBufferSource();s.buffer=b;s.connect(this.m);s.start()}catch(e){}}this.unlock&&this.unlock()};
- AU.shot=function(pan,dist,own){
+ AU.shot=function(pan,dist,own){dist=dist/DSC;
   if(own){if(this.play('tiro_proprio',{gain:.85}))return}
   else{if(this.play('tiro_longe',{pan:pan,gain:clamp(1.05-dist/1500,.4,.95)}))return}
   _shot(pan,dist,own)};
@@ -749,7 +751,7 @@ const HINTS={
  zoom:'ZOOM: afaste ou aproxime dois dedos (pinça) na mira. Mais zoom mostra detalhe, mas a mira treme mais.',
  inicio:'Toque em qualquer ponto do campo para mirar ali. Cuidado: mirar sobe a EXPOSIÇÃO.',
  caderno:'CADERNO: o quadro junta as pistas por objeto. Aposte (SUSPEITO) no objeto com mais tipos de pista diferentes. Acertar reduz a camuflagem dele.',
- foco:'FOCO: nítido só em uma distância. Troque entre 100, 200 e 300 m.',
+ foco:'FOCO: nítido só em uma distância. Troque entre 300, 600 e 900 m.',
  som:'O som chega atrasado: quanto maior o atraso, mais longe o tiro.',
  observ:'BINÓCULO: toque no botão BINÓCULO (à esquerda) para trocar. Ele só observa, mas vê mais e expõe metade.',
  noite:'ANOITECENDO: ele fica mais difícil de ver, mas clarões e brilhos aparecem mais.',
@@ -849,13 +851,13 @@ const STORY_INTRO=[
  {img:'h_aterro',t:'Aterro Nove. Atrás do muro, mil e duzentas pessoas. Na frente, o campo de lixo.',a:'nar_h1'},
  {img:'h_empresa',t:'Uma empresa quer a terra. Contratou quatro atiradores. Cada um sabe esperar.',a:'nar_h2'},
  {img:'h_quatro',t:'Eles entraram no lixo. Se você cair, o muro cai.',a:'nar_h3'},
- {img:'h_regra',t:'Você aprendeu com alguém que ensinava uma regra só: quem se mexe primeiro, perde.',a:'nar_h4'}];
+ {img:'h_regra',t:'Você aprendeu com alguém que ensinava uma regra só: quem se denuncia primeiro, perde.',a:'nar_h4'}];
 const STORY_FIM=[
  {img:'h_fim',t:'O portão abre. Os caminhões entram.',a:'nar_f1'},
  {img:'h_fim',t:'A cerca da empresa cai. Atrás do muro, o acampamento escuta o motor.',a:'nar_f2'},
  {img:'h_fim',t:'Regra Um.',a:'nar_f3'}];
 const PAGES=[
- {who:'O PACIENTE',last:'O Mestre disse que você viria.',a:'en_u1',txt:'Regra Um: quem se mexe primeiro, perde.'},
+ {who:'O PACIENTE',last:'O Mestre disse que você viria.',a:'en_u1',txt:'Regra Um: quem se denuncia primeiro, perde.'},
  {who:'O NERVOSO',last:'Ele me ensinou a esperar. Não ensinou a perder.',a:'en_u2',txt:'Todo atirador tem um tique. O meu aluno mais novo mexe o ombro antes do tiro.'},
  {who:'O CAÇADOR',last:'Ele sabe o seu jeito. Sempre soube.',a:'en_u3',txt:'Me pagaram para tirar vocês daí. Não perguntei o preço da terra.'},
  {who:'O FANTASMA',last:'',a:null,txt:'Se for você que chegar até aqui, não se mexa.',photo:true}];
@@ -1004,7 +1006,7 @@ function setupAmb(){
   g.amb=hs.map((h,i)=>({kind:ks[i],x:h.x+rr(-110,110),y:h.y+rr(10,50),state:'idle',until:0,next:rr(2,8),spin:0,bark:0,barkAt:0,t0:0}));
   g.ambNext=rr(25,45);
 }
-function ambSnd(a,name,gain){AU.play('amb_'+name,{pan:panOf(a.x),gain:(gain||.6)*clamp(1.2-distM(a.y)/350,.25,1)})}
+function ambSnd(a,name,gain){AU.play('amb_'+name,{pan:panOf(a.x),gain:(gain||.6)*clamp(1.2-distM(a.y)/(350*DSC),.25,1)})}
 const AMB_CD={passaros:14,cachorro:10,moinho:12,goteira:12,portao:10},AMB_ICO={passaros:'🐦',cachorro:'🐕',moinho:'⚙️',goteira:'💧',portao:'🚪'},AMB_NM={passaros:'pássaros',cachorro:'cachorro',moinho:'moinho',goteira:'goteira',portao:'portão'};
 function ambReact(x,y,cause){
   if(!g||!g.amb)return;
@@ -1099,7 +1101,7 @@ function drawAmb(c,pl){
 
 // ---------------------------------------------------------------- caderno de campo
 const SIDEW={ESQ:'esquerda',DIR:'direita',CENTRO:'frente'};
-const planeOfD=d=>d>=250?0:d>=150?1:2;
+const planeOfD=d=>d>=750?0:d>=450?1:2;
 const NOTE_LBL={tiro:'TIRO',brilho:'BRILHO',poeira:'POEIRA',ambiente:'AMBIENTE',voz:'VOZ'};
 function addNote(kind,text,side,plane,x,y){
   if(!g||g.over)return;
@@ -1516,9 +1518,9 @@ function fire(){
   if(g.view!=='scope'||g.bullets<=0||g.over||g.spot||g.t<g.swapUntil)return;
   const e=g.e,sw=sway(),ax=g.cam.x+sw.x,ay=g.cam.y+sw.y,d=distM(ay);
   g.bullets--;g.shots++;
-  const ix=ax+g.wind.val*d/650*TICK,iy=ay;
+  const ix=ax+g.wind.val*d/(650*DSC)*TICK,iy=ay;
   g.impacts.push({x:ix,y:iy,ttl:6});fx((Math.random()*3)|0,ix,iy+6,260*sOfY(iy),1.9,'n',.95);g.shotMsg={t0:g.t,text:'ERROU',sub:'o ✕ vermelho é onde a sua bala caiu',col:'255,110,90'};ambReact(ix,iy,'tiro');g.tracer={ax,ay,ix,iy,t0:g.t};dust(ix,iy,6,false);
-  AU.shot(0,0,true);AU.impact(d);g.held=false;g.cam.y-=7;g.shake=.25;
+  AU.shot(0,0,true);AU.impact(d/DSC);g.held=false;g.cam.y-=7;g.shake=.25;
   const dd=Math.hypot(ix-e.x,iy-e.y),nearB=dd<260;
   {const z0=Math.max(1.2,curZoom()),zE=nearB?clamp(250/Math.max(dd,60),z0*1.15,z0*2.4):z0*1.9;g.bcam={rt0:performance.now(),dur:dd<=e.hr?2.4:(nearB?2.3:1.6),ax,ay,ix,iy,tx:nearB?(ix+e.x)/2:ix,ty:nearB?(iy+e.y)/2:iy,z0,zk:zE/z0,near:nearB}}if(nearB){const s3=stt();s3.shown=(s3.shown||0)+1}
   if(dd<=e.hr){g.won=true;g.shotMsg={t0:g.t,text:'ACERTOU!',sub:'tiro certeiro',col:'120,230,130'};end('win');return}
@@ -1858,7 +1860,7 @@ function renderScope(){
   ctx.beginPath();ctx.moveTo(cx-Rr,ry);ctx.lineTo(rx-12,ry);ctx.moveTo(rx+12,ry);ctx.lineTo(cx+Rr,ry);ctx.moveTo(rx,cy-Rr);ctx.lineTo(rx,ry-12);ctx.moveTo(rx,ry+12);ctx.lineTo(rx,cy+Rr);ctx.stroke();
   ctx.lineWidth=2;for(let i=1;i<=5;i++){const l=7;ctx.beginPath();ctx.moveTo(rx+i*tk,ry-l);ctx.lineTo(rx+i*tk,ry+l);ctx.moveTo(rx-i*tk,ry-l);ctx.lineTo(rx-i*tk,ry+l);ctx.stroke();
     ctx.fillStyle='rgba(10,10,8,.85)';ctx.font='600 13px Oswald,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i),rx+i*tk,ry-15);ctx.fillText(String(i),rx-i*tk,ry-15)}
-  {const dm=distM(g.cam.y+sw.y),wmk=g.wind.val*dm/650,mxk=rx+wmk*tk,inside=Math.abs(mxk-cx)<Rr-18,px2=clamp(mxk,cx-Rr+18,cx+Rr-18);
+  {const dm=distM(g.cam.y+sw.y),wmk=g.wind.val*dm/(650*DSC),mxk=rx+wmk*tk,inside=Math.abs(mxk-cx)<Rr-18,px2=clamp(mxk,cx-Rr+18,cx+Rr-18);
     ctx.save();ctx.strokeStyle='rgba(255,210,74,.95)';ctx.fillStyle='rgba(255,210,74,.95)';ctx.lineWidth=2.4;
     ctx.beginPath();ctx.arc(px2,ry,13,0,6.3);ctx.stroke();ctx.beginPath();ctx.moveTo(px2,ry-13);ctx.lineTo(px2,ry-22);ctx.moveTo(px2,ry+13);ctx.lineTo(px2,ry+22);ctx.moveTo(px2-13,ry);ctx.lineTo(px2-22,ry);ctx.moveTo(px2+13,ry);ctx.lineTo(px2+22,ry);ctx.stroke();
     ctx.font='700 14px Oswald,sans-serif';ctx.textAlign='center';ctx.fillText(inside?'IMPACTO':(wmk>0?'IMPACTO »':'« IMPACTO'),px2,ry+38);ctx.restore()}
@@ -1872,9 +1874,9 @@ function renderScope(){
   if(g.t<g.swapUntil)txt('TROCANDO…',cx,cy+Rr-30,22,'#ffd24a','center',700);
   if(FRI){const D=720*FRS;ctx.drawImage(FRI,cx-D/2,cy-D/2,D,D)}else{ctx.strokeStyle='#161610';ctx.lineWidth=16;ctx.beginPath();ctx.arc(cx,cy,Rr+8,0,6.3);ctx.stroke();
   ctx.strokeStyle=g.spot?'#5f8fb8':'#3b3a2c';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,Rr,0,6.3);ctx.stroke()}
-  const d=distM(g.cam.y+sw.y),r=g.lo.range,shown=r===1?d:Math.round(d/r)*r;
+  const d=distM(g.cam.y+sw.y),r=g.lo.range,shown=r===1?d:Math.round(d/(r*DSC))*(r*DSC);
   txt('DIST '+(r===1?'':'~')+shown+' m',cx-150,cy+Rr+20,24,'#f2ebc9','center');
-  {const wm=g.wind.val*d/650,aw=Math.abs(wm);txt(aw<.3?'VENTO FRACO':'VENTO '+(wm>0?'→ ':'← ')+aw.toFixed(1)+' marcas',cx+170,cy+Rr+20,24,'#cfe3e8','center')}
+  {const wm=g.wind.val*d/(650*DSC),aw=Math.abs(wm);txt(aw<.3?'VENTO FRACO':'VENTO '+(wm>0?'→ ':'← ')+aw.toFixed(1)+' marcas',cx+170,cy+Rr+20,24,'#cfe3e8','center')}
   if(PORT)txt('TRECHO '+(g.pos+1)+' · '+TYPE[g.types[g.pos]].nome+' · ZOOM '+g.zoomCur.toFixed(1)+'×',cx,cy+Rr+48,17,'#a8a18a','center',600);else{txt('TRECHO '+(g.pos+1),24+75,VH/2-92,18,'#a8a18a','center',600);txt(TYPE[g.types[g.pos]].nome,24+75,VH/2-70,15,'#a8a18a','center',500)}
   const mw=PORT?480:400,mh=PORT?60:48,mx=VW/2-mw/2,my=PORT?cy+Rr+74:8;
   ctx.fillStyle='rgba(8,8,6,.78)';rrect(ctx,mx,my,mw,mh,6);ctx.fill();
@@ -2060,7 +2062,7 @@ cv.addEventListener('pointermove',e=>{if(!DESK||e.pointerType==='touch')return;c
 const TUT=[
  {t:'Ache o atirador inimigo.',p:'Ele está escondido no lixo, pequeno e camuflado. Você está atrás do muro. Quem acertar a cabeça ou a luneta do outro primeiro vence.',n:'nar_tut_1',v:0},
  {t:'Mirar te expõe.',p:'Olhar pela luneta sobe a EXPOSIÇÃO. Em 100%, ele atira. Abaixe para esfriar e deslize pelo muro para trocar de lugar.',n:'nar_tut_2',v:1},
- {t:'Procure pistas.',p:'Zoom e foco (100, 200, 300 m) revelam detalhes. O CADERNO junta as pistas por objeto. Aposte no objeto com mais tipos de pista. Acertar revela um pouco o inimigo.',n:null,v:9},
+ {t:'Procure pistas.',p:'Zoom e foco (300, 600, 900 m) revelam detalhes. O CADERNO junta as pistas por objeto. Aposte no objeto com mais tipos de pista. Acertar revela um pouco o inimigo.',n:null,v:9},
  {t:'Atire com o vento.',p:'O círculo amarelo IMPACTO mostra onde a bala cai. Coloque o alvo dentro dele e atire. O resto o jogo explica quando você precisar.',n:'nar_tut_6',v:5}
 ];
 function tutVisual(i){
@@ -2136,7 +2138,7 @@ function wzRender(step,silent){
 function showMenu(){wzRender(0)}
 function showTitle(){
   scene='menu';const ov=$('#ov');ov.dataset.screen='title';ov.classList.add('on','title');
-  ov.innerHTML=`<div class="tbox tcv" data-a="start"><div class="tbg"></div><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">DUELO DE SNIPERS<br>QUEM SE MEXE PRIMEIRO, PERDE.</div></div><div class="tap">TOQUE PARA COMEÇAR</div></div>`;
+  ov.innerHTML=`<div class="tbox tcv" data-a="start"><div class="tbg"></div><div class="tmid"><h1 class="tt">DEAD STILL</h1><div class="tsub">DOIS SNIPERS<br>UM MURO QUASE CAINDO ENTRE ELES<br>QUALQUER ERRO É FATAL.</div></div><div class="tap">TOQUE PARA COMEÇAR</div></div>`;
 }
 function startFlow(){let seen=false;try{seen=localStorage.getItem('ds_brief')==='1'}catch(err){}if(seen){opHome()}else{try{localStorage.setItem('ds_brief','1')}catch(err){}showBrief()}}
 function setDev(d){DEV=d;DESK=d==='pc';try{localStorage.setItem('ds_dev',d)}catch(e){}resize()}
