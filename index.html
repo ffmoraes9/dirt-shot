@@ -242,7 +242,7 @@ const AUTOPC=(()=>{if(TOUCHUA)return false;try{return matchMedia('(hover:hover) 
 let DESK=DEV?DEV==='pc':AUTOPC;
 function viewSize(){const vv=window.visualViewport;let w=innerWidth,h=innerHeight;if(vv&&vv.width>50&&vv.height>50){w=Math.round(vv.width);h=Math.round(vv.height)}return {w,h}}
 const DBGON=/debug/.test(location.search);
-const BUILD='4.1.2';
+const BUILD='4.2.0';
 setTimeout(()=>{try{fetch(location.pathname+'?chk='+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD='([^']+)'/);if(m&&m[1]!==BUILD){let done=false;try{done=sessionStorage.getItem('ds_rl')===m[1]}catch(e){}if(!done){try{sessionStorage.setItem('ds_rl',m[1])}catch(e){}location.replace(location.pathname+'?v='+m[1]+(DBGON?'&debug':''))}}}).catch(()=>{})}catch(e){}},1500);
 let lastVS='';
 let AIM='stick';try{AIM=localStorage.getItem('ds_aim')||'stick'}catch(e){}
@@ -255,10 +255,11 @@ const lowC=mkc(200,120), lowX=lowC.getContext('2d');
 const holeC=mkc(160,120), holeX=holeC.getContext('2d');
 let wallC=null;
 function resize(){
-  const vs=viewSize(),dpr=Math.min(2,window.devicePixelRatio||1);let cw=vs.w,ch=vs.h,ox=0;
+  const vs=viewSize(),dpr=Math.min(Math.min(vs.w,vs.h)>=700?1.25:2,window.devicePixelRatio||1);let cw=vs.w,ch=vs.h,ox=0,oy=0;
   lastVS=vs.w+'x'+vs.h;
+  if(ch>cw*1.05&&ch/cw<1.5){ch=Math.round(cw*9/16);oy=Math.round((vs.h-ch)/2)}
   if(DESK&&!TOUCHUA&&cw/ch>16/9){cw=Math.round(ch*16/9);ox=Math.round((vs.w-cw)/2)}
-  cv.style.left=ox+'px';cv.style.top='0px';cv.style.width=cw+'px';cv.style.height=ch+'px';
+  cv.style.left=ox+'px';cv.style.top=oy+'px';cv.style.width=cw+'px';cv.style.height=ch+'px';
   cv.width=Math.round(cw*dpr);cv.height=Math.round(ch*dpr);
   PORT=ch>cw*1.05;
   if(PORT){S=cv.width/720;VW=720;VH=cv.height/S}else{S=cv.height/720;VW=cv.width/S;VH=720}
@@ -476,6 +477,7 @@ function makeSprArt(i,base){
   return {c,ax:lm.lx/lm.w*W,ay:lm.ly/lm.h*H,w:W,h:H};
 }
 function buildScene(seed){if(ART.ready)buildSceneArt(seed);else buildSceneProc(seed)}
+const FOCOR=['730–900 m','520–680 m','300–470 m'];
 const PLANES=[{y0:440,y1:495,s:.26,d:900},{y0:515,y1:565,s:.38,d:600},{y0:585,y1:640,s:.54,d:300}];
 const planeOfY=y=>y<505?0:y<575?1:2;
 function blurCopy(cv,k){const W2=Math.max(8,Math.round(cv.width/2)),H2=Math.max(8,Math.round(cv.height/2)),w=Math.max(8,Math.round(cv.width/k)),h=Math.max(8,Math.round(cv.height/k));let src=cv;for(let i=0;i<2;i++){const sm=mkc(w,h),x=sm.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(src,0,0,w,h);const bg2=mkc(i?cv.width:W2,i?cv.height:H2),y=bg2.getContext('2d');y.imageSmoothingEnabled=true;y.imageSmoothingQuality='high';y.drawImage(sm,0,0,bg2.width,bg2.height);src=bg2}const out=mkc(W2,H2),o=out.getContext('2d');o.imageSmoothingEnabled=true;o.drawImage(src,0,0,W2,H2);return out}
@@ -621,7 +623,7 @@ const AU={c:null,m:null,level:(()=>{try{const v=localStorage.getItem('ds_snd');r
 function g_alive(){return !!(g&&scene==='play'&&!g.over)}
 
 // ---------------------------------------------------------------- áudio gravado (ElevenLabs): sons e falas
-const RO_TXT={"nar_h1": "Aterro Nove. Atrás do muro, mil e duzentas pessoas. Na frente, o campo de lixo.", "nar_h2": "Uma empresa quer a terra. Contratou quatro atiradores. Cada um sabe esperar.", "nar_h3": "Eles entraram no lixo. Se você cair, o muro cai.", "nar_h4": "Você aprendeu com alguém que ensinava uma regra só: quem se denuncia primeiro, perde.", "nar_f1": "O portão abre. Os caminhões entram.", "nar_f2": "A cerca da empresa cai. Atrás do muro, o acampamento escuta o motor.", "nar_f3": "Regra Um.", "ro_pre1": "Primeiro. Ele não vai se mexer. Você também não.", "ro_pre2": "Esse é mais novo. Nervoso erra. Espere o erro.", "ro_pre3": "Esse caça. Não deixa rastro. Cuidado com o seu.", "ro_pre4": "Só sobrou um. Não sei quem é. Ele não fala.", "ro_hit": "Fui atingido! Me cubra, atirador!", "ro_out": "Estou vivo. Mas não consigo mais te ajudar. Segura o muro.", "ro_alone": "Esse você faz sozinho. Eu confio em você.", "ro_nomore": "Não tenho mais o que ver daqui.", "ro_v_ef_c": "O vento vai virar para a esquerda. Fraco. Tenho certeza.", "ro_v_ef_a": "Acho que o vento vai virar para a esquerda. Fraco.", "ro_v_em_c": "O vento vai virar para a esquerda. Médio. Tenho certeza.", "ro_v_em_a": "Acho que o vento vai virar para a esquerda. Médio.", "ro_v_eg_c": "O vento vai virar para a esquerda. Forte. Tenho certeza.", "ro_v_eg_a": "Acho que o vento vai virar para a esquerda. Forte.", "ro_v_df_c": "O vento vai virar para a direita. Fraco. Tenho certeza.", "ro_v_df_a": "Acho que o vento vai virar para a direita. Fraco.", "ro_v_dm_c": "O vento vai virar para a direita. Médio. Tenho certeza.", "ro_v_dm_a": "Acho que o vento vai virar para a direita. Médio.", "ro_v_dg_c": "O vento vai virar para a direita. Forte. Tenho certeza.", "ro_v_dg_a": "Acho que o vento vai virar para a direita. Forte.", "ro_o0_c": "Brilho perto do carro vermelho. Tenho certeza.", "ro_o0_a": "Acho que vi um brilho perto do carro vermelho.", "ro_o1_c": "Brilho perto do sofá rosa. Tenho certeza.", "ro_o1_a": "Acho que vi um brilho perto do sofá rosa.", "ro_o2_c": "Brilho perto do moinho. Tenho certeza.", "ro_o2_a": "Acho que vi um brilho perto do moinho.", "ro_o3_c": "Brilho perto da TV velha. Tenho certeza.", "ro_o3_a": "Acho que vi um brilho perto da TV velha.", "ro_o4_c": "Brilho perto da bicicleta. Tenho certeza.", "ro_o4_a": "Acho que vi um brilho perto da bicicleta.", "ro_o5_c": "Brilho perto do fogão. Tenho certeza.", "ro_o5_a": "Acho que vi um brilho perto do fogão.", "ro_o6_c": "Brilho perto da porta azul. Tenho certeza.", "ro_o6_a": "Acho que vi um brilho perto da porta azul.", "ro_o7_c": "Brilho perto do ônibus amarelo. Tenho certeza.", "ro_o7_a": "Acho que vi um brilho perto do ônibus amarelo.", "ro_o8_c": "Brilho perto do carrinho de supermercado. Tenho certeza.", "ro_o8_a": "Acho que vi um brilho perto do carrinho de supermercado.", "ro_o9_c": "Brilho perto da placa de trânsito. Tenho certeza.", "ro_o9_a": "Acho que vi um brilho perto da placa de trânsito.", "ro_o10_c": "Brilho perto do ursinho de pelúcia. Tenho certeza.", "ro_o10_a": "Acho que vi um brilho perto do ursinho de pelúcia.", "ro_o11_c": "Brilho perto da banheira. Tenho certeza.", "ro_o11_a": "Acho que vi um brilho perto da banheira.", "ro_o12_c": "Brilho perto do pneu. Tenho certeza.", "ro_o12_a": "Acho que vi um brilho perto do pneu.", "ro_o13_c": "Brilho perto da pilha de pneus. Tenho certeza.", "ro_o13_a": "Acho que vi um brilho perto da pilha de pneus.", "ro_o14_c": "Brilho perto do saco preto. Tenho certeza.", "ro_o14_a": "Acho que vi um brilho perto do saco preto.", "ro_o15_c": "Brilho perto do saco azul. Tenho certeza.", "ro_o15_a": "Acho que vi um brilho perto do saco azul.", "ro_o16_c": "Brilho perto da lona azul. Tenho certeza.", "ro_o16_a": "Acho que vi um brilho perto da lona azul.", "ro_o17_c": "Brilho perto da lona enrolada. Tenho certeza.", "ro_o17_a": "Acho que vi um brilho perto da lona enrolada.", "ro_o18_c": "Brilho perto do barril enferrujado. Tenho certeza.", "ro_o18_a": "Acho que vi um brilho perto do barril enferrujado.", "ro_o19_c": "Brilho perto do palete. Tenho certeza.", "ro_o19_a": "Acho que vi um brilho perto do palete.", "ro_o20_c": "Brilho perto do colchão. Tenho certeza.", "ro_o20_a": "Acho que vi um brilho perto do colchão.", "ro_o21_c": "Brilho perto da geladeira. Tenho certeza.", "ro_o21_a": "Acho que vi um brilho perto da geladeira.", "ro_o22_c": "Brilho perto das caixas de papelão. Tenho certeza.", "ro_o22_a": "Acho que vi um brilho perto das caixas de papelão.", "ro_o23_c": "Brilho perto da máquina de lavar. Tenho certeza.", "ro_o23_a": "Acho que vi um brilho perto da máquina de lavar.", "en_u1": "O Mestre disse que você viria.", "en_u2": "Ele me ensinou a esperar. Não ensinou a perder.", "en_u3": "Ele sabe o seu jeito. Sempre soube.", "av_0": "Você demorou.", "av_1": "Você ainda mexe o ombro.", "av_2": "Eu avisei."};
+const RO_TXT={"nar_h1": "Aterro Nove. Atrás do muro, mil e duzentas pessoas. Na frente, o campo de lixo.", "nar_h2": "Uma empresa quer a terra. Contratou quatro atiradores. Cada um sabe esperar.", "nar_h3": "Eles entraram no lixo. Se você cair, o muro cai.", "nar_h4": "Você aprendeu com alguém que ensinava uma regra só: quem se denuncia primeiro, perde.", "nar_f1": "O portão abre. Os caminhões entram.", "nar_f2": "A cerca da empresa cai. Atrás do muro, o acampamento escuta o motor.", "nar_f3": "Regra Um.", "ro_pre1": "Primeiro. Ele é paciente. Seja mais.", "ro_pre2": "Esse é mais novo. Nervoso erra. Espere o erro.", "ro_pre3": "Esse caça. Não deixa rastro. Cuidado com o seu.", "ro_pre4": "Só sobrou um. Fala pouco. Cuidado.", "ro_hit": "Fui atingido! Me cubra, atirador!", "ro_out": "Estou vivo. Mas não consigo mais te ajudar. Segura o muro.", "ro_alone": "Esse você faz sozinho. Eu confio em você.", "ro_nomore": "Não tenho mais o que ver daqui.", "ro_v_ef_c": "O vento vai virar para a esquerda. Fraco. Tenho certeza.", "ro_v_ef_a": "Acho que o vento vai virar para a esquerda. Fraco.", "ro_v_em_c": "O vento vai virar para a esquerda. Médio. Tenho certeza.", "ro_v_em_a": "Acho que o vento vai virar para a esquerda. Médio.", "ro_v_eg_c": "O vento vai virar para a esquerda. Forte. Tenho certeza.", "ro_v_eg_a": "Acho que o vento vai virar para a esquerda. Forte.", "ro_v_df_c": "O vento vai virar para a direita. Fraco. Tenho certeza.", "ro_v_df_a": "Acho que o vento vai virar para a direita. Fraco.", "ro_v_dm_c": "O vento vai virar para a direita. Médio. Tenho certeza.", "ro_v_dm_a": "Acho que o vento vai virar para a direita. Médio.", "ro_v_dg_c": "O vento vai virar para a direita. Forte. Tenho certeza.", "ro_v_dg_a": "Acho que o vento vai virar para a direita. Forte.", "ro_o0_c": "Brilho perto do carro vermelho. Tenho certeza.", "ro_o0_a": "Acho que vi um brilho perto do carro vermelho.", "ro_o1_c": "Brilho perto do sofá rosa. Tenho certeza.", "ro_o1_a": "Acho que vi um brilho perto do sofá rosa.", "ro_o2_c": "Brilho perto do moinho. Tenho certeza.", "ro_o2_a": "Acho que vi um brilho perto do moinho.", "ro_o3_c": "Brilho perto da TV velha. Tenho certeza.", "ro_o3_a": "Acho que vi um brilho perto da TV velha.", "ro_o4_c": "Brilho perto da bicicleta. Tenho certeza.", "ro_o4_a": "Acho que vi um brilho perto da bicicleta.", "ro_o5_c": "Brilho perto do fogão. Tenho certeza.", "ro_o5_a": "Acho que vi um brilho perto do fogão.", "ro_o6_c": "Brilho perto da porta azul. Tenho certeza.", "ro_o6_a": "Acho que vi um brilho perto da porta azul.", "ro_o7_c": "Brilho perto do ônibus amarelo. Tenho certeza.", "ro_o7_a": "Acho que vi um brilho perto do ônibus amarelo.", "ro_o8_c": "Brilho perto do carrinho de supermercado. Tenho certeza.", "ro_o8_a": "Acho que vi um brilho perto do carrinho de supermercado.", "ro_o9_c": "Brilho perto da placa de trânsito. Tenho certeza.", "ro_o9_a": "Acho que vi um brilho perto da placa de trânsito.", "ro_o10_c": "Brilho perto do ursinho de pelúcia. Tenho certeza.", "ro_o10_a": "Acho que vi um brilho perto do ursinho de pelúcia.", "ro_o11_c": "Brilho perto da banheira. Tenho certeza.", "ro_o11_a": "Acho que vi um brilho perto da banheira.", "ro_o12_c": "Brilho perto do pneu. Tenho certeza.", "ro_o12_a": "Acho que vi um brilho perto do pneu.", "ro_o13_c": "Brilho perto da pilha de pneus. Tenho certeza.", "ro_o13_a": "Acho que vi um brilho perto da pilha de pneus.", "ro_o14_c": "Brilho perto do saco preto. Tenho certeza.", "ro_o14_a": "Acho que vi um brilho perto do saco preto.", "ro_o15_c": "Brilho perto do saco azul. Tenho certeza.", "ro_o15_a": "Acho que vi um brilho perto do saco azul.", "ro_o16_c": "Brilho perto da lona azul. Tenho certeza.", "ro_o16_a": "Acho que vi um brilho perto da lona azul.", "ro_o17_c": "Brilho perto da lona enrolada. Tenho certeza.", "ro_o17_a": "Acho que vi um brilho perto da lona enrolada.", "ro_o18_c": "Brilho perto do barril enferrujado. Tenho certeza.", "ro_o18_a": "Acho que vi um brilho perto do barril enferrujado.", "ro_o19_c": "Brilho perto do palete. Tenho certeza.", "ro_o19_a": "Acho que vi um brilho perto do palete.", "ro_o20_c": "Brilho perto do colchão. Tenho certeza.", "ro_o20_a": "Acho que vi um brilho perto do colchão.", "ro_o21_c": "Brilho perto da geladeira. Tenho certeza.", "ro_o21_a": "Acho que vi um brilho perto da geladeira.", "ro_o22_c": "Brilho perto das caixas de papelão. Tenho certeza.", "ro_o22_a": "Acho que vi um brilho perto das caixas de papelão.", "ro_o23_c": "Brilho perto da máquina de lavar. Tenho certeza.", "ro_o23_a": "Acho que vi um brilho perto da máquina de lavar.", "en_u1": "O Mestre disse que você viria.", "en_u2": "Ele me ensinou a esperar. Não ensinou a perder.", "en_u3": "Ele sabe o seu jeito. Sempre soube.", "av_0": "Você demorou.", "av_1": "Você ainda mexe o ombro.", "av_2": "Eu avisei."};
 const STORY_FILES=["nar_h1", "nar_h2", "nar_h3", "nar_h4", "nar_f1", "nar_f2", "nar_f3", "ro_pre1", "ro_pre2", "ro_pre3", "ro_pre4", "ro_hit", "ro_out", "ro_alone", "ro_nomore", "ro_v_ef_c", "ro_v_ef_a", "ro_v_em_c", "ro_v_em_a", "ro_v_eg_c", "ro_v_eg_a", "ro_v_df_c", "ro_v_df_a", "ro_v_dm_c", "ro_v_dm_a", "ro_v_dg_c", "ro_v_dg_a", "ro_o0_c", "ro_o0_a", "ro_o1_c", "ro_o1_a", "ro_o2_c", "ro_o2_a", "ro_o3_c", "ro_o3_a", "ro_o4_c", "ro_o4_a", "ro_o5_c", "ro_o5_a", "ro_o6_c", "ro_o6_a", "ro_o7_c", "ro_o7_a", "ro_o8_c", "ro_o8_a", "ro_o9_c", "ro_o9_a", "ro_o10_c", "ro_o10_a", "ro_o11_c", "ro_o11_a", "ro_o12_c", "ro_o12_a", "ro_o13_c", "ro_o13_a", "ro_o14_c", "ro_o14_a", "ro_o15_c", "ro_o15_a", "ro_o16_c", "ro_o16_a", "ro_o17_c", "ro_o17_a", "ro_o18_c", "ro_o18_a", "ro_o19_c", "ro_o19_a", "ro_o20_c", "ro_o20_a", "ro_o21_c", "ro_o21_a", "ro_o22_c", "ro_o22_a", "ro_o23_c", "ro_o23_a", "en_u1", "en_u2", "en_u3", "av_0", "av_1", "av_2"];
 const RO_NAMES=["o carro vermelho", "o sofá rosa", "o moinho", "a TV velha", "a bicicleta", "o fogão", "a porta azul", "o ônibus amarelo", "o carrinho de supermercado", "a placa de trânsito", "o ursinho de pelúcia", "a banheira", "o pneu", "a pilha de pneus", "o saco preto", "o saco azul", "a lona azul", "a lona enrolada", "o barril enferrujado", "o palete", "o colchão", "a geladeira", "as caixas de papelão", "a máquina de lavar"],RO_IDX={};RO_NAMES.forEach((n,i)=>RO_IDX[n]=i);
 const RO_DE=n=>{const p=n.split(' ');return ({o:'do',a:'da',as:'das',os:'dos'})[p[0]]+' '+p.slice(1).join(' ')};
@@ -765,7 +767,7 @@ const HINTS={
  zoom:'ZOOM: afaste ou aproxime dois dedos (pinça) na mira. Mais zoom mostra detalhe, mas a mira treme mais.',
  inicio:'Toque em qualquer ponto do campo para mirar ali. Cuidado: mirar sobe a EXPOSIÇÃO.',
  caderno:'CADERNO: o quadro junta as pistas por objeto. Aposte (SUSPEITO) no objeto com mais tipos de pista diferentes. Acertar reduz a camuflagem dele.',
- foco:'FOCO: nítido só em uma distância. Troque entre 300, 600 e 900 m.',
+ foco:'FOCO: nítido só em uma distância. Troque entre perto (300–470 m), médio (520–680 m) e longe (730–900 m).',
  som:'O som chega atrasado: quanto maior o atraso, mais longe o tiro.',
  observ:'BINÓCULO: toque no botão BINÓCULO (à esquerda) para trocar. Ele só observa, mas vê mais e expõe metade.',
  noite:'ANOITECENDO: ele fica mais difícil de ver, mas clarões e brilhos aparecem mais.',
@@ -901,7 +903,7 @@ function storyPage(n,done){
   const ov=$('#ov');ov.dataset.screen='page';ov.classList.add('on','title');
   ov.innerHTML='<div class="pgs" data-a="pgnext"><div class="pgp"><div class="pgh">PÁGINA '+n+' DE 4 · ARRANCADA DO CADERNO DO MESTRE'+(p.photo?'':' · ENCONTRADA COM '+p.who)+'</div>'+
    (p.last?'<div class="pgl">“'+p.last+'”</div>':'')+(p.photo?'<img class="pgi" src="art/hist/h_polaroid.webp" alt="">':'')+
-   '<div class="pgt">'+p.txt+'</div>'+(p.photo?'<div class="pgc">O Fantasma era Aurélio Vaz, seu instrutor.</div>':'')+
+   '<div class="pgt">'+p.txt+'</div>'+(n===3?'<div class="pgc">Ao fim deste duelo, o Rocha foi atingido. No último, você está sozinho.</div>':'')+(p.photo?'<div class="pgc">O Fantasma era Aurélio Vaz, seu instrutor.</div>':'')+
    '<button class="btn" data-a="pgnext">CONTINUAR ›</button></div></div>';
   if(p.a)AU.whenReady(()=>{if(ov.dataset.screen==='page')AU.narr(p.a)},4000);
 }
@@ -910,12 +912,14 @@ function opHome(){
   const ov=$('#ov');ov.dataset.screen='ophome';ov.classList.add('on','title');
   ov.innerHTML=`<div class="scr th-modo"><div class="tint"></div>
    <div class="wh"><div class="whl">DEAD STILL</div><div class="whr">OPERAÇÃO</div></div>
+   <button class="devico" style="right:calc(3vw + 52px)" data-a="sndtog">${['×','♪','♪♪'][AU.level]}</button>
    <button class="devico" data-dev="${DESK?'mobile':'pc'}" title="${DESK?'Modo computador. Toque para trocar para celular':'Modo celular. Toque para trocar para computador'}" aria-label="aparelho">${DESK?'🖥️':'📱'}</button>
    <div class="wmain"><div class="q">4 DUELOS. UMA OPERAÇÃO.</div>
+    <div class="opmeta" style="max-width:min(88vw,820px);text-align:center;color:#f2e6b8"><b>Atrás do muro, mil e duzentas pessoas. Quatro atiradores contratados por uma empresa querem derrubá-lo. Você é quem o defende.</b></div>
     <div class="opmeta" style="max-width:min(88vw,820px);text-align:center">Você começa escolhendo a arma e o primeiro equipamento.<br>Vidas e ferimentos passam de um duelo para o outro.<br>Depois de cada duelo você escolhe 1 entre 3 equipamentos, ou pula e recupera 1 vida.<br>Antes de cada duelo você escolhe o muro: o mais arriscado dá 4 equipamentos.</div>
     <div class="dif"><span>DIFICULDADE</span><button class="chip ${diffKey==='recruta'?'sel':''}" data-d="recruta">RECRUTA</button><button class="chip ${diffKey==='veterano'?'sel':''}" data-d="veterano">VETERANO</button><em>${diffKey==='recruta'?'7 vidas. Ele demora mais para te achar.':'6 vidas. Ele te caça no ritmo normal.'}</em></div>
     <div class="dif"><span>MODO FONE</span><button class="chip ${phoneMode?'sel':''}" data-fone="1">${phoneMode?'LIGADO':'DESLIGADO'}</button><em>${phoneMode?'Ligado: o inimigo dá tiros extras só pelo som, sem aviso na tela. Melhor com fone.':'Desligado: sem tiros extras. Todo tiro mostra aviso e seta na tela.'}</em></div>
-    <div class="dif"><span>MIRA</span><button class="chip ${AIM==='stick'?'sel':''}" data-aim="stick">DIRECIONAL</button><button class="chip ${AIM==='drag'?'sel':''}" data-aim="drag">ARRASTAR</button><em>${AIM==='stick'?'Círculo na esquerda: empurre para mover a mira.':'Arraste o dedo pela mira.'}</em></div>
+    ${DESK?'':`    <div class="dif"><span>MIRA</span><button class="chip ${AIM==='stick'?'sel':''}" data-aim="stick">DIRECIONAL</button><button class="chip ${AIM==='drag'?'sel':''}" data-aim="drag">ARRASTAR</button><em>${AIM==='stick'?'Círculo na esquerda: empurre para mover a mira.':'Arraste o dedo pela mira.'}</em></div>`}
     <button class="btn" data-a="opstart">INICIAR OPERAÇÃO ›</button>
    </div>
    <div class="wfoot"><button class="btn sec" data-a="how">COMO JOGAR</button><button class="btn sec" data-a="story">HISTÓRIA</button><button class="btn sec" data-a="snd">TESTAR SOM</button><span class="snd" id="sndst" ${/debug/.test(location.search)?'':'style="display:none"'}>${AU.diag()}</span></div></div>`;
@@ -984,7 +988,7 @@ function opFinish(win,kind){
   const ov=$('#ov');ov.dataset.screen='opend';ov.classList.add('on','title');ov.classList.remove('endw','endl');ov.classList.add(win?'endw':'endl');
   const names=op.cards.map(id=>CARD[id].n),done=op.n-(win?0:1)+(win?0:0);
   const reach=win?4:op.n-1;
-  const T={win:['OPERAÇÃO CONCLUÍDA','Você abateu os 4 atiradores.'],head:['OPERAÇÃO ENCERRADA','Tiro na cabeça no duelo '+op.n+'. Você apareceu tempo demais.'],wounds:['OPERAÇÃO ENCERRADA','No duelo '+op.n+', os ferimentos se acumularam.'],ammo:['OPERAÇÃO ENCERRADA','No duelo '+op.n+' você ficou sem balas.'],time:['OPERAÇÃO ENCERRADA','No duelo '+op.n+' o tempo esgotou.']}[win?'win':kind]||['OPERAÇÃO ENCERRADA',''];
+  const T={win:['ATERRO SALVO','Você abateu os 4 atiradores. O muro resistiu e os caminhões entraram.'],head:['OPERAÇÃO ENCERRADA','Tiro na cabeça no duelo '+op.n+'. Você apareceu tempo demais.'],wounds:['OPERAÇÃO ENCERRADA','No duelo '+op.n+', os ferimentos se acumularam.'],ammo:['OPERAÇÃO ENCERRADA','No duelo '+op.n+' você ficou sem balas.'],time:['OPERAÇÃO ENCERRADA','No duelo '+op.n+' o tempo esgotou.']}[win?'win':kind]||['OPERAÇÃO ENCERRADA',''];
   let reveal='';
   if(!win){try{const c=mkc(560,300),x=c.getContext('2d'),e=g.e;x.fillStyle='#222';x.fillRect(0,0,560,300);
     drawWorld(x,e.x,e.y+6,2.2,280,150,{sharp:true});
@@ -1273,7 +1277,7 @@ function sideOf(x){const a=X0+(X1-X0)/3,b=X0+2*(X1-X0)/3;return x<a?'ESQ':x>b?'D
 const RQ={q:[],busy:false,
  say(who,text,pan,force){
   if(!g||g.lo.noRadio||(g.over&&!force))return;
-  if(!force&&(this.busy||this.q.length))return;
+  if(!force&&(this.busy||this.q.length||performance.now()<roAt))return;
   this.q.push({who,text,pan:pan||0});this.pump()},
  pump(){
   if(this.busy||!this.q.length||!g)return;
@@ -1334,7 +1338,7 @@ function update(dt){
   g.time-=dt*(g.wounds.leg?1.25:1)*(g.lo.tScale||1);
   if(g.time<=0){if(!g.tx){g.tx=1;g.lives-=1;if(g.lives>0){g.time=60;g.w60=1;g.w30=0;toast('TEMPO ESGOTADO','Você perdeu 1 vida. Mais 60 s.',5);return}}g.time=0;end('time');return}
   g.radioCd=Math.max(0,g.radioCd-dt);if(g.ro&&g.ro.cd>0&&!g.ro.hurt)g.ro.cd-=dt;
-  {const prog=clamp(1-g.time/g.timeMax,0,1);g.expFloor=prog*(diffKey==='veterano'?55:40);if(g.ro&&typeof op!=='undefined'&&op&&op.n===3&&!g.ro.hurt&&prog>=.4)roHurt();if(prog>.1)hint('queda');if(prog>.55)hint('noite');if(prog>=.5&&!g.s50){g.s50=1;eLine('t50',{p:1})}if(prog>=.9&&!g.s90){g.s90=1;eLine('t10',{p:1})}if(g.time<=60&&!g.w60){g.w60=1;toast('RESTAM 60 s','Se o tempo zerar, você perde 1 vida.',3.5)}if(g.time<=30&&!g.w30){g.w30=1;toast('RESTAM 30 s','',3)}if(g.exp>=60)hint('exp60',5);g.idx=(g.idx||0)*Math.exp(-dt/110);if(g.view==='scope'){g.scopeT=(g.scopeT||0)+dt;if(g.scopeT>7)hint('zoom');if(g.scopeT>16)hint('vento');if(g.scopeT>26)hint('foco')}if(prog>=g.nextCol&&g.nextCol<.99){g.nextCol+=.2;collapseWall()}if(g.view!=='moving')g.stay=(g.stay||0)+dt;if(g.stay>14)hint('exposicao')}
+  {const prog=clamp(1-g.time/g.timeMax,0,1);g.expFloor=prog*(diffKey==='veterano'?55:40);if(g.ro&&typeof op!=='undefined'&&op&&op.n===3&&!g.ro.hurt&&(prog>=.4||g.t>=45))roHurt();if(prog>.1)hint('queda');if(prog>.55)hint('noite');if(prog>=.5&&!g.s50){g.s50=1;eLine('t50',{p:1})}if(prog>=.9&&!g.s90){g.s90=1;eLine('t10',{p:1})}if(g.time<=60&&!g.w60){g.w60=1;toast('RESTAM 60 s','Se o tempo zerar, você perde 1 vida.',3.5)}if(g.time<=30&&!g.w30){g.w30=1;toast('RESTAM 30 s','',3)}if(g.exp>=60)hint('exp60',5);g.idx=(g.idx||0)*Math.exp(-dt/110);if(g.view==='scope'){g.scopeT=(g.scopeT||0)+dt;if(g.scopeT>7)hint('zoom');if(g.scopeT>16)hint('vento');if(g.scopeT>26)hint('foco')}if(prog>=g.nextCol&&g.nextCol<.99){g.nextCol+=.2;collapseWall()}if(g.view!=='moving')g.stay=(g.stay||0)+dt;if(g.stay>14)hint('exposicao')}
   g.flash=Math.max(0,g.flash-dt*1.4);g.shake=Math.max(0,g.shake-dt*2);g.noiseWin=Math.max(0,g.noiseWin-dt);
   const w=g.wind;if(w.nt===undefined)w.nt=rr(-3.5,3.5)*(R()<.3?1.6:1)*(g.windK||1);w.next-=dt;if(w.next<=0){w.next=rr(3,7);w.tgt=w.nt;w.nt=rr(-3.5,3.5)*(R()<.3?1.6:1)*(g.windK||1)}
   w.gust+=(w.tgt-w.gust)*Math.min(1,dt*.7);w.base+=rr(-.2,.2)*dt;w.base=clamp(w.base,-3,3);w.val=clamp(w.base*.6+w.gust,-6,6);if(AU.windG&&AU.c&&scene==='play')AU.windG.gain.setTargetAtTime(.3+.12*Math.abs(w.val),AU.c.currentTime,.6);
@@ -1343,7 +1347,13 @@ function update(dt){
   if(g.view==='moving'){g.moveT+=dt/g.moveDur;const t=Math.min(1,g.moveT);g.posF=lerp(g.moveFrom,g.moveTo,t*t*(3-2*t));if(g.moveT>=1){g.pos=g.moveTo;g.posF=g.pos;g.view='cover'}}
   if(g.decoy&&g.t>=g.decoy.at){resolveDecoy()}
   updateEnemy(dt);updateAmb(dt);
-  if(!g.s26&&(g.timeMax-g.time)>=18&&g.e){g.s26=1;const e0=g.e,sd0=sideOf(e0.x),pl0=planeOfY(e0.y);addNote('ambiente','Algo se mexeu à '+SIDEW[sd0]+' · '+PLANES[pl0].d+' m',sd0,pl0,e0.x+rr(-70,70),e0.y+rr(-25,25));try{ambReact(e0.x,e0.y,'mov')}catch(er){}}
+  if(typeof op!=='undefined'&&op&&op.n===1&&g.e&&!g.over&&!g.e.moving){
+    const el=g.timeMax-g.time;
+    if(g.guard===undefined)g.guard=32;
+    if(el>=g.guard){g.guard=el+25;const e0=g.e,sd=sideOf(e0.x),pl=planeOfY(e0.y);addNote('ambiente','Algo se mexeu à '+SIDEW[sd]+' · '+PLANES[pl].d+' m',sd,pl,e0.x+rr(-60,60),e0.y+rr(-20,20))}
+    if(g.ro&&!g.ro.hurt&&((el>=60&&!g.rf1&&(g.idx||0)<.25)||(el>=130&&!g.rf2&&(g.idx||0)<.25))){if(el<130)g.rf1=1;else g.rf2=1;roFree()}
+  }
+  if(!g.s26&&(g.timeMax-g.time)>=10&&g.e){g.s26=1;const e0=g.e,sd0=sideOf(e0.x),pl0=planeOfY(e0.y);addNote('ambiente','Algo se mexeu à '+SIDEW[sd0]+' · '+PLANES[pl0].d+' m',sd0,pl0,e0.x+rr(-70,70),e0.y+rr(-25,25));try{ambReact(e0.x,e0.y,'mov')}catch(er){}}
   g.fkD=(g.fkD==null?rr(20,40):g.fkD)-dt;if(g.fkD<=0){g.fkD=rr(45,75);const o=pick(HID);dust(o.x,o.y+16,(rr(2,5)|0),false);seen('poeira',o.x,o.y,'Poeira')}
   g.fkG=(g.fkG==null?rr(12,20):g.fkG)-dt;if(g.fkG<=0){g.fkG=rr(14,26);const o=pick(HID);glint(o.x+rr(-60,60),o.y+rr(-10,25),rr(.25,.6),true)}
   g.recT=(g.recT||0)-dt;if(g.recT<=0){g.recT=.12;const sw0=sway();(g.rec=g.rec||[]).push({t:g.t,v:g.view,cx:g.cam.x,cy:g.cam.y,z:curZoom(),exp:g.exp,pos:g.pos,sx:sw0.x,sy:sw0.y});if(g.rec.length>70)g.rec.shift()}
@@ -1489,7 +1499,7 @@ function act(id){
 let roAt=0;
 function roSay(name){if(!g)return;const t=RO_TXT[name]||'';toast('ROCHA',t,3.6);
   const bf=AU.buf['v_'+name],dur=bf?bf.duration:2.2,now=performance.now(),at=Math.max(now,roAt);roAt=at+dur*1000+500;const gg=g;let tries=0;
-  const go=()=>{if(g!==gg||g.over||AU.level===0)return;if(RQ.busy&&tries++<8){setTimeout(go,600);return}AU.play('v_'+name,{gain:1.0})};
+  const go=()=>{if(g!==gg||g.over||AU.level===0)return;if(RQ.busy&&tries++<8){setTimeout(go,600);return}try{const c=AU.c,s2=c.createBufferSource();s2.buffer=bf;const gn=AU.out(0);gn.gain.value=1;s2.connect(gn);s2.start();g._roSrc=s2}catch(e){AU.play('v_'+name,{gain:1})}};
   setTimeout(go,Math.max(0,at-now))}
 function eClip(name){if(!g||g.over||!g.e||g.lo.noRadio)return;const t=RO_TXT[name]||'';log('ELE',t);const b=AU.buf['v_'+name];if(b&&AU.level>0)AU.radioVoice(b,panOf(g.e.x),'ELE')}
 function roHurt(){const r=g.ro;if(!r||r.hurt)return;r.hurt=true;r.cd=999;if(g.menu==='apoio')g.menu=null;try{AU.shot(-.6,260,false)}catch(err){}const gg=g;setTimeout(()=>{if(g===gg&&!g.over)roSay('ro_hit')},700);setTimeout(()=>{if(g===gg&&!g.over&&g.ro===r)roSay('ro_out')},4800)}
@@ -1501,6 +1511,7 @@ function roWind(){
   if(!sure&&R()>.55){if(R()<.5)d=d==='d'?'e':'d';else k=clamp(k+(R()<.5?-1:1),0,2)}
   r.w={at:g.t+w.next,d,s:k,sure};
   roSay('ro_v_'+d+'fmg'[k]+'_'+(sure?'c':'a'))}
+function roFree(){const r=g.ro;if(!r||r.hurt||!g.e)return;const e=g.e,nm=LM.filter(m=>RO_IDX[m.n]!==undefined),near=nm.slice().sort((a,b)=>Math.hypot(a.x-e.x,(a.y-e.y)*2)-Math.hypot(b.x-e.x,(b.y-e.y)*2))[0];if(!near)return;roSay('ro_o'+RO_IDX[near.n]+'_c');const x=near.x+rr(-30,30),y=near.y+rr(-10,10);addNote('brilho','Rocha: brilho perto '+RO_DE(near.n),sideOf(x),planeOfY(y),x,y)}
 function roLook(){
   const r=g.ro;if(!r||r.hurt||r.cd>0||r.left<=0)return;
   r.cd=22;r.left--;g.menu=null;g.exp=Math.min(100,g.exp+6);
@@ -1508,7 +1519,7 @@ function roLook(){
   if(!nm.length){roSay('ro_nomore');return}
   const near=nm.slice().sort((a,b)=>dist(a)-dist(b))[0],truth=dist(near)<330&&R()<.5;
   let lm;if(truth)lm=near;else{const far=nm.filter(m=>dist(m)>380);lm=pick(far.length?far:nm)}
-  const sure=R()<(truth?.65:.35),x=lm.x+rr(-30,30),y=lm.y+rr(-10,10);
+  const sure=R()<(truth?.65:.12),x=lm.x+rr(-30,30),y=lm.y+rr(-10,10);
   roSay('ro_o'+RO_IDX[lm.n]+'_'+(sure?'c':'a'));
   addNote('brilho','Rocha: brilho perto '+RO_DE(lm.n)+(sure?'':' (incerto)'),sideOf(x),planeOfY(y),x,y)}
 function radio(kind){
@@ -1537,7 +1548,7 @@ function fire(){
   g.bullets--;g.shots++;
   const ix=ax+g.wind.val*d/(650*DSC)*TICK,iy=ay;
   g.impacts.push({x:ix,y:iy,ttl:6});fx((Math.random()*3)|0,ix,iy+6,260*sOfY(iy),1.9,'n',.95);g.shotMsg={t0:g.t,text:'ERROU',sub:'o ✕ vermelho é onde a sua bala caiu',col:'255,110,90'};ambReact(ix,iy,'tiro');g.tracer={ax,ay,ix,iy,t0:g.t};dust(ix,iy,6,false);
-  AU.shot(0,0,true);AU.impact(d/DSC);g.held=false;g.cam.y-=7;g.shake=.25;
+  AU.shot(0,0,true);AU.impact(d);g.held=false;g.cam.y-=7;g.shake=.25;
   const dd=Math.hypot(ix-e.x,iy-e.y),nearB=dd<260;
   {const z0=Math.max(1.2,curZoom()),zE=nearB?clamp(250/Math.max(dd,60),z0*1.15,z0*2.4):z0*1.9;g.bcam={rt0:performance.now(),dur:dd<=e.hr?2.4:(nearB?2.3:1.6),ax,ay,ix,iy,tx:nearB?(ix+e.x)/2:ix,ty:nearB?(iy+e.y)/2:iy,z0,zk:zE/z0,near:nearB}}if(nearB){const s3=stt();s3.shown=(s3.shown||0)+1}
   if(dd<=e.hr){g.won=true;g.shotMsg={t0:g.t,text:'ACERTOU!',sub:'tiro certeiro',col:'120,230,130'};end('win');return}
@@ -1548,7 +1559,7 @@ function fire(){
   e.threat+=near*.9;e.alertUntil=g.t+14;{const nn=near;setTimeout(()=>{if(g&&!g.over)eLine(nn>.35?'errp':'errl',{force:true,p:.7})},1100)}
 }
 function end(kind){
-  if(g.over)return;AU.heart(0);g.over=true;g.endKind=kind;RQ.clear();try{AU.curVoice&&AU.curVoice.stop()}catch(e){}g.endAt=g.t+(kind==='win'?1.4:1.1);g.held=false;
+  if(g.over)return;AU.heart(0);g.over=true;g.endKind=kind;RQ.clear();try{AU.curVoice&&AU.curVoice.stop()}catch(e){}try{g._roSrc&&g._roSrc.stop()}catch(e){}g.endAt=g.t+(kind==='win'?1.4:1.1);g.held=false;
   if(kind==='win'){glint(g.e.x,g.e.y,.2,false);dust(g.e.x,g.e.y,10,true);fx(2,g.e.x,g.e.y+10,360*g.e.s,2.4,'n',1);fx(9,g.e.x,g.e.y,260*g.e.s,.8,'lighter',1,'c');g.slowT=1.3;g.wflash=1;g.kz=0;g.endAt=g.t+.95}
   else if((kind==='head'||kind==='wounds')&&!g.lo.noRadio&&R()<.6)setTimeout(()=>{RQ.say('ELE',pick(['Fim de linha.','Você devia ter ficado abaixado.']),panOf(g.e.x),true)},900);
   if(kind==='win'&&'speechSynthesis' in window)try{speechSynthesis.cancel()}catch(e){}
@@ -1635,7 +1646,7 @@ function slice9(im,x,y,w,h,bs,bd){const iw=im.width,ih=im.height;bd=Math.min(bd,
   const xs=[0,bs,iw-bs,iw],ys=[0,bs,ih-bs,ih],xd=[x,x+bd,x+w-bd,x+w],yd=[y,y+bd,y+h-bd,y+h];
   for(let r=0;r<3;r++)for(let c=0;c<3;c++)ctx.drawImage(im,xs[c],ys[r],xs[c+1]-xs[c],ys[r+1]-ys[r],xd[c],yd[r],xd[c+1]-xd[c],yd[r+1]-yd[r])}
 let pressId=null;
-const KEYT={peek:'ESPAÇO',fire:'ESPAÇO',moveL:'A',moveR:'D',hole:'B',decoy:'I',radio:'R',notes:'C',duck:'S',hold:'SHIFT',mark:'M',apoio:'E',swap:'Q',fin:'3',fout:'1',zin:'+',zout:'-'};
+const KEYT={peek:'ESPAÇO',fire:'ESPAÇO',moveL:'A',moveR:'D',hole:'B',decoy:'I',radio:'R',notes:'C',duck:'S',hold:'SHIFT',mark:'M',apoio:'E',swap:'Q',fin:'1',fout:'3',zin:'+',zout:'-'};
 const FEAT_N={hole:2,mark:2,apoio:2,decoy:3,radio:3},FEAT_NEW={hole:2,mark:2,apoio:2,decoy:3,radio:3};
 function featOn(id){if(id==='hole'&&NEWW())return false;if(typeof op==='undefined'||!op||!op.n)return true;if(id==='decoy'&&g&&(g.helm+g.rocks+g.mirrors)>0)return true;return op.n>=(FEAT_N[id]||1)}
 function pulseOn(id){if(!g||typeof op==='undefined'||!op||!op.n)return false;if(id==='notes')return g.notes&&g.notes.length>0&&!(g.used&&g.used.notes);return op.n===FEAT_NEW[id]&&!(g.used&&g.used[id])}
@@ -1790,6 +1801,7 @@ function renderCover(){
   txt(TYPE[g.types[cur]].nome+' · '+TYPE[g.types[cur]].dica,VW/2,by-40,19,'#f2ebc9','center',500);
   txt('▲ alto   ◣ quebrado   ● fresta   ✕ caído   ▮ proteção que resta',VW/2,py0+113,13,'#cfc8aa','center',500);
   const gr=ctx.createRadialGradient(VW/2,VH/2,VH*.4,VW/2,VH/2,VH*.95);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VH);
+  if(g.view==='moving'){const bw=Math.min(520,VW-80),bx=VW/2-bw/2,by=PORT?VH-330:VH-156;ctx.fillStyle='rgba(0,0,0,.6)';rrect(ctx,bx-12,by-40,bw+24,64,10);ctx.fill();txt('DESLIZANDO PARA O TRECHO '+(g.moveTo+1)+(g.moveDur>3?' · atravessando entulho':''),VW/2,by-18,19,'#f2ebc9','center',600);ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(bx,by,bw,10);ctx.fillStyle='#e3c86a';ctx.fillRect(bx,by,bw*Math.min(1,g.moveT),10)}
   const gap=14,bh=84,y=VH-bh-22,cw=PORT?(VW-48-gap)/2:Math.min(200,VW*.13),mw2=PORT?(VW-48-4*gap)/5:Math.min(200,(VW-2*(cw+24)-6*gap)/5),tot=5*mw2+4*gap,x0m=VW/2-tot/2,mx=i=>x0m+i*(mw2+gap),ym=PORT?y-bh-gap:y,cs=PORT?{capfs:11}:{};
   const CV=['peek','hole','decoy','radio','notes'].filter(featOn),mxi=id=>{const n=CV.length,tt=n*mw2+(n-1)*gap;return VW/2-tt/2+CV.indexOf(id)*(mw2+gap)};
   const busy=g.view==='moving';
@@ -1891,7 +1903,7 @@ function renderScope(){
   if(g.t<g.swapUntil)txt('TROCANDO…',cx,cy+Rr-30,22,'#ffd24a','center',700);
   if(FRI){const D=720*FRS;ctx.drawImage(FRI,cx-D/2,cy-D/2,D,D)}else{ctx.strokeStyle='#161610';ctx.lineWidth=16;ctx.beginPath();ctx.arc(cx,cy,Rr+8,0,6.3);ctx.stroke();
   ctx.strokeStyle=g.spot?'#5f8fb8':'#3b3a2c';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,Rr,0,6.3);ctx.stroke()}
-  const d=distM(g.cam.y+sw.y),r=g.lo.range,shown=r===1?d:Math.round(d/(r*DSC))*(r*DSC);
+  const d=distM(g.cam.y+sw.y),r=g.lo.range,shown=r===1?d:Math.round(d/r)*r;
   txt('DIST '+(r===1?'':'~')+shown+' m',cx-150,cy+Rr+20,24,'#f2ebc9','center');
   {const wm=g.wind.val*d/(650*DSC),aw=Math.abs(wm);txt(aw<.3?'VENTO FRACO':'VENTO '+(wm>0?'→ ':'← ')+aw.toFixed(1)+' marcas',cx+170,cy+Rr+20,24,'#cfe3e8','center')}
   if(PORT)txt('TRECHO '+(g.pos+1)+' · '+TYPE[g.types[g.pos]].nome+' · ZOOM '+g.zoomCur.toFixed(1)+'×',cx,cy+Rr+48,17,'#a8a18a','center',600);else{txt('TRECHO '+(g.pos+1),24+75,VH/2-92,18,'#a8a18a','center',600);txt(TYPE[g.types[g.pos]].nome,24+75,VH/2-70,15,'#a8a18a','center',500)}
@@ -1925,14 +1937,14 @@ function renderScope(){
       if(id==='apoio')btn('apoio',x,rowY,w,58,g.ro.hurt?'FERIDO':'APOIO',{ic:g.ro.hurt?'h/ic_ferido':'h/ic_apoio',icL:1,fs:19,dis:g.ro.hurt||g.ro.cd>0||g.ro.left<=0,cap:g.ro.hurt?'Rocha caiu':(g.ro.cd>0?'aguarde '+Math.ceil(g.ro.cd)+'s':g.ro.left+' pedidos'),capfs:10});
       if(id==='mark')btn('mark',x,rowY,w,58,'MARCAR',{ic:'n/ic5',icL:1,fs:19,cap:g.pins.length+'/4 marcas',capfs:10});
       if(id==='swap')btn('swap',x,rowY,w,58,g.spot?'USAR RIFLE':'BINÓCULO',{ic:g.spot?null:'n/ic0',icL:1,fs:17,dis:g.t<g.swapUntil,cap:g.t<g.swapUntil?'trocando…':(g.spot?'2 s':'½ exposição'),capfs:10})});
-    {const fl='FOCO '+PLANES[g.focus].d+' m';btn('fout',VW/2-170,my+68,76,58,'◂',{fs:34,dis:g.focus<=0});txt(fl,VW/2,my+97,24,'#cfe3e8','center',700);btn('fin',VW/2+94,my+68,76,58,'▸',{fs:34,dis:g.focus>=2})}
+    {const fl='FOCO '+FOCOR[g.focus];btn('fout',VW/2-170,my+68,76,58,'◂',{fs:34,dis:g.focus<=0});txt(fl,VW/2,my+97,24,'#cfe3e8','center',700);btn('fin',VW/2+94,my+68,76,58,'▸',{fs:34,dis:g.focus>=2})}
     btn('zout',20,my-2,84,64,'',{ic:'n/ic3'});btn('zin',VW-104,my-2,84,64,'',{ic:'n/ic2'});
   }else{
     let y=170;const step=62;
     if(g.ro&&featOn('apoio')){btn('apoio',lm,y,150,54,g.ro.hurt?'FERIDO':'APOIO',{ic:g.ro.hurt?'h/ic_ferido':'h/ic_apoio',icL:1,fs:20,dis:g.ro.hurt||g.ro.cd>0||g.ro.left<=0,cap:g.ro.hurt?'Rocha caiu':(g.ro.cd>0?'aguarde '+Math.ceil(g.ro.cd)+'s':g.ro.left+' pedidos'),capfs:10});y+=step}
     if(featOn('radio')){btn('radio',lm,y,150,54,g.lo.noRadio?'SEM RÁDIO':'FALAR',{fs:20,dis:g.lo.noRadio||g.radioCd>0||g.radioLeft<=0,cap:g.lo.noRadio?'':(g.radioCd>0?'aguarde '+Math.ceil(g.radioCd)+'s':'com o inimigo'),capfs:10});y+=step}
     if(g.lo.spotter){btn('swap',lm,y,150,54,g.spot?'USAR RIFLE':'BINÓCULO',{ic:g.spot?null:'n/ic0',icL:1,fs:18,dis:g.t<g.swapUntil,cap:g.t<g.swapUntil?'trocando…':(g.spot?'2 s':'½ exposição'),capfs:10});y+=step}
-    {const fl='FOCO '+PLANES[g.focus].d+' m';btn('fout',lm,y,70,50,'◂',{fs:28,dis:g.focus<=0});btn('fin',lm+80,y,70,50,'▸',{fs:28,dis:g.focus>=2});txt(fl,lm+75,y+66,16,'#cfe3e8','center',700)}
+    {const fl='FOCO '+FOCOR[g.focus];btn('fout',lm,y,70,50,'◂',{fs:28,dis:g.focus<=0});btn('fin',lm+80,y,70,50,'▸',{fs:28,dis:g.focus>=2});txt(fl,lm+75,y+66,16,'#cfe3e8','center',700)}
     const zx=VW-(VW>1400?130:100);
     btn('zin',zx,170,76,60,'',{ic:'n/ic2'});btn('zout',zx,236,76,60,'',{ic:'n/ic3'});txt('ZOOM '+g.zoomCur.toFixed(1)+'×',zx+38,310,15,'#cfe3e8','center');
     if(featOn('mark'))btn('mark',zx-50,326,126,50,'MARCAR',{ic:'n/ic5',icL:1,fs:18,cap:g.pins.length+'/4',capfs:10});
@@ -2003,7 +2015,7 @@ function hud(){
     {const pi=ART.img['n/pt'+(l.who==='ELE'?1:l.who==='VOCÊ'?2:0)];if(pi&&ox){ctx.save();ctx.beginPath();ctx.arc(rx-24,yb+14,24,0,6.3);ctx.clip();ctx.drawImage(pi,rx-48,yb-10,48,pi.height*48/pi.width);ctx.restore();ctx.strokeStyle=l.who==='ELE'?'#ffb070':'#bfe0a0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx-24,yb+14,24,0,6.3);ctx.stroke()}}
     lines.slice(0,PORT?3:2).forEach((ln,k)=>{const wd=ctx.measureText(ln).width;ctx.fillStyle='rgba(8,8,6,.72)';ctx.fillRect(rx-ox-wd-14,yb+k*(fsz+8)-fsz/2-3,wd+22,fsz+8);ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle=col;ctx.fillText(ln,rx-ox,yb+k*(fsz+8))});
     ctx.globalAlpha=1});}
-  if(g.toast){const t=g.toast,k=g.t-t.t0;if(k>t.ttl)g.toast=null;else{const a=Math.min(1,k/.15,(t.ttl-k)/.6);ctx.globalAlpha=a;const hyB=PORT?(g.view==='scope'?VH-380:VH-314):(g.view==='scope'?VH-178:VH-216),ty=PORT?(g.view==='scope'?208:(g.hint?hyB-80:hyB+14)):(g.view==='scope'?(g.hint?hyB-80:104):(g.hint?hyB-80:hyB+14));
+  if(g.toast){const t=g.toast,k=g.t-t.t0;if(k>t.ttl)g.toast=null;else{const a=Math.min(1,k/.15,(t.ttl-k)/.6);ctx.globalAlpha=a;const ty=PORT?208:(g.view==='scope'?104:54);
     ctx.fillStyle='rgba(8,9,6,.8)';rrect(ctx,VW/2-210,ty,420,70,10);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
     txt(t.a,VW/2,ty+25,26,'#ffd24a','center',700);txt(t.b,VW/2,ty+52,17,'#eee6c8','center',500);ctx.globalAlpha=1}}
   if(g.exp>60&&!g.over){const k=(g.exp-60)/40,pl=.5+.5*Math.sin(g.t*lerp(5,11,k));edgeVig(120,10,10,k*.6*(.65+.35*pl))}
@@ -2013,17 +2025,17 @@ function hud(){
   if(g.wflash>0){ctx.fillStyle=`rgba(255,250,235,${g.wflash*.65})`;ctx.fillRect(0,0,VW,VH)}
   btn('sound',276,20,40,36,['×','♪','♪♪'][AU.level],{fs:19});
   btn('help',326,20,40,36,'?',{fs:22});
-  if(g.hint&&!(g.bcam&&bcamActive())){const h=g.hint,k=Math.min(1,(g.t-h.t0)/.4),w=Math.min(760,VW-120);const hy0=PORT?(g.view==='scope'?(g.toast?290:208):VH-314):(g.view==='scope'?VH-178:VH-216);ctx.globalAlpha=k;ctx.fillStyle='rgba(8,9,6,.8)';rrect(ctx,VW/2-w/2,hy0,w,96,12);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
-    ctx.font='600 22px Oswald,Arial Narrow,sans-serif';ctx.fillStyle='#f6efd0';ctx.textAlign='center';ctx.textBaseline='middle';
+  if(g.hint&&!(g.bcam&&bcamActive())){const h=g.hint,k=Math.min(1,(g.t-h.t0)/.4),lsc=!PORT&&g.view==='scope',w=Math.min(PORT?760:(lsc?470:620),VW-120);const hy0=PORT?(g.toast?290:208):(lsc?VH-138:(g.toast?136:54));ctx.globalAlpha=k;ctx.fillStyle='rgba(8,9,6,.8)';rrect(ctx,VW/2-w/2,hy0,w,96,12);ctx.fill();ctx.strokeStyle='#e3c86a';ctx.lineWidth=2.5;ctx.stroke();
+    ctx.font='600 '+(lsc?18:22)+'px Oswald,Arial Narrow,sans-serif';ctx.fillStyle='#f6efd0';ctx.textAlign='center';ctx.textBaseline='middle';
     const words=h.text.split(' ');let line='',lines=[];for(const wd of words){const t2=line?line+' '+wd:wd;if(ctx.measureText(t2).width>w-40){lines.push(line);line=wd}else line=t2}lines.push(line);
-    lines.slice(0,3).forEach((ln,i)=>ctx.fillText(ln,VW/2,hy0+48+(i-(Math.min(3,lines.length)-1)/2)*27));ctx.globalAlpha=1}
+    lines.slice(0,3).forEach((ln,i)=>ctx.fillText(ln,VW/2,hy0+48+(i-(Math.min(3,lines.length)-1)/2)*(lsc?23:27)));ctx.globalAlpha=1}
 }
 function helpOverlay(){
   ctx.fillStyle='rgba(4,5,3,.82)';ctx.fillRect(0,0,VW,VH);
   const w=Math.min(900,VW-60),px=VW/2-w/2,py=40;
   const ph=PORT?Math.min(VH-80,8*72+170):VH-80;ctx.fillStyle='rgba(30,34,20,.98)';rrect(ctx,px,py,w,ph,14);ctx.fill();ctx.strokeStyle='#d7bd62';ctx.lineWidth=3;ctx.stroke();
   txt('COMO FUNCIONA (jogo em pausa)',VW/2,py+30,26,'#e3c86a','center',700);
-  const L2=[['MIRAR','olha pela luneta. A EXPOSIÇÃO sobe; em 100% ele atira.'],['ABAIXAR','volta para trás do muro e esfria a exposição.'],['DESLIZAR','muda de trecho do muro. Trocar de lugar o confunde.'],['FRESTA','observar com pouco risco (só nos trechos ●).'],['ISCA','capacete, pedra ou espelho para fazê-lo se revelar.'],['RÁDIO','provocar, conversar ou blefar. Cada um tem um efeito.'],['SEGURAR','estabiliza a mira, mas o fôlego acaba.'],['VENTO','empurra a bala. Conte as marcas da retícula.']];
+  const L2=[['MIRAR','olha pela luneta. A EXPOSIÇÃO sobe; em 100% ele atira.'],['ABAIXAR','volta para trás do muro e esfria a exposição.'],['DESLIZAR','muda de trecho do muro. Trocar de lugar o confunde.'],['TRECHOS','alto protege mais; quebrado mostra o campo; com fresta, toque em ESPIAR; caído não protege.']].concat(featOn('decoy')?[['ISCA','capacete, pedra ou espelho para fazê-lo se revelar.']]:[]).concat(featOn('radio')?[['FALAR','provocar, conversar ou blefar com o inimigo (não é o Rocha).']]:[]).concat(featOn('apoio')?[['APOIO','o Rocha prevê o vento ou vigia o campo. Pode errar.']]:[]).concat(featOn('mark')?[['MARCAR','fixa um ponto na mira (até 4).']]:[]).concat([['SEGURAR','estabiliza a mira, mas o fôlego acaba.'],['VENTO','empurra a bala. Conte as marcas da retícula.']]);
   L2.forEach((r,i)=>{if(PORT){const y=py+84+i*72;txt(r[0],px+24,y,22,'#e3c86a','left',700);txt(r[1],px+24,y+28,18,'#eee6c8','left',500)}else{const y=py+72+i*34;txt(r[0],px+30,y,22,'#e3c86a','left',700);txt(r[1],px+190,y,20,'#eee6c8','left',500)}});
   btn('help',VW/2-80,PORT?py+ph-62:VH-122,160,48,'CONTINUAR',{fs:22});
 }
@@ -2099,7 +2111,7 @@ addEventListener('keydown',e=>{
   else if(k==='a'||k==='arrowleft'){if(!sc)act('moveL')}else if(k==='d'||k==='arrowright'){if(!sc)act('moveR')}
   else if(k==='b')act(NEWW()?'hole0':'hole');else if(k==='i')act('decoy');else if(k==='r')act('radio');else if(k==='c')act('notes');
   else if(k==='m')act('mark');else if(k==='e')act('apoio');else if(k==='q')act('swap');
-  else if(k==='1'||k==='2'||k==='3')setFocus(+k-1);
+  else if(k==='1'||k==='2'||k==='3')setFocus(3-(+k));
   else if(k==='+'||k==='=')act('zin');else if(k==='-'||k==='_')act('zout');
 });
 addEventListener('keyup',e=>{if(g&&e.key==='Shift')g.held=false});
@@ -2111,6 +2123,7 @@ cv.addEventListener('pointermove',e=>{if(!DESK||e.pointerType==='touch')return;c
 const TUT=[
  {t:'Ache o atirador inimigo.',p:'Ele está escondido no lixo, pequeno e camuflado. Você está atrás do muro. Quem acertar a cabeça ou a luneta do outro primeiro vence.',n:'nar_tut_1',v:0},
  {t:'Mirar te expõe.',p:'Olhar pela luneta sobe a EXPOSIÇÃO. Em 100%, ele atira. Abaixe para esfriar e deslize pelo muro para trocar de lugar.',n:'nar_tut_2',v:1},
+ {t:'Os trechos do muro.',p:'O muro tem 5 trechos. ALTO protege mais. QUEBRADO deixa ver o campo. FRESTA tem buracos: toque em ESPIAR para olhar por eles, sem zoom e com pouca exposição. CAÍDO não protege. Deslize para trocar de trecho.',n:null,v:2},
  {t:'Procure pistas.',p:'Zoom e foco (300, 600, 900 m) revelam detalhes. O CADERNO junta as pistas por objeto. Aposte no objeto com mais tipos de pista. Acertar revela um pouco o inimigo.',n:null,v:9},
  {t:'Atire com o vento.',p:'O círculo amarelo IMPACTO mostra onde a bala cai. Coloque o alvo dentro dele e atire. O resto o jogo explica quando você precisar.',n:'nar_tut_6',v:5}
 ];
@@ -2221,8 +2234,9 @@ $('#ov').addEventListener('click',e=>{
   const dv=t.closest('[data-dev]');if(dv){const was=$('#ov').dataset.screen;setDev(dv.dataset.dev);if(was==='devpick')startFlow();else opHome();return}
   const df=t.closest('[data-d]');if(df){diffKey=df.dataset.d;saveEq();opHome();return}
   const a=t.closest('[data-a]');if(!a)return;const v=a.dataset.a;
+  if(v==='sndtog'){AU.init();AU.setLevel((AU.level+2)%3);opHome();return}
   if(v==='storynext'){storyNext();return}if(v==='storyskip'){storySkip();return}if(v==='pgnext'){AU.stopNarr();const d=ST.pg;ST.pg=null;if(d)d();return}if(v==='story'){showStory(STORY_INTRO,opHome);return}
-  if(v==='opstart'){AU.stopNarr();let sn=false;try{sn=localStorage.getItem('ds_story')==='1'}catch(err){}const go=()=>{newOp();offerIds=shuffle(WEAP.map(w=>w.id)).slice(0,3);cardSel=null;opPick()};if(sn){go();return}try{localStorage.setItem('ds_story','1')}catch(err){}showStory(STORY_INTRO,go);return}
+  if(v==='opstart'){AU.stopNarr();let sn=false;try{sn=localStorage.getItem('ds_story')==='1'}catch(err){}const go=()=>{try{localStorage.setItem('ds_story','1')}catch(err){}newOp();offerIds=shuffle(WEAP.map(w=>w.id)).slice(0,3);cardSel=null;opPick()};if(sn){go();return}showStory(STORY_INTRO,go);return}
   if(v==='cgo'){if(!cardSel)return;const c=CARD[cardSel];if(op.stage==='weapon'){op.weapon=cardSel;op.stage=null;offerIds=offerCards(4,true);cardSel=null;opPick();return}if(c.pick)c.pick(op);if(c.inst)op.hist.push({n:op.n,card:c.id});else op.cards.push(c.id);cardSel=null;opGoMap();return}
   if(v==='cskip'){op.lives=Math.min(op.maxLives,op.lives+1);cardSel=null;opGoMap();return}
   if(v==='mgo'){if(mapSel===null||!ART.done)return;goDuel();return}
